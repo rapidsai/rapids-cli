@@ -1,0 +1,4 @@
+Click
+nvidia-ml-py3
+psutil
+rich

@@ -1,0 +1,2 @@
+[console_scripts]
+rapids = rapids_cli:rapids

@@ -1,0 +1,397 @@
+import click
+import pynvml
+import platform
+import subprocess
+import psutil
+from rich import print 
+from rich.console import Console 
+from rich.table import Table
+
+CHECK_SYMBOL = "🚨"
+OK_MARK = "✅"
+X_MARK = "❌"
+DOCTOR_SYMBOL = "🧑‍⚕️"
+
+
+def gpu_check():
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]GPU Availability[/italic red]")
+    try: 
+        pynvml.nvmlInit()
+        try: 
+            num_gpus = pynvml.nvmlDeviceGetCount()
+            print(f"      {OK_MARK} Number of GPUs detected: {num_gpus}")
+            return True
+        except:
+            print(f"      {X_MARK} GPU detected but not available")
+            return False 
+        
+        pynvml.nvmlShutdown()
+    except: 
+        print(f"      {X_MARK} No available GPUs detected")
+        return False
+
+
+def cuda_check():
+    try: 
+        pynvml.nvmlInit()
+        print(f"   {CHECK_SYMBOL} Checking for [italic red]CUDA Availability[/italic red]")
+        try: 
+            cuda_version = pynvml.nvmlSystemGetCudaDriverVersion()
+            print(f"      {OK_MARK} CUDA detected")
+            print(f'           CUDA VERSION:{cuda_version//1000}.{cuda_version % 1000}')
+            return True 
+        except: 
+            print(f"      {X_MARK} No CUDA is available")
+            return False 
+        pynvml.nvmlShutdown()
+    except:
+        return False
+    
+    
+def check_gpu_compute_capability(required_capability):
+    # Initialize pynvml
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]GPU Compute Capability[/italic red]")
+    try: 
+        pynvml.nvmlInit()
+
+        num_gpus = pynvml.nvmlDeviceGetCount()
+        for i in range(num_gpus):
+            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+            major, minor = pynvml.nvmlDeviceGetCudaComputeCapability(handle)
+            compute_capability = major * 10 + minor
+            
+            print(f"      GPU {i} Compute Capability: {major}.{minor}")
+            
+            if compute_capability >= int(required_capability):
+                print(f"         GPU {i} meets the required compute capability {required_capability[0]}.{required_capability[1]}")
+            else:
+                print(f"         GPU {i} does not meet the required compute capability {required_capability[0]}.{required_capability[1]}.")
+    
+        pynvml.nvmlShutdown()
+    except: 
+        print(f"       {X_MARK} No GPU - cannot determineg GPU Compute Capability")
+
+
+VALID_LINUX_OS_VERSIONS = ["Ubuntu 20.04", "Ubuntu 22.04", "Rocky Linux 8.7"] 
+
+def check_os_version(os_attributes):
+    os_name = os_attributes['NAME'] + " " + os_attributes['VERSION_ID']
+    print(f"Current OS Version: {os_name}")
+    return os_name in VALID_LINUX_OS_VERSIONS 
+
+    
+def get_os_attributes(os_release): 
+    os_attributes = {}
+    for attribute in os_release.split("\n"):
+        if len(attribute) < 2: continue 
+        #print(attribute.split("="))
+        key, value = attribute.split("=")[0], attribute.split("=")[1]
+        os_attributes[key] = value[1:-1]
+    
+    return os_attributes
+
+def get_linux_os_version():
+    try: 
+        with open('/etc/os-release') as f: 
+            os_release = f.read()
+            os_attributes =get_os_attributes(os_release)        
+        return os_attributes
+    except FileNotFoundError:
+        return "OS release file not found."
+        
+def detect_os():
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]OS Capability[/italic red]")
+    system = platform.system()
+    release = platform.release()
+    version = platform.version()
+
+    print(f"        System: {system}")
+    print(f"        Release: {release}")
+    print(f"        Version: {version}")
+    validOS = False 
+    if system == "Windows":
+        if release == '11': 
+            try:
+                result = subprocess.check_output(['wsl', '--list', '--verbose'], text=True)
+                if "Version 2" in result:
+                    validOS = True
+            except FileNotFoundError:
+                print("WSL is not installed")
+            except subprocess.CalledProcessError as e:
+                print(f"Error checking WSL version: {e}")
+    elif system == "Linux":
+        print("Running on Linux")
+
+        # Check for specific Linux distributions
+        try: 
+            with open('/etc/os-release') as f: 
+                os_release = f.read()
+                os_attributes =get_os_attributes(os_release)
+                validOS = check_os_version(os_attributes)
+        except FileNotFoundError:
+            print("/etc/os-release file not found. This might not be a typical Linux environment.")
+    else:
+        print(f"      {X_MARK} Operating System not recognized")
+    if validOS: 
+        print(f"      {OK_MARK} OS is compatible with RAPIDS")
+    else:
+        print(f"      {X_MARK} OS is not compatible with RAPIDS. Please see https://docs.rapids.ai/install for system requirements.")
+
+#CUDA Version : NVIDIA DRIVER Version
+SUPPORTED_VERSIONS = {
+    "11.2": "470.42.01",
+    "11.4": "470.42.01",
+    "11.5": "495.29.05",
+    "11.8": "520.61.05",
+    "12.0": "525.60.13",
+    "12.1": "530.30.02",
+    "12.2": "535.86.10"
+}
+
+def get_cuda_version():
+    try:
+        output = subprocess.check_output(["nvcc", "--version"])
+        #print(output)
+        version_line = output.decode("utf-8").strip().split('\n')[-1]
+        #print(version_line)
+        print(version_line.split()[-1].split("/")[0][-4:])
+        return version_line.split()[-1].split("/")[0][-4:]  # Extract the version number
+    except Exception as e:
+        return str(e)
+    
+
+def get_driver_version():
+    try:
+        result = subprocess.run(['nvidia-smi', '--query-gpu=driver_version', '--format=csv,noheader'],
+                                capture_output=True, text=True, check=True)
+        result_chain =  result.stdout.strip()
+        return result_chain.split("\n")[0]
+    except subprocess.CalledProcessError:
+        return None
+
+
+#https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
+def check_driver_compatibility():
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]Driver Capability[/italic red]")
+    system = platform.system()
+    driver_compatible = True
+    cuda_version = get_cuda_version()
+    print(f"CUDA Version: {cuda_version}")
+    driver_version = get_driver_version()
+    print(f"Driver Version: {driver_version}")
+
+    if cuda_version >= "12.3": 
+        driver_compatible = True
+    elif cuda_version < "11.2": 
+        driver_compatible = False
+    else:
+        if driver_version < SUPPORTED_VERSIONS[cuda_version]:
+            driver_compatible = False
+
+    if driver_compatible: 
+        print(f"      {OK_MARK} CUDA & Driver is compatible with RAPIDS")
+    else:
+        print(f"      {X_MARK} CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatability guidance.")
+
+
+
+def check_sdd_nvme():
+    #checks if the system has NVMe SSDs
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]NVME SSDs[/italic red]")
+    has_nvme = False 
+    for disk in psutil.disk_partitions():
+        if 'nvme' in disk.device.lower():
+            has_nvme = True 
+    if has_nvme:
+        print(f"      {OK_MARK} SSD drive with preferred NVMe detected for optimized performance.")
+    else:
+        print(f"      {X_MARK} SSD drive with preferred NVMe not detected. For optimized performance, consider switching to system with NVMe-SSD drive.")
+
+
+
+def get_system_memory():
+    virtual_memory = psutil.virtual_memory()
+    total_memory = virtual_memory.total / (1024 ** 3) #converts bytes to gigabytes
+    print("System Memory Information: \n")
+    print(f"Total Virtual Memory: {virtual_memory.total / (1024 ** 3):.2f} GB")
+    print(f"Available Virtual Memory: {virtual_memory.available / (1024 ** 3):.2f} GB")
+    print(f"Used Virtual Memory: {virtual_memory.used / (1024 ** 3):.2f} GB")
+    return total_memory
+    
+    
+def get_gpu_memory():
+    pynvml.nvmlInit()
+    gpus = pynvml.nvmlDeviceGetCount()
+    gpu_memory_total = 0
+    for i in range(gpus):
+        handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+        memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+        gpu_memory_total += memory_info.total / (1024 ** 3) #converts to gigabytes
+        print(f"GPU {i} memory: {memory_info.total / (1024 ** 3):.2f} GB")
+
+    pynvml.nvmlShutdown()
+
+    print(f"Total GPU memory: {gpu_memory_total:.2f} GB")
+    return gpu_memory_total
+
+
+#checks that approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask)
+def check_memory_to_gpu_ratio():
+    print(f"   {CHECK_SYMBOL} Checking for approximately [italic red]2:1 system Memory to total GPU memory ratio[/italic red]")
+    system_memory = get_system_memory()
+    gpu_memory = get_gpu_memory()
+    ratio = system_memory / gpu_memory
+    print(f"      System Memory to GPU Memory Ratio: {ratio:.2f}")
+    if ratio >= 1.8 and ratio <=2.2:
+        print(f"      {OK_MARK} Approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask).")
+    else:
+        print(f"      {X_MARK} System Memory to total GPU Memory ratio not approximately 2:1 ratio.")
+
+
+#check for NVLink with 2 or more GPUs 
+def check_nvlink_status():
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]NVLink with 2 or more GPUs[/italic red]")
+
+    pynvml.nvmlInit()
+    try: 
+        device_count = pynvml.nvmlDeviceGetCount()
+        if device_count < 2:
+            print(f"      {X_MARK} Less than 2 GPUs detected. NVLink status check is not applicable.")
+        for i in range(device_count):
+            print(device_count)
+            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+            for nvlink_id in range(pynvml.NVML_NVLINK_MAX_LINKS):
+                try:
+                    nvlink_state = pynvml.nvmlDeviceGetNvLinkState(handle, 0)
+                    print(f"  NVLink {nvlink_id} State: {nvlink_state}")
+                    print(pynvml.NVML_SUCCESS)
+                except pynvml.NVMLError as e:
+                    print(f"  NVLink {nvlink_id} Status Check Failed: {e}")
+
+    except pynvml.NVMLError as e:
+        print(f"NVML Error: {e}")
+
+    pynvml.nvmlShutdown()
+
+
+
+def check_docker(docker_requirement):
+
+    #result = subprocess.run(['docker', 'run', '--gpus', 'all', 'nvcr.io/nvidia/k8s/cuda-sample:nbody', 'nbody', '-gpu', '-benchmark'],
+                            #capture_output=True, text=True, check=True)、
+    result =  subprocess.run(['docker', '--version'], capture_output=True, text=True, check=True)
+    #result = subprocess.run(['docker', '--version'], cwd = "/usr/local/bin", stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    result_chain =  result.stdout.strip()
+    version = result_chain.split("\n")[0]
+    version_num = version.split(" ")[-1]
+    print(version_num)
+
+    
+
+
+@click.group()
+def rapids(): 
+    #main CLI for RAPIDS 
+    print("[bold] Welcome to the RAPIDS CLI [/bold]\n")
+
+    print("[italic green] NVIDIA RAPIDS is a suite of open-source software libraries and APIs designed to accelerate data science and ML workflows on GPUs. It leverages the power of NVIDIA GPUs to enable high-performance computing, allowing users to process large datasets much faster than traditional CPU-based methods. [/italic green] \n")
+    print("[italic] For more information on RAPIDS installation, please visit [purple] https://docs.rapids.ai/install?_gl=1*o8b62b*_ga*MTU3MTEzNzgxNC4xNzI0OTc1MzQ1*_ga_RKXFW6CM42*MTcyNjg2NDcyNC42LjEuMTcyNjg2NTIzNS40OC4wLjA [/purple].[/italic] \n")
+    print("RAPIDS Installation System Requirements \n")
+    
+    table = Table(title = "[bold] System Requirements [/bold]")
+
+    table.add_column("-", style = "cyan")
+    table.add_column("Requirement", style = "magenta")
+
+    table.add_row("GPU", "NVIDIA Volta™ or higher with compute capability 7.0+", style = "red")
+    table.add_row("OS", "Ubuntu 20.04/22.04 or Rocky Linux 8 with gcc/++ 9.0+ \nWindows 11 using a WSL2 specific install \nRHEL 7/8 support is provided through Rocky Linux 8 builds/installs", style = "dark_orange")
+    table.add_row("CUDA & Nvidia Drivers", "CUDA 11.2 with Driver 470.42.01 or newer \nCUDA 11.4 with Driver 470.42.01 or newer \nCUDA 11.5 with Driver 495.29.05 or newer\nCUDA 11.8 with Driver 520.61.05 or newer \nCUDA 12.0 with Driver 525.60.13 or newer see CUDA 12 section below for notes on usage \nCUDA 12.2 with Driver 535.86.10 or newer", style = "yellow")
+ 
+    console = Console()
+    console.print(table)
+    print("\n")
+
+    print("RAPIDS Installation System [italic] Recommendations [/italic] \n")
+    table = Table(title = "[bold] System Recommendations [/bold]")
+
+    table.add_column("-", style = "cyan")
+    table.add_column("Recommendation", style = "magenta")
+
+
+    table.add_row("SSD Drive", "NVMe preferred", style = "green")
+    table.add_row("System to GPU Memory Ratio", "Approximately 2:1 ratio", style = "cyan1")
+    table.add_row("GPU Linkage", "NVLink with 2 or more GPUs", style = "purple")
+
+    console = Console()
+    console.print(table)
+    print("\n")
+
+ 
+
+
+@rapids.command()
+def help():
+    """Display help information for RAPIDS CLI."""
+    click.echo("RAPIDS CLI Help")
+    click.echo("Available commands:")
+    click.echo("  rapid       - Run the main RAPIDS command")
+    click.echo("  help        - Display this help message")
+    click.echo("  info       - Display this help message")
+
+    table = Table(title = "RAPIDS subcommands")
+
+    table.add_column("Subcommand", style = "cyan")
+    table.add_column("Description", style = "magenta")
+
+    table.add_row("doctor", "checks that all system and hardware requirements are met")
+    table.add_row("help", "instructions on how to use RAPIDS")
+
+    console = Console()
+    console.print(table)
+    
+@rapids.command()
+def doctor():
+    click.echo("checking environment")
+    print("\n")
+    print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
+    gpu_check_return = gpu_check()
+    cuda_check_return = cuda_check()
+    if gpu_check_return:
+        check_gpu_compute_capability("70")
+    if cuda_check_return:
+        check_driver_compatibility()
+    detect_os()
+
+    print("\n")
+    print(f"[bold green]{DOCTOR_SYMBOL} Performing RECOMMENDED health check for RAPIDS[/bold green] \n")
+    check_sdd_nvme()
+    if gpu_check_return:
+        check_memory_to_gpu_ratio()
+        check_nvlink_status()
+
+    check_docker("19.03")
+
+@rapids.command()
+def info():
+    click.echo("Information about RAPIDS subcommands \n")
+    
+
+
+    table = Table(title = "[bold] doctor [/bold]")
+
+    table.add_column("function", style = "cyan")
+    table.add_column("description", style = "magenta")
+
+    table.add_row("check_gpu_compute_capability()", "checks GPU compute capability", style = "red")
+    table.add_row("check_os_compatibility()", "checks OS version compatibility", style = "dark_orange")
+    table.add_row("check_driver_compatibility()", "checks Driver & CUDA compatibility", style = "yellow")
+    table.add_row("check_sdd_nvme()", "detects if NVMe SSDs exist (recommended)", style = "green")
+    table.add_row("check_memory_to_gpu_ratio()", "checks if System Memory to GPU Memory ratio is approximately 2:1 ratio (recommended)", style = "cyan1")
+    table.add_row("check_nvlink_status()", "checks if NVLink with 2 or more GPUs exist (recommended)", style = "purple")
+
+    console = Console()
+    console.print(table)
+    print("\n")
+
+if __name__ == '__main__':
+    rapids()
