@@ -277,18 +277,14 @@ def check_nvlink_status():
 
 def check_docker(docker_requirement):
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Docker Version[/italic red]")
-
-    result =  subprocess.run(['docker', '--version'], capture_output=True, text=True, check=True)
-   
-    result_chain =  result.stdout.strip()
-    version = result_chain.split("\n")[0]
-    version_num = version.split(",")[0].split(" ")[-1]
+    result = str(subprocess.check_output(["docker", "--version"]))
+    
+    version_num = result.split(",")[0].split(" ")[-1]
     if version_num >= docker_requirement:
         print(f"      {OK_MARK} DOCKER Version is compatible with RAPIDS")
     else:
         print(f"      {X_MARK} DOCKER Version is not compatible with RAPIDS - please upgrade to Docker {docker_requirement}")
     
-    return result_chain.split("\n")
     
 
 
