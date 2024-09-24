@@ -226,7 +226,7 @@ def get_gpu_memory():
     for i in range(gpus):
         handle = pynvml.nvmlDeviceGetHandleByIndex(i)
         memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-        gpu_memory_total += memory_info.total / (1024 ** 3)
+        gpu_memory_total += memory_info.total / (1024 ** 3) #converts to gigabytes
         print(f"GPU {i} memory: {memory_info.total / (1024 ** 3):.2f} GB")
 
     pynvml.nvmlShutdown()
@@ -275,15 +275,21 @@ def check_nvlink_status():
 
 
 
-def check_docker():
+def check_docker(docker_requirement):
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]Docker Version[/italic red]")
 
-    #result = subprocess.run(['docker', 'run', '--gpus', 'all', 'nvcr.io/nvidia/k8s/cuda-sample:nbody', 'nbody', '-gpu', '-benchmark'],
-                            #capture_output=True, text=True, check=True)、
     result =  subprocess.run(['docker', '--version'], capture_output=True, text=True, check=True)
-    print(result)
-    #result = subprocess.run(['docker', '--version'], cwd = "/usr/local/bin", stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+   
     result_chain =  result.stdout.strip()
+    version = result_chain.split("\n")[0]
+    version_num = version.split(",")[0].split(" ")[-1]
+    if version_num >= docker_requirement:
+        print(f"      {OK_MARK} DOCKER Version is compatible with RAPIDS")
+    else:
+        print(f"      {X_MARK} DOCKER Version is not compatible with RAPIDS - please upgrade to Docker {docker_requirement}")
+    
     return result_chain.split("\n")
+    
 
 
 @click.group()
@@ -366,7 +372,9 @@ def doctor():
         check_memory_to_gpu_ratio()
         check_nvlink_status()
 
-    print(check_docker())
+    print("\n")
+    print(f"[bold green]{DOCTOR_SYMBOL} Performing OTHER health checks for RAPIDS[/bold green] \n")
+    check_docker("19.03")
 
 @rapids.command()
 def info():
