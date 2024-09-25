@@ -296,15 +296,20 @@ def check_docker(docker_requirement):
 
 def check_conda(conda_requirement):
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Conda Version[/italic red]")
-    result = subprocess.check_output(["conda", "--version"], stderr=subprocess.DEVNULL)
-    result_str = result.decode('utf-8')
-    version_num = result_str.strip().split(" ")[-1]
+    result =  subprocess.check_output(["conda", "info", "--json"], stderr=subprocess.DEVNULL)
+    result_json = json.loads(result.decode('utf-8'))
+    version_num = result_json["conda_version"]
+    print(version_num)
+    
     
     if version_num >= conda_requirement:
         print(f"      {OK_MARK} CONDA Version is compatible with RAPIDS")
     else:
         print(f"      {X_MARK} CONDA Version is not compatible with RAPIDS - please upgrade to Docker {conda_requirement}")
     
+
+#def check_pip():
+
 
 @click.group()
 def rapids(): 
