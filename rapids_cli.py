@@ -2,6 +2,7 @@ import click
 import pynvml
 import platform
 import subprocess
+import json
 import psutil
 from rich import print 
 from rich.console import Console 
@@ -285,7 +286,29 @@ def check_docker(docker_requirement):
     else:
         print(f"      {X_MARK} DOCKER Version is not compatible with RAPIDS - please upgrade to Docker {docker_requirement}")
     
+    try:
+        docker_version_data = json.loads(subprocess.check_output(["docker", "version", "-f", "json"]))
+        print(docker_version_data)
+    except:
+        print(f"      {X_MARK} NVIDIA Docker Runtime not available - please install here : https://github.com/NVIDIA/nvidia-container-toolkit")
+
+
+
+def check_conda(conda_requirement):
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]Conda Version[/italic red]")
+    result =  subprocess.check_output(["conda", "info", "--json"], stderr=subprocess.DEVNULL)
+    result_json = json.loads(result.decode('utf-8'))
+    version_num = result_json["conda_version"]
+    print(version_num)
     
+    
+    if version_num >= conda_requirement:
+        print(f"      {OK_MARK} CONDA Version is compatible with RAPIDS")
+    else:
+        print(f"      {X_MARK} CONDA Version is not compatible with RAPIDS - please upgrade to Docker {conda_requirement}")
+    
+
+#def check_pip():
 
 
 @click.group()
@@ -371,6 +394,7 @@ def doctor():
     print("\n")
     print(f"[bold green]{DOCTOR_SYMBOL} Performing OTHER health checks for RAPIDS[/bold green] \n")
     check_docker("19.03")
+    check_conda("22.11")
 
 @rapids.command()
 def info():
