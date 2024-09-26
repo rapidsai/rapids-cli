@@ -7,6 +7,7 @@ import psutil
 from rich import print 
 from rich.console import Console 
 from rich.table import Table
+import platform
 
 CHECK_SYMBOL = "🚨"
 OK_MARK = "✅"
@@ -296,14 +297,10 @@ def check_docker(docker_requirement):
 
 def check_conda(conda_requirement):
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Conda Version[/italic red]")
-    #result = subprocess.check_output(["conda", "--version"], stderr=subprocess.DEVNULL)
-    #result_str = result.decode('utf-8')
-   #version_num = result_str.strip().split(" ")[-1]
     result =  subprocess.check_output(["conda", "info", "--json"], stderr=subprocess.DEVNULL)
     result_json = json.loads(result.decode('utf-8'))
     version_num = result_json["conda_version"]
-    print(version_num)
-    
+
     
     if version_num >= conda_requirement:
         print(f"      {OK_MARK} CONDA Version is compatible with RAPIDS")
@@ -311,7 +308,36 @@ def check_conda(conda_requirement):
         print(f"      {X_MARK} CONDA Version is not compatible with RAPIDS - please upgrade to Docker {conda_requirement}")
     
 
-#def check_pip():
+def check_pip():
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]Pip Requirements[/italic red]")
+    system_cuda_version = get_cuda_version()
+    print(f"      System CUDA Tookit Version: {system_cuda_version}")
+    result = subprocess.check_output(["pip", "show", "cuda-python"], stderr=subprocess.DEVNULL)
+    pip_cuda_version = result.decode('utf-8').strip().split("\n")[1].split(" ")[-1]
+    print(f"      pip CUDA  Version: {pip_cuda_version}")
+    system_cuda_version_major, pip_cuda_version_major = system_cuda_version.split(".")[0], pip_cuda_version.split(".")[0]
+    if system_cuda_version_major == pip_cuda_version_major:
+        print(f"      {OK_MARK} System and pip CUDA Versions are compatible with each other")
+    elif system_cuda_version_major >  pip_cuda_version_major:
+        print(f"      {X_MARK} Please upgrade pip CUDA version to {system_cuda_version_major}")
+    else:
+        print(f"      {X_MARK} Please upgrade system CUDA version to {pip_cuda_version_major}")
+
+
+def check_architecture():
+    arch = platform.architecture()[0]
+    machine = platform.machine()
+    print(arch)
+    if machine == 'x86_64':
+        return "x86_64 architecture detected."
+    elif machine == 'aarch64':
+        return "ARM64 (aarch64) architecture detected."
+    else:
+        return f"Unknown architecture: {machine}"
+
+
+
+
 
 
 @click.group()
@@ -398,6 +424,11 @@ def doctor():
     print(f"[bold green]{DOCTOR_SYMBOL} Performing OTHER health checks for RAPIDS[/bold green] \n")
     check_docker("19.03")
     check_conda("22.11")
+
+    if cuda_check_return:
+        check_pip()
+    
+    print(check_architecture())
 
 @rapids.command()
 def info():

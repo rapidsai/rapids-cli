@@ -7,6 +7,7 @@ import psutil
 from rich import print 
 from rich.console import Console 
 from rich.table import Table
+import platform
 
 CHECK_SYMBOL = "🚨"
 OK_MARK = "✅"
@@ -131,6 +132,7 @@ def detect_os():
                 os_release = f.read()
                 os = get_os_attributes(os_release)["NAME"]
                 os_attributes =get_os_attributes(os_release)
+                os = get_os_attributes(os_release)["NAME"]
                 validOS = check_os_version(os_attributes)
         except FileNotFoundError:
             print("/etc/os-release file not found. This might not be a typical Linux environment.")
@@ -138,11 +140,12 @@ def detect_os():
         print(f"      {X_MARK} Operating System not recognized")
         os = None
 
-        
+
     if validOS: 
         print(f"      {OK_MARK} OS is compatible with RAPIDS")
     else:
         print(f"      {X_MARK} OS is not compatible with RAPIDS. Please see https://docs.rapids.ai/install for system requirements.")
+
 
     return os
 
@@ -307,8 +310,7 @@ def check_conda(conda_requirement):
     result =  subprocess.check_output(["conda", "info", "--json"], stderr=subprocess.DEVNULL)
     result_json = json.loads(result.decode('utf-8'))
     version_num = result_json["conda_version"]
-    print(version_num)
-    
+
     
     if version_num >= conda_requirement:
         print(f"      {OK_MARK} CONDA Version is compatible with RAPIDS")
@@ -316,6 +318,21 @@ def check_conda(conda_requirement):
         print(f"      {X_MARK} CONDA Version is not compatible with RAPIDS - please upgrade to Docker {conda_requirement}")
     
 
+
+def check_pip():
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]Pip Requirements[/italic red]")
+    system_cuda_version = get_cuda_version()
+    print(f"      System CUDA Tookit Version: {system_cuda_version}")
+    result = subprocess.check_output(["pip", "show", "cuda-python"], stderr=subprocess.DEVNULL)
+    pip_cuda_version = result.decode('utf-8').strip().split("\n")[1].split(" ")[-1]
+    print(f"      pip CUDA  Version: {pip_cuda_version}")
+    system_cuda_version_major, pip_cuda_version_major = system_cuda_version.split(".")[0], pip_cuda_version.split(".")[0]
+    if system_cuda_version_major == pip_cuda_version_major:
+        print(f"      {OK_MARK} System and pip CUDA Versions are compatible with each other")
+    elif system_cuda_version_major >  pip_cuda_version_major:
+        print(f"      {X_MARK} Please upgrade pip CUDA version to {system_cuda_version_major}")
+    else:
+        print(f"      {X_MARK} Please upgrade system CUDA version to {pip_cuda_version_major}")
 
 
 def check_glb():
@@ -343,7 +360,6 @@ def check_glb():
             print(f"      Please upgrade glb to 2.17 and above")
         elif machine == 'aarch64' or machine == "arm64":
             print(f"      Please upgrade glb to 2.32 and above")
-
 
 
 @click.group()
@@ -431,9 +447,11 @@ def doctor():
     check_docker("19.03")
     check_conda("22.11")
 
-    if os == "Ubuntu":
+    if cuda_check_return:
+        check_pip()
+    
+    if os == 'Ubuntu':
         check_glb()
-
 
 
 @rapids.command()
