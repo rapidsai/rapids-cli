@@ -3,6 +3,7 @@ import pynvml
 import platform
 import subprocess
 import json
+import yaml
 import psutil
 from rich import print 
 from rich.console import Console 
@@ -106,12 +107,14 @@ def detect_os():
     system = platform.system()
     release = platform.release()
     version = platform.version()
+    os = ""
 
     print(f"        System: {system}")
     print(f"        Release: {release}")
     print(f"        Version: {version}")
     validOS = False 
     if system == "Windows":
+        os = "Windows"
         if release == '11': 
             try:
                 result = subprocess.check_output(['wsl', '--list', '--verbose'], text=True)
@@ -129,15 +132,21 @@ def detect_os():
             with open('/etc/os-release') as f: 
                 os_release = f.read()
                 os_attributes =get_os_attributes(os_release)
+                os = get_os_attributes(os_release)["NAME"]
                 validOS = check_os_version(os_attributes)
         except FileNotFoundError:
             print("/etc/os-release file not found. This might not be a typical Linux environment.")
     else:
         print(f"      {X_MARK} Operating System not recognized")
+        os = None
+
     if validOS: 
         print(f"      {OK_MARK} OS is compatible with RAPIDS")
     else:
         print(f"      {X_MARK} OS is not compatible with RAPIDS. Please see https://docs.rapids.ai/install for system requirements.")
+
+    return os 
+
 
 #CUDA Version : NVIDIA DRIVER Version
 SUPPORTED_VERSIONS = {
@@ -324,20 +333,33 @@ def check_pip():
         print(f"      {X_MARK} Please upgrade system CUDA version to {pip_cuda_version_major}")
 
 
-def check_architecture():
-    arch = platform.architecture()[0]
+
+def check_glb():
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]glb comp[/italic red]")
+    glb_compatible = False
+    result = subprocess.check_output(["ldd", "--version"])
+    glb_version = result.decode('utf-8').strip().split("\n")[0].split(" ")[-1]
+    
     machine = platform.machine()
-    print(arch)
+
     if machine == 'x86_64':
-        return "x86_64 architecture detected."
-    elif machine == 'aarch64':
-        return "ARM64 (aarch64) architecture detected."
+        if glb_version >= "2.17":
+            glb_compatible = True 
+    elif machine == 'aarch64' or machine == "arm64":
+        if glb_version >= "2.32":
+            glb_compatible =  True 
+    else: 
+        print(f"      {X_MARK} Please only use x86_64 or arm64 architectures")
+    if glb_compatible:
+        print(f"      {OK_MARK} GLB version and CPU architecture are compatible with each other")
     else:
-        return f"Unknown architecture: {machine}"
-
-
-
-
+        print(f"      {X_MARK} GLB version and CPU architecture are NOT compatible with each other. ")
+        
+        if machine == 'x86_64':
+            print(f"      Please upgrade glb to 2.17 and above")
+        elif machine == 'aarch64' or machine == "arm64":
+            print(f"      Please upgrade glb to 2.32 and above")
+        
 
 
 @click.group()
@@ -405,13 +427,21 @@ def doctor():
     click.echo("checking environment")
     print("\n")
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
+    
+    with open('environment.yml', 'r') as file: 
+        config = yaml.safe_load(file)
+    
+    gpu_compute_requirement = config['variables']['gpu_compute_requirement']
+    docker_requirement = config['variables']['docker_requirement']
+    conda_requirement = config['variables']['conda_requirement']
+
     gpu_check_return = gpu_check()
     cuda_check_return = cuda_check()
     if gpu_check_return:
-        check_gpu_compute_capability("70")
+        check_gpu_compute_capability(gpu_compute_requirement)
     if cuda_check_return:
         check_driver_compatibility()
-    detect_os()
+    os = detect_os()
 
     print("\n")
     print(f"[bold green]{DOCTOR_SYMBOL} Performing RECOMMENDED health check for RAPIDS[/bold green] \n")
@@ -422,13 +452,15 @@ def doctor():
 
     print("\n")
     print(f"[bold green]{DOCTOR_SYMBOL} Performing OTHER health checks for RAPIDS[/bold green] \n")
-    check_docker("19.03")
-    check_conda("22.11")
+    check_docker(docker_requirement)
+    check_conda(conda_requirement)
 
     if cuda_check_return:
         check_pip()
     
-    print(check_architecture())
+    if os == 'Ubuntu':
+        check_glb()
+
 
 @rapids.command()
 def info():

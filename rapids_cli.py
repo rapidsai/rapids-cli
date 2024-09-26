@@ -3,6 +3,7 @@ import pynvml
 import platform
 import subprocess
 import json
+import yaml
 import psutil
 from rich import print 
 from rich.console import Console 
@@ -426,10 +427,18 @@ def doctor():
     click.echo("checking environment")
     print("\n")
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
+    
+    with open('environment.yml', 'r') as file: 
+        config = yaml.safe_load(file)
+    
+    gpu_compute_requirement = config['variables']['gpu_compute_requirement']
+    docker_requirement = config['variables']['docker_requirement']
+    conda_requirement = config['variables']['conda_requirement']
+
     gpu_check_return = gpu_check()
     cuda_check_return = cuda_check()
     if gpu_check_return:
-        check_gpu_compute_capability("70")
+        check_gpu_compute_capability(gpu_compute_requirement)
     if cuda_check_return:
         check_driver_compatibility()
     os = detect_os()
@@ -443,8 +452,8 @@ def doctor():
 
     print("\n")
     print(f"[bold green]{DOCTOR_SYMBOL} Performing OTHER health checks for RAPIDS[/bold green] \n")
-    check_docker("19.03")
-    check_conda("22.11")
+    check_docker(docker_requirement)
+    check_conda(conda_requirement)
 
     if cuda_check_return:
         check_pip()
