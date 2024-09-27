@@ -61,7 +61,7 @@ def check_gpu_compute_capability(required_capability):
     print(f"   {CHECK_SYMBOL} Checking for [italic red]GPU Compute Capability[/italic red]")
     try: 
         pynvml.nvmlInit()
-
+        meets_requirement = False 
         num_gpus = pynvml.nvmlDeviceGetCount()
         for i in range(num_gpus):
             handle = pynvml.nvmlDeviceGetHandleByIndex(i)
@@ -71,6 +71,7 @@ def check_gpu_compute_capability(required_capability):
             print(f"      GPU {i} Compute Capability: {major}.{minor}")
             
             if compute_capability >= int(required_capability):
+                meets_requirement = True
                 print(f"         GPU {i} meets the required compute capability {required_capability[0]}.{required_capability[1]}")
             else:
                 print(f"         GPU {i} does not meet the required compute capability {required_capability[0]}.{required_capability[1]}.")
@@ -78,7 +79,8 @@ def check_gpu_compute_capability(required_capability):
         pynvml.nvmlShutdown()
     except: 
         print(f"       {X_MARK: >6} No GPU - cannot determineg GPU Compute Capability")
-
+    
+    return meets_requirement
 
 VALID_LINUX_OS_VERSIONS = ["Ubuntu 20.04", "Ubuntu 22.04", "Rocky Linux 8.7"] 
 
@@ -209,7 +211,7 @@ def check_driver_compatibility():
     else:
         print(f"      {X_MARK: >6} CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatability guidance.")
 
-
+    
 
 def check_sdd_nvme():
     #checks if the system has NVMe SSDs
@@ -428,35 +430,36 @@ def help():
     console.print(table)
 
 
-def cudf_checks():
-    print(f"Checking CUDF dependencies")
+def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
 
-    if compare_version(get_cuda_version(), "11.2"):
-        print(f"{X_MARK:>6} GLB version and CPU architecture are NOT compatible with each other. ")
+    print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for CUDF [/bold green] \n")
+    
+    
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]CUDA dependencies[/italic red]")
+    if compare_version(get_cuda_version(), cuda_requirement): #when the other branch gets merged, will move the magic numbers to their yaml file 
+        print(f"{OK_MARK: >6}  CUDA version compatible with CUDF")
     else:
-        print(f"      {X_MARK} GLB version and CPU architecture are NOT compatible with each other. ")
-    
-    
-    
-    
-    
+        print(f"{X_MARK: >6}  CUDA version not compatible with CUDF. Please upgrade to {cuda_requirement}")
     
 
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]Driver Availability[/italic red]")
+    if cuda_check():
+        if compare_version(get_driver_version(), driver_requirement):
+            print(f"{OK_MARK: >6}  Nvidia Driver version compatible with CUDF")
+        else:
+            print(f"{X_MARK: >6}  Nvidia Driver version not compatible with CUDF. Please upgrade to {driver_requirement}")
+    else: 
+        print(f"{X_MARK: >6} No Nvidia Driver Detected")
 
-@rapids.command()
-@click.argument('arguments', nargs=-1)
-def doctor(arguments):
-    click.echo("checking environment")
-    print("\n")
+    if gpu_check():
+        if check_gpu_compute_capability(compute_requirement):
+            print(f"{OK_MARK: >6}  GPU compute compatible with CUDF")
+        else:
+            print(f"{X_MARK: >6}  GPU compute not compatible with CUDF. Please upgrade to compute >={compute_requirement}") 
+   
+    
+def default_checks(): 
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
-    
-    for argument in arguments: 
-        if argument not in VALID_SUBCOMMANDS: 
-            print(f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}")
-        if argument == "cudf":
-            cudf_checks() 
-
-
     gpu_check_return = gpu_check()
     cuda_check_return = cuda_check()
     if gpu_check_return:
@@ -483,6 +486,23 @@ def doctor(arguments):
     if os == 'Ubuntu':
         check_glb()
 
+
+@rapids.command()
+@click.argument('arguments', nargs=-1)
+def doctor(arguments):
+    click.echo("checking environment")
+    print("\n")
+    
+    if len(arguments) == 0:
+        default_checks()
+    else:
+        for argument in arguments: 
+            if argument not in VALID_SUBCOMMANDS: 
+                print(f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}")
+            if argument == "cudf":
+                cudf_checks("11.2", "450.80.02", "7.0") 
+
+    
 
 @rapids.command()
 def info():
