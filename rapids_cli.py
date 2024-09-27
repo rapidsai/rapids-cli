@@ -428,7 +428,7 @@ def doctor():
     print("\n")
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
     
-    with open('environment.yml', 'r') as file: 
+    with open('config.yml', 'r') as file: 
         config = yaml.safe_load(file)
     
     gpu_compute_requirement = config['variables']['gpu_compute_requirement']
