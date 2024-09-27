@@ -19,6 +19,12 @@ def compare_version(version, requirement):
     if str(version) >= str(requirement): 
         return True
     return False 
+VALID_SUBCOMMANDS = ["cudf"]
+
+def compare_version(version, requirement):
+    if str(version) >= str(requirement): 
+        return True
+    return False 
 
 
 def gpu_check():
@@ -460,6 +466,14 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
     
 def default_checks(): 
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
+    
+    for argument in arguments: 
+        if argument not in VALID_SUBCOMMANDS: 
+            print(f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}")
+        if argument == "cudf":
+            cudf_checks() 
+
+
     gpu_check_return = gpu_check()
     cuda_check_return = cuda_check()
     if gpu_check_return:
