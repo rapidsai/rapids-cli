@@ -13,6 +13,7 @@ CHECK_SYMBOL = "🚨"
 OK_MARK = "✅"
 X_MARK = "❌"
 DOCTOR_SYMBOL = "🧑‍⚕️"
+VALID_SUBCOMMANDS = ["cudf"]
 
 
 def gpu_check():
@@ -420,12 +421,28 @@ def help():
 
     console = Console()
     console.print(table)
+
+
+def cudf_checks():
+    print(f"Checking CUDF dependencies")
     
+    
+
+
 @rapids.command()
-def doctor():
+@click.argument('arguments', nargs=-1)
+def doctor(arguments):
     click.echo("checking environment")
     print("\n")
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
+    
+    for argument in arguments: 
+        if argument not in VALID_SUBCOMMANDS: 
+            print(f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}")
+        if argument == "cudf":
+            cudf_checks()
+
+
     gpu_check_return = gpu_check()
     cuda_check_return = cuda_check()
     if gpu_check_return:
