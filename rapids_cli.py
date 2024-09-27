@@ -20,12 +20,6 @@ def compare_version(version, requirement):
     if str(version) >= str(requirement): 
         return True
     return False 
-VALID_SUBCOMMANDS = ["cudf"]
-
-def compare_version(version, requirement):
-    if str(version) >= str(requirement): 
-        return True
-    return False 
 
 
 def gpu_check():
@@ -437,10 +431,9 @@ def help():
     console.print(table)
 
 
-def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
+def cudf_checks(cuda_requirement,driver_requirement, compute_requirement):
+    print(f"Checking CUDF dependencies")
 
-    print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for CUDF [/bold green] \n")
-    
     
     print(f"   {CHECK_SYMBOL} Checking for [italic red]CUDA dependencies[/italic red]")
     if compare_version(get_cuda_version(), cuda_requirement): #when the other branch gets merged, will move the magic numbers to their yaml file 
