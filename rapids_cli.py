@@ -15,6 +15,11 @@ X_MARK = "❌"
 DOCTOR_SYMBOL = "🧑‍⚕️"
 VALID_SUBCOMMANDS = ["cudf"]
 
+def compare_version(version, requirement):
+    if str(version) >= str(requirement): 
+        return True
+    return False 
+
 
 def gpu_check():
     print(f"   {CHECK_SYMBOL} Checking for [italic red]GPU Availability[/italic red]")
@@ -425,6 +430,15 @@ def help():
 
 def cudf_checks():
     print(f"Checking CUDF dependencies")
+
+    if compare_version(get_cuda_version(), "11.2"):
+        print(f"{X_MARK:>6} GLB version and CPU architecture are NOT compatible with each other. ")
+    else:
+        print(f"      {X_MARK} GLB version and CPU architecture are NOT compatible with each other. ")
+    
+    
+    
+    
     
     
 
@@ -440,7 +454,7 @@ def doctor(arguments):
         if argument not in VALID_SUBCOMMANDS: 
             print(f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}")
         if argument == "cudf":
-            cudf_checks()
+            cudf_checks() 
 
 
     gpu_check_return = gpu_check()
