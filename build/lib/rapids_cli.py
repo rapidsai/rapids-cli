@@ -3,7 +3,6 @@ import pynvml
 import platform
 import subprocess
 import json
-import yaml
 import psutil
 from rich import print 
 from rich.console import Console 
@@ -359,9 +358,9 @@ def check_glb():
     else: 
         print(f"      {X_MARK: >6} Please only use x86_64 or arm64 architectures")
     if glb_compatible:
-        print(f"      {OK_MARK: >6} GLB version and CPU architecture are compatible with each other. ")
+        print(f"      {OK_MARK: >6} GLB version and CPU architecture are compatible with each other")
     else:
-        print(f"      {X_MARK: >6} GLB version and CPU architecture are NOT compatible with each other.")
+        print(f"      {X_MARK: >6} GLB version and CPU architecture are NOT compatible with each other. ")
         
         if machine == 'x86_64':
             print(f"      Please upgrade glb to 2.17 and above")
@@ -436,14 +435,14 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for CUDF [/bold green] \n")
     
     
-    print(f"   {CHECK_SYMBOL} Checking for [italic red]CUDA dependencies[/italic red]")
+    print(f"   {CHECK_SYMBOL} Checking for [italic red] CUDA dependencies[/italic red]")
     if compare_version(get_cuda_version(), cuda_requirement): #when the other branch gets merged, will move the magic numbers to their yaml file 
         print(f"{OK_MARK: >6}  CUDA version compatible with CUDF")
     else:
         print(f"{X_MARK: >6}  CUDA version not compatible with CUDF. Please upgrade to {cuda_requirement}")
     
 
-    print(f"   {CHECK_SYMBOL} Checking for [italic red]Driver Availability[/italic red]")
+    print(f"   {CHECK_SYMBOL} Checking for [italic red] Driver Availability[/italic red]")
     if cuda_check():
         if compare_version(get_driver_version(), driver_requirement):
             print(f"{OK_MARK: >6}  Nvidia Driver version compatible with CUDF")
@@ -461,22 +460,10 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
     
 def default_checks(): 
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
-
-
-    
-    with open('config.yml', 'r') as file: 
-        config = yaml.safe_load(file)
-    
-
-    gpu_compute_requirement = config['min_supported_versions']['gpu_compute_requirement']
-    docker_requirement = config['min_supported_versions']['docker_requirement']
-    conda_requirement = config['min_supported_versions']['conda_requirement']
-
-
     gpu_check_return = gpu_check()
     cuda_check_return = cuda_check()
     if gpu_check_return:
-        check_gpu_compute_capability(gpu_compute_requirement)
+        check_gpu_compute_capability("70")
     if cuda_check_return:
         check_driver_compatibility()
     os = detect_os()
@@ -490,8 +477,8 @@ def default_checks():
 
     print("\n")
     print(f"[bold green]{DOCTOR_SYMBOL} Performing OTHER health checks for RAPIDS[/bold green] \n")
-    check_docker(docker_requirement)
-    check_conda(conda_requirement)
+    check_docker("19.03")
+    check_conda("22.11")
 
     if cuda_check_return:
         check_pip()
@@ -505,6 +492,7 @@ def default_checks():
 def doctor(arguments):
     click.echo("checking environment")
     print("\n")
+    
     if len(arguments) == 0:
         default_checks()
     else:
@@ -512,14 +500,8 @@ def doctor(arguments):
             if argument not in VALID_SUBCOMMANDS: 
                 print(f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}")
             if argument == "cudf":
-                with open('config.yml', 'r') as file: 
-                    config = yaml.safe_load(file)
-                cuda_requirement = config['cudf_requirements']['cuda_requirement']
-                driver_requirement = config['cudf_requirements']['driver_requirement']
-                compute_requirement = config['cudf_requirements']['compute_requirement']
+                cudf_checks("11.2", "450.80.02", "7.0") 
 
-                cudf_checks(cuda_requirement,driver_requirement, compute_requirement)
-                
     
 
 @rapids.command()
