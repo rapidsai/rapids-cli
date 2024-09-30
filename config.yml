@@ -1,4 +1,4 @@
-variables:
+min_supported_versions:
   gpu_compute_requirement: "70"
   docker_requirement: "19.03"
   conda_requirement: "22.11"
