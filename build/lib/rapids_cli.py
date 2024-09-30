@@ -144,11 +144,7 @@ def detect_os():
         except FileNotFoundError:
             print("/etc/os-release file not found. This might not be a typical Linux environment.")
     else:
-<<<<<<< HEAD
-        print(f"      {X_MARK: >6} Operating System not recognized")
-=======
-        print(f"      {X_MARK} Operating System not recognized")
->>>>>>> faa464aea7a6780ca72e49e153fed58c440a8593
+        print(f"{X_MARK: >6} Operating System not recognized")
         os = None
 
     if validOS: 
