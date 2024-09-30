@@ -8,6 +8,7 @@ from rich import print
 from rich.console import Console 
 from rich.table import Table
 import platform
+import importlib.util
 
 CHECK_SYMBOL = "🚨"
 OK_MARK = "✅"
@@ -19,13 +20,6 @@ def compare_version(version, requirement):
     if str(version) >= str(requirement): 
         return True
     return False 
-VALID_SUBCOMMANDS = ["cudf"]
-
-def compare_version(version, requirement):
-    if str(version) >= str(requirement): 
-        return True
-    return False 
-
 
 def gpu_check():
     print(f"   {CHECK_SYMBOL} Checking for [italic red]GPU Availability[/italic red]")
@@ -348,7 +342,7 @@ def check_pip():
 
 
 def check_glb():
-    print(f"   {CHECK_SYMBOL} Checking for [italic red]glb comp[/italic red]")
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]glb compatibility [/italic red]")
     glb_compatible = False
     result = subprocess.check_output(["ldd", "--version"])
     glb_version = result.decode('utf-8').strip().split("\n")[0].split(" ")[-1]
@@ -361,7 +355,7 @@ def check_glb():
     elif machine == 'aarch64' or machine == "arm64":
         if glb_version >= "2.32":
             glb_compatible =  True 
-    else: 
+    else:
         print(f"      {X_MARK: >6} Please only use x86_64 or arm64 architectures")
     if glb_compatible:
         print(f"      {OK_MARK: >6} GLB version and CPU architecture are compatible with each other")
@@ -440,6 +434,14 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
 
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for CUDF [/bold green] \n")
     
+    if check_package_exists("cudf"):
+        import cudf
+        cudf_version = cudf.__version___
+        print(f"{X_MARK: >6} cuDF Version: {cudf_version}")
+    else:
+        print(f"{X_MARK: >6} cuDF is not installed - please install cuDF (https://github.com/rapidsai/cudf)")
+    
+
     
     print(f"   {CHECK_SYMBOL} Checking for [italic red]CUDA dependencies[/italic red]")
     if compare_version(get_cuda_version(), cuda_requirement): #when the other branch gets merged, will move the magic numbers to their yaml file 
@@ -462,17 +464,52 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
             print(f"{OK_MARK: >6}  GPU compute compatible with CUDF")
         else:
             print(f"{X_MARK: >6}  GPU compute not compatible with CUDF. Please upgrade to compute >={compute_requirement}") 
-   
+
+
+
+def check_package_exists(package_name):
     
+    if importlib.util.find_spec(package_name) is not None: 
+        return True
+    return False
+
+
+
+def cuml_checks():
+
+    print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for CUML [/bold green] \n")
+
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]cuML installation[/italic red]")
+    if check_package_exists("cuml"):
+        import cuml
+        cuml_version = cuml.__version___
+        print(f"{OK_MARK: >6} cuML Version: {cuml_version}")
+    else:
+        print(f"{X_MARK: >6} cuML is not installed - please install cuML (https://github.com/rapidsai/cuml?tab=readme-ov-file)")
+
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]cuDF installation[/italic red]")
+    if check_package_exists("cudf"):
+        import cudf
+        cudf_version = cudf.__version___
+        print(f"{OK_MARK: >6} cuDF Version: {cudf_version}")
+    else:
+        print(f"{X_MARK: >6} cuDF is not installed - please install cuDF (https://github.com/rapidsai/cudf)")
+    
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]zlib installation[/italic red]")
+    if check_package_exists("zlib"):
+        import zlib 
+        zlib_version = zlib.__version__
+        print(f"{OK_MARK: >6} zlib Version: {zlib_version}")
+    else:
+        print(f"{X_MARK: >6} zlib is not installed - please install zlib (https://github.com/rapidsai/cudf)")
+
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]cmake version[/italic red]")
+    result = subprocess.check_output(["cmake", "--version"])
+
+    
+
 def default_checks(): 
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
-    
-    for argument in arguments: 
-        if argument not in VALID_SUBCOMMANDS: 
-            print(f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}")
-        if argument == "cudf":
-            cudf_checks() 
-
 
     gpu_check_return = gpu_check()
     cuda_check_return = cuda_check()
@@ -515,13 +552,14 @@ def doctor(arguments):
                 print(f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}")
             if argument == "cudf":
                 cudf_checks("11.2", "450.80.02", "7.0") 
+            elif argument == "cuml":
+                cuml_checks()
 
     
 
 @rapids.command()
 def info():
     click.echo("Information about RAPIDS subcommands \n")
-    
 
 
     table = Table(title = "[bold] doctor [/bold]")

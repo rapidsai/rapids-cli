@@ -19,6 +19,12 @@ def compare_version(version, requirement):
     if str(version) >= str(requirement): 
         return True
     return False 
+VALID_SUBCOMMANDS = ["cudf"]
+
+def compare_version(version, requirement):
+    if str(version) >= str(requirement): 
+        return True
+    return False 
 
 
 def gpu_check():
@@ -144,20 +150,13 @@ def detect_os():
         except FileNotFoundError:
             print("/etc/os-release file not found. This might not be a typical Linux environment.")
     else:
-<<<<<<< HEAD
         print(f"      {X_MARK: >6} Operating System not recognized")
-=======
-        print(f"      {X_MARK} Operating System not recognized")
->>>>>>> faa464aea7a6780ca72e49e153fed58c440a8593
         os = None
 
     if validOS: 
         print(f"      {OK_MARK: >6} OS is compatible with RAPIDS")
     else:
         print(f"      {X_MARK: >6} OS is not compatible with RAPIDS. Please see https://docs.rapids.ai/install for system requirements.")
-
-    return os 
-
 
     return os 
 
@@ -363,19 +362,11 @@ def check_glb():
         if glb_version >= "2.32":
             glb_compatible =  True 
     else: 
-<<<<<<< HEAD
         print(f"      {X_MARK: >6} Please only use x86_64 or arm64 architectures")
     if glb_compatible:
         print(f"      {OK_MARK: >6} GLB version and CPU architecture are compatible with each other")
     else:
         print(f"      {X_MARK: >6} GLB version and CPU architecture are NOT compatible with each other. ")
-=======
-        print(f"      {X_MARK} Please only use x86_64 or arm64 architectures")
-    if glb_compatible:
-        print(f"      {OK_MARK} GLB version and CPU architecture are compatible with each other")
-    else:
-        print(f"      {X_MARK} GLB version and CPU architecture are NOT compatible with each other. ")
->>>>>>> faa464aea7a6780ca72e49e153fed58c440a8593
         
         if machine == 'x86_64':
             print(f"      Please upgrade glb to 2.17 and above")
@@ -449,16 +440,15 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
 
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for CUDF [/bold green] \n")
     
-<<<<<<< HEAD
     
-    print(f"   {CHECK_SYMBOL} Checking for [italic red] CUDA dependencies[/italic red]")
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]CUDA dependencies[/italic red]")
     if compare_version(get_cuda_version(), cuda_requirement): #when the other branch gets merged, will move the magic numbers to their yaml file 
         print(f"{OK_MARK: >6}  CUDA version compatible with CUDF")
     else:
         print(f"{X_MARK: >6}  CUDA version not compatible with CUDF. Please upgrade to {cuda_requirement}")
     
 
-    print(f"   {CHECK_SYMBOL} Checking for [italic red] Driver Availability[/italic red]")
+    print(f"   {CHECK_SYMBOL} Checking for [italic red]Driver Availability[/italic red]")
     if cuda_check():
         if compare_version(get_driver_version(), driver_requirement):
             print(f"{OK_MARK: >6}  Nvidia Driver version compatible with CUDF")
@@ -475,16 +465,8 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
    
     
 def default_checks(): 
-=======
-@rapids.command()
-@click.argument('arguments', nargs=-1)
-def doctor(arguments):
-    click.echo("checking environment")
-    print("\n")
->>>>>>> faa464aea7a6780ca72e49e153fed58c440a8593
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
-    
-    print("ARGUMENTS: ", arguments)
+
     gpu_check_return = gpu_check()
     cuda_check_return = cuda_check()
     if gpu_check_return:
@@ -511,7 +493,6 @@ def doctor(arguments):
     if os == 'Ubuntu':
         check_glb()
 
-<<<<<<< HEAD
 
 @rapids.command()
 @click.argument('arguments', nargs=-1)
@@ -529,8 +510,6 @@ def doctor(arguments):
                 cudf_checks("11.2", "450.80.02", "7.0") 
 
     
-=======
->>>>>>> faa464aea7a6780ca72e49e153fed58c440a8593
 
 @rapids.command()
 def info():
