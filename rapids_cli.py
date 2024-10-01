@@ -22,15 +22,15 @@ def gpu_check():
         pynvml.nvmlInit()
         try: 
             num_gpus = pynvml.nvmlDeviceGetCount()
-            print(f"      {OK_MARK} Number of GPUs detected: {num_gpus}")
+            print(f"      {OK_MARK: >6} Number of GPUs detected: {num_gpus}")
             return True
         except:
-            print(f"      {X_MARK} GPU detected but not available")
+            print(f"      {X_MARK: >6} GPU detected but not available")
             return False 
         
         pynvml.nvmlShutdown()
     except: 
-        print(f"      {X_MARK} No available GPUs detected")
+        print(f"      {X_MARK: >6} No available GPUs detected")
         return False
 
 
@@ -40,11 +40,11 @@ def cuda_check():
         print(f"   {CHECK_SYMBOL} Checking for [italic red]CUDA Availability[/italic red]")
         try: 
             cuda_version = pynvml.nvmlSystemGetCudaDriverVersion()
-            print(f"      {OK_MARK} CUDA detected")
+            print(f"      {OK_MARK: >6} CUDA detected")
             print(f'           CUDA VERSION:{cuda_version//1000}.{cuda_version % 1000}')
             return True 
         except: 
-            print(f"      {X_MARK} No CUDA is available")
+            print(f"      {X_MARK: >6} No CUDA is available")
             return False 
         pynvml.nvmlShutdown()
     except:
@@ -72,7 +72,7 @@ def check_gpu_compute_capability(required_capability):
     
         pynvml.nvmlShutdown()
     except: 
-        print(f"       {X_MARK} No GPU - cannot determineg GPU Compute Capability")
+        print(f"       {X_MARK: >6} No GPU - cannot determineg GPU Compute Capability")
 
 
 VALID_LINUX_OS_VERSIONS = ["Ubuntu 20.04", "Ubuntu 22.04", "Rocky Linux 8.7"] 
@@ -137,13 +137,13 @@ def detect_os():
         except FileNotFoundError:
             print("/etc/os-release file not found. This might not be a typical Linux environment.")
     else:
-        print(f"      {X_MARK} Operating System not recognized")
+        print(f"      {X_MARK: >6} Operating System not recognized")
         os = None
 
     if validOS: 
-        print(f"      {OK_MARK} OS is compatible with RAPIDS")
+        print(f"      {OK_MARK: >6} OS is compatible with RAPIDS")
     else:
-        print(f"      {X_MARK} OS is not compatible with RAPIDS. Please see https://docs.rapids.ai/install for system requirements.")
+        print(f"      {X_MARK: >6} OS is not compatible with RAPIDS. Please see https://docs.rapids.ai/install for system requirements.")
 
     return os 
 
@@ -200,9 +200,9 @@ def check_driver_compatibility():
             driver_compatible = False
 
     if driver_compatible: 
-        print(f"      {OK_MARK} CUDA & Driver is compatible with RAPIDS")
+        print(f"      {OK_MARK: >6} CUDA & Driver is compatible with RAPIDS")
     else:
-        print(f"      {X_MARK} CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatability guidance.")
+        print(f"      {X_MARK: >6} CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatability guidance.")
 
 
 
@@ -214,9 +214,9 @@ def check_sdd_nvme():
         if 'nvme' in disk.device.lower():
             has_nvme = True 
     if has_nvme:
-        print(f"      {OK_MARK} SSD drive with preferred NVMe detected for optimized performance.")
+        print(f"      {OK_MARK: >6} SSD drive with preferred NVMe detected for optimized performance.")
     else:
-        print(f"      {X_MARK} SSD drive with preferred NVMe not detected. For optimized performance, consider switching to system with NVMe-SSD drive.")
+        print(f"      {X_MARK: >6} SSD drive with preferred NVMe not detected. For optimized performance, consider switching to system with NVMe-SSD drive.")
 
 
 
@@ -254,9 +254,9 @@ def check_memory_to_gpu_ratio():
     ratio = system_memory / gpu_memory
     print(f"      System Memory to GPU Memory Ratio: {ratio:.2f}")
     if ratio >= 1.8 and ratio <=2.2:
-        print(f"      {OK_MARK} Approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask).")
+        print(f"      {OK_MARK: >6} Approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask).")
     else:
-        print(f"      {X_MARK} System Memory to total GPU Memory ratio not approximately 2:1 ratio.")
+        print(f"      {X_MARK: >6} System Memory to total GPU Memory ratio not approximately 2:1 ratio.")
 
 
 #check for NVLink with 2 or more GPUs 
@@ -267,7 +267,7 @@ def check_nvlink_status():
     try: 
         device_count = pynvml.nvmlDeviceGetCount()
         if device_count < 2:
-            print(f"      {X_MARK} Less than 2 GPUs detected. NVLink status check is not applicable.")
+            print(f"      {X_MARK: >6} Less than 2 GPUs detected. NVLink status check is not applicable.")
         for i in range(device_count):
             print(device_count)
             handle = pynvml.nvmlDeviceGetHandleByIndex(i)
@@ -292,15 +292,15 @@ def check_docker(docker_requirement):
     
     version_num = result.split(",")[0].split(" ")[-1]
     if version_num >= docker_requirement:
-        print(f"      {OK_MARK} DOCKER Version is compatible with RAPIDS")
+        print(f"      {OK_MARK: >6} DOCKER Version is compatible with RAPIDS")
     else:
-        print(f"      {X_MARK} DOCKER Version is not compatible with RAPIDS - please upgrade to Docker {docker_requirement}")
+        print(f"      {X_MARK: >6} DOCKER Version is not compatible with RAPIDS - please upgrade to Docker {docker_requirement}")
     
     try:
         docker_version_data = json.loads(subprocess.check_output(["docker", "version", "-f", "json"]))
         print(docker_version_data)
     except:
-        print(f"      {X_MARK} NVIDIA Docker Runtime not available - please install here : https://github.com/NVIDIA/nvidia-container-toolkit")
+        print(f"      {X_MARK: >6} NVIDIA Docker Runtime not available - please install here : https://github.com/NVIDIA/nvidia-container-toolkit")
 
 
 
@@ -312,9 +312,9 @@ def check_conda(conda_requirement):
 
     
     if version_num >= conda_requirement:
-        print(f"      {OK_MARK} CONDA Version is compatible with RAPIDS")
+        print(f"      {OK_MARK: >6} CONDA Version is compatible with RAPIDS")
     else:
-        print(f"      {X_MARK} CONDA Version is not compatible with RAPIDS - please upgrade to Docker {conda_requirement}")
+        print(f"      {X_MARK: >6} CONDA Version is not compatible with RAPIDS - please upgrade to Docker {conda_requirement}")
     
 
 def check_pip():
@@ -326,11 +326,11 @@ def check_pip():
     print(f"      pip CUDA  Version: {pip_cuda_version}")
     system_cuda_version_major, pip_cuda_version_major = system_cuda_version.split(".")[0], pip_cuda_version.split(".")[0]
     if system_cuda_version_major == pip_cuda_version_major:
-        print(f"      {OK_MARK} System and pip CUDA Versions are compatible with each other")
+        print(f"      {OK_MARK: >6} System and pip CUDA Versions are compatible with each other")
     elif system_cuda_version_major >  pip_cuda_version_major:
-        print(f"      {X_MARK} Please upgrade pip CUDA version to {system_cuda_version_major}")
+        print(f"      {X_MARK: >6} Please upgrade pip CUDA version to {system_cuda_version_major}")
     else:
-        print(f"      {X_MARK} Please upgrade system CUDA version to {pip_cuda_version_major}")
+        print(f"      {X_MARK: >6} Please upgrade system CUDA version to {pip_cuda_version_major}")
 
 
 
@@ -349,11 +349,11 @@ def check_glb():
         if glb_version >= "2.32":
             glb_compatible =  True 
     else: 
-        print(f"      {X_MARK} Please only use x86_64 or arm64 architectures")
+        print(f"      {X_MARK: >6} Please only use x86_64 or arm64 architectures")
     if glb_compatible:
-        print(f"      {OK_MARK} GLB version and CPU architecture are compatible with each other")
+        print(f"      {OK_MARK: >6} GLB version and CPU architecture are compatible with each other")
     else:
-        print(f"      {X_MARK} GLB version and CPU architecture are NOT compatible with each other. ")
+        print(f"      {X_MARK: >6} GLB version and CPU architecture are NOT compatible with each other. ")
         
         if machine == 'x86_64':
             print(f"      Please upgrade glb to 2.17 and above")
