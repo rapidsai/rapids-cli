@@ -365,9 +365,9 @@ def check_glb():
     else: 
         print(f"      {X_MARK: >6} Please only use x86_64 or arm64 architectures")
     if glb_compatible:
-        print(f"      {OK_MARK: >6} GLB version and CPU architecture are compatible with each other")
+        print(f"      {OK_MARK: >6} GLB version and CPU architecture are compatible with each other. ")
     else:
-        print(f"      {X_MARK: >6} GLB version and CPU architecture are NOT compatible with each other. ")
+        print(f"      {X_MARK: >6} GLB version and CPU architecture are NOT compatible with each other.")
         
         if machine == 'x86_64':
             print(f"      Please upgrade glb to 2.17 and above")
@@ -473,9 +473,9 @@ def default_checks():
     with open('config.yml', 'r') as file: 
         config = yaml.safe_load(file)
     
-    gpu_compute_requirement = config['variables']['gpu_compute_requirement']
-    docker_requirement = config['variables']['docker_requirement']
-    conda_requirement = config['variables']['conda_requirement']
+    gpu_compute_requirement = config['min_supported_versions']['gpu_compute_requirement']
+    docker_requirement = config['min_supported_versions']['docker_requirement']
+    conda_requirement = config['min_supported_versions']['conda_requirement']
 
     gpu_check_return = gpu_check()
     cuda_check_return = cuda_check()
@@ -517,8 +517,14 @@ def doctor(arguments):
             if argument not in VALID_SUBCOMMANDS: 
                 print(f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}")
             if argument == "cudf":
-                cudf_checks("11.2", "450.80.02", "7.0") 
+                with open('config.yml', 'r') as file: 
+                    config = yaml.safe_load(file)
+                cuda_requirement = config['cudf_requirements']['cuda_requirement']
+                driver_requirement = config['cudf_requirements']['driver_requirement']
+                compute_requirement = config['cudf_requirements']['compute_requirement']
 
+                cudf_checks(cuda_requirement,driver_requirement, compute_requirement)
+                
     
 
 @rapids.command()
