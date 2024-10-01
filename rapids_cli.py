@@ -3,6 +3,7 @@ import pynvml
 import platform
 import subprocess
 import json
+import yaml
 import psutil
 from rich import print 
 from rich.console import Console 
@@ -466,18 +467,20 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
     
 def default_checks(): 
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
-    
-    for argument in arguments: 
-        if argument not in VALID_SUBCOMMANDS: 
-            print(f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}")
-        if argument == "cudf":
-            cudf_checks() 
 
+
+    
+    with open('config.yml', 'r') as file: 
+        config = yaml.safe_load(file)
+    
+    gpu_compute_requirement = config['variables']['gpu_compute_requirement']
+    docker_requirement = config['variables']['docker_requirement']
+    conda_requirement = config['variables']['conda_requirement']
 
     gpu_check_return = gpu_check()
     cuda_check_return = cuda_check()
     if gpu_check_return:
-        check_gpu_compute_capability("70")
+        check_gpu_compute_capability(gpu_compute_requirement)
     if cuda_check_return:
         check_driver_compatibility()
     os = detect_os()
@@ -491,8 +494,8 @@ def default_checks():
 
     print("\n")
     print(f"[bold green]{DOCTOR_SYMBOL} Performing OTHER health checks for RAPIDS[/bold green] \n")
-    check_docker("19.03")
-    check_conda("22.11")
+    check_docker(docker_requirement)
+    check_conda(conda_requirement)
 
     if cuda_check_return:
         check_pip()
@@ -506,7 +509,7 @@ def default_checks():
 def doctor(arguments):
     click.echo("checking environment")
     print("\n")
-    
+
     if len(arguments) == 0:
         default_checks()
     else:
