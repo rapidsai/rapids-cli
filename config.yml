@@ -3,7 +3,9 @@ min_supported_versions:
   docker_requirement: "19.03"
   conda_requirement: "22.11"
 
+
 cudf_requirements: 
   cuda_requirement: "11.2"
   driver_requirement: "450.80.02"
   compute_requirement: "7.0"
+

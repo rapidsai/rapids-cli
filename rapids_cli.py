@@ -473,9 +473,11 @@ def default_checks():
     with open('config.yml', 'r') as file: 
         config = yaml.safe_load(file)
     
+
     gpu_compute_requirement = config['min_supported_versions']['gpu_compute_requirement']
     docker_requirement = config['min_supported_versions']['docker_requirement']
     conda_requirement = config['min_supported_versions']['conda_requirement']
+
 
     gpu_check_return = gpu_check()
     cuda_check_return = cuda_check()
