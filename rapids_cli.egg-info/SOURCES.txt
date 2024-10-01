@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-rapids_cli.py
-rapids_cli.egg-info/PKG-INFO
-rapids_cli.egg-info/SOURCES.txt
-rapids_cli.egg-info/dependency_links.txt
-rapids_cli.egg-info/entry_points.txt
-rapids_cli.egg-info/requires.txt
-rapids_cli.egg-info/top_level.txt

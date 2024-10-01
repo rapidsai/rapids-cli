@@ -1,9 +1,0 @@
-Metadata-Version: 2.1
-Name: rapids_cli
-Version: 0.1
-Summary: A CLI for RAPIDS
-Requires-Python: >=3.10
-Requires-Dist: Click
-Requires-Dist: nvidia-ml-py3
-Requires-Dist: psutil
-Requires-Dist: rich
