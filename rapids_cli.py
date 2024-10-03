@@ -10,6 +10,9 @@ from rich.console import Console
 from rich.table import Table
 import platform
 
+from dependency-parser import dependency_parser
+
+
 CHECK_SYMBOL = "🚨"
 OK_MARK = "✅"
 X_MARK = "❌"
@@ -22,10 +25,6 @@ def compare_version(version, requirement):
     return False 
 VALID_SUBCOMMANDS = ["cudf"]
 
-def compare_version(version, requirement):
-    if str(version) >= str(requirement): 
-        return True
-    return False 
 
 
 def gpu_check():
@@ -437,7 +436,7 @@ def help():
     console.print(table)
 
 
-def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
+def cudf_checks(cuda_requirement, driver_requirement, compute_requirement, dependencies):
 
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for CUDF [/bold green] \n")
     
@@ -463,7 +462,9 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
             print(f"{OK_MARK: >6}  GPU compute compatible with CUDF")
         else:
             print(f"{X_MARK: >6}  GPU compute not compatible with CUDF. Please upgrade to compute >={compute_requirement}") 
-   
+    
+    dependency_parser(dependencies)
+    
     
     
 def default_checks(): 
@@ -524,8 +525,8 @@ def doctor(arguments):
                 cuda_requirement = config['cudf_requirements']['cuda_requirement']
                 driver_requirement = config['cudf_requirements']['driver_requirement']
                 compute_requirement = config['cudf_requirements']['compute_requirement']
-
-                cudf_checks(cuda_requirement,driver_requirement, compute_requirement)
+                dependicies = config['cudf_dependencies']
+                cudf_checks(cuda_requirement,driver_requirement, compute_requirement, dependicies)
                 
     
 
