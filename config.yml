@@ -28,3 +28,10 @@ cudf_dependencies:
     "rmm==24.12.*,>=0.0.0a0",
     "typing_extensions>=4.0.0"
   ]
+
+
+symbols: 
+  CHECK_SYMBOL: "🚨"
+  OK_MARK: "✅"
+  X_MARK: "❌"
+  DOCTOR_SYMBOL: "🧑‍⚕️"
