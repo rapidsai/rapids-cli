@@ -10,7 +10,7 @@ from rich.console import Console
 from rich.table import Table
 import platform
 
-from dependency-parser import rapids_cli.dependency_parser as dependency_parser
+from rapids_cli.dependency_parser import dependency_parser
 
 
 CHECK_SYMBOL = "🚨"
