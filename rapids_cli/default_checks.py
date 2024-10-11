@@ -18,7 +18,7 @@ conda_requirement = config['min_supported_versions']['conda_requirement']
 
 
 def default_checks(): 
-    #print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
+    print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
     # Load the entry points
 
     gpu_check = importlib.import_module('rapids_cli.functions').gpu_check

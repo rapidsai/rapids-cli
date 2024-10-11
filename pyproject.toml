@@ -19,9 +19,9 @@ dependencies = [
 rapids = "rapids_cli:rapids"
 
 [project.entry-points.rapids_doctor_check]
-gpu = "rapids_cli.functions.gpu_check"
-cuda = "rapids_cli.functions.cuda_check"
-gpu_compute_capability = "rapids_cli.functions.check_gpu_compute_capability"
+gpu_check= "rapids_cli.functions.gpu_check"
+cuda_check= "rapids_cli.functions.cuda_check"
+check_gpu_compute_capability = "rapids_cli.functions.check_gpu_compute_capability"
 check_driver_compatibility = "rapids_cli.functions.check_driver_compatibility"
 detect_os =  "rapids_cli.functions.detect_os"
 check_sdd_nvme = "rapids_cli.functions.check_sdd_nvme"
@@ -31,3 +31,7 @@ check_docker = "rapids_cli.functions.check_docker"
 check_conda = "rapids_cli.functions.check_conda"
 check_pip = "rapids_cli.functions.check_pip"
 check_glb = "rapids_cli.functions.check_glb"
+compare_version = "rapids_cli.functions.compare_version"
+get_cuda_version = "rapids_cli.functions.get_cuda_version"
+get_driver_version = "rapids_cli.functions.get_driver_version"
+
