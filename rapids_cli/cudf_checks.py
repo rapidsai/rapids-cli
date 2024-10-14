@@ -31,12 +31,10 @@ def import_cudf():
         print(f"{X_MARK: >6}  CUDA version not compatible with CUDF. Please upgrade to {cuda_requirement}")
 
 
-        
-        
 
 def cudf_checks(cuda_requirement, driver_requirement, compute_requirement, dependencies):
 
-    print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for CUDF [/bold green] \n")
+    print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for cuDF [/bold green] \n")
     
     gpu_check = importlib.import_module('rapids_cli.functions').gpu_check
     cuda_check = importlib.import_module('rapids_cli.functions').cuda_check
