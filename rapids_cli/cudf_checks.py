@@ -1,6 +1,10 @@
 import yaml
 import importlib
 import pytest 
+from rich import print 
+from rich.console import Console 
+from rich.table import Table
+
 
 with open('config.yml', 'r') as file: 
     config = yaml.safe_load(file)
@@ -21,18 +25,26 @@ def import_cudf():
         'value': [10.5, 20.0, 30.1, 40.3, 50.8] 
         }   
         df = cudf.DataFrame(data)
-        assert(df.shape == (5, 2)), "cuDF dataframe dimensions are wrong"
+        all_checks_passed = True
+        try: 
+            assert(df.shape == (5, 2)), f"{X_MARK: >6} cuDF dataframe dimensions are wrong"
+        except AssertionError as e: 
+            all_checks_passed = False
+            print(f"{X_MARK: >6  e}")
+        try: 
+            expected_columns = ['id', 'value']
+            assert all(col in df.columns for col in expected_columns), f"{X_MARK: >6} DataFrame columns do not match expected"
+        except AssertionError as e: 
+            all_checks_passed = False
+            print(f"{X_MARK: >6  e}")
 
-        expected_columns = ['id', 'value']
-        assert all(col in df.columns for col in expected_columns), "DataFrame columns do not match expected"
-        
+        if all_checks_passed: 
+            print(f"{OK_MARK: >6}   successfully imported")
         
     except ImportError: 
-        print(f"{X_MARK: >6}  CUDA version not compatible with CUDF. Please upgrade to {cuda_requirement}")
+        print(f"{X_MARK: >6}  cuDF could not be imported. Please install cuDF https://docs.rapids.ai/install/")
 
 
-        
-        
 
 def cudf_checks(cuda_requirement, driver_requirement, compute_requirement, dependencies):
 
@@ -68,3 +80,4 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement, depen
         else:
             print(f"{X_MARK: >6}  GPU compute not compatible with CUDF. Please upgrade to compute >={compute_requirement}") 
     
+    import_cudf()
