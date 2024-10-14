@@ -10,6 +10,10 @@ from rich.console import Console
 from rich.table import Table
 import platform
 
+from rapids_cli.os_checks import detect_os
+
+
+
 CHECK_SYMBOL = "🚨"
 OK_MARK = "✅"
 X_MARK = "❌"

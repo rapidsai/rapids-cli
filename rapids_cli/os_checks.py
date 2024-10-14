@@ -1,8 +1,17 @@
 import platform 
 import subprocess
+import yaml
 
+with open('config.yml', 'r') as file: 
+    config = yaml.safe_load(file)
 
-VALID_LINUX_OS_VERSIONS = ["Ubuntu 20.04", "Ubuntu 22.04", "Rocky Linux 8.7"] 
+CHECK_SYMBOL = config['symbols']['CHECK_SYMBOL']
+OK_MARK = config['symbols']['OK_MARK']
+X_MARK = config['symbols']['X_MARK']
+DOCTOR_SYMBOL = config['symbols']['DOCTOR_SYMBOL']
+
+VALID_LINUX_OS_VERSIONS = config['os_requirements']['VALID_LINUX_OS_VERSIONS']
+
 
 def check_os_version(os_attributes):
     os_name = os_attributes['NAME'] + " " + os_attributes['VERSION_ID']
