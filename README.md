@@ -29,7 +29,7 @@ After cloning the repository, run the following commands in your terminal:
 
 ## Subcommands
 
-Currently RAPIDs Doctor supports the following health checks: 
+Currently RAPIDS Doctor supports the following health checks: 
 
 - `rapids doctor` (system runthrough of basic dependencies and requirements)
 - `rapids doctor cudf` (checks for cuDF specific dependencies)
