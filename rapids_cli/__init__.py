@@ -10,7 +10,6 @@ from rich.console import Console
 from rich.table import Table
 import platform
 
-from rapids_cli.dependency_parser import dependency_parser
 from rapids_cli.default_checks import default_checks
 from rapids_cli.cudf_checks import cudf_checks
 
@@ -101,8 +100,7 @@ def doctor(arguments):
                 cuda_requirement = config['cudf_requirements']['cuda_requirement']
                 driver_requirement = config['cudf_requirements']['driver_requirement']
                 compute_requirement = config['cudf_requirements']['compute_requirement']
-                dependicies = config['cudf_dependencies']
-                cudf_checks(cuda_requirement,driver_requirement, compute_requirement, dependicies)
+                cudf_checks(cuda_requirement,driver_requirement, compute_requirement)
                 
     
 

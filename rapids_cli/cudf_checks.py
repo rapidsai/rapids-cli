@@ -34,7 +34,7 @@ def import_cudf():
         
         
 
-def cudf_checks(cuda_requirement, driver_requirement, compute_requirement, dependencies):
+def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
 
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for CUDF [/bold green] \n")
     

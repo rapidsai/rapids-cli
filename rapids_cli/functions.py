@@ -10,7 +10,7 @@ from rich.console import Console
 from rich.table import Table
 import platform
 
-from rapids_cli.dependency_parser import dependency_parser
+
 from rapids_cli.default_checks import default_checks
 
 CHECK_SYMBOL = "🚨"
@@ -376,4 +376,3 @@ def check_glb():
             print(f"      Please upgrade glb to 2.32 and above")
         
 
-        
