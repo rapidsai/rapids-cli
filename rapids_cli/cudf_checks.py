@@ -1,5 +1,6 @@
 import yaml
 import importlib
+import pytest 
 
 with open('config.yml', 'r') as file: 
     config = yaml.safe_load(file)
@@ -9,6 +10,29 @@ OK_MARK = config['symbols']['OK_MARK']
 X_MARK = config['symbols']['X_MARK']
 DOCTOR_SYMBOL = config['symbols']['DOCTOR_SYMBOL']
 
+
+def import_cudf():
+    print(f"   {CHECK_SYMBOL} Checking for successful installation of [italic red]cuDF[/italic red]")
+    try: 
+        import cudf 
+        print(f"{OK_MARK: >6}  cuDF successfully imported")
+        data = {
+        'id': [0, 1, 2, 3, 4],                 
+        'value': [10.5, 20.0, 30.1, 40.3, 50.8] 
+        }   
+        df = cudf.DataFrame(data)
+        assert(df.shape == (5, 2)), "cuDF dataframe dimensions are wrong"
+
+        expected_columns = ['id', 'value']
+        assert all(col in df.columns for col in expected_columns), "DataFrame columns do not match expected"
+        
+        
+    except ImportError: 
+        print(f"{X_MARK: >6}  CUDA version not compatible with CUDF. Please upgrade to {cuda_requirement}")
+
+
+        
+        
 
 def cudf_checks(cuda_requirement, driver_requirement, compute_requirement, dependencies):
 
