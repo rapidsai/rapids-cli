@@ -13,12 +13,7 @@ import platform
 from rapids_cli.default_checks import default_checks
 from rapids_cli.cudf_checks import cudf_checks
 
-CHECK_SYMBOL = "🚨"
-OK_MARK = "✅"
-X_MARK = "❌"
-DOCTOR_SYMBOL = "🧑‍⚕️"
 VALID_SUBCOMMANDS = ["cudf"]
-
 
 @click.group()
 def rapids(): 
