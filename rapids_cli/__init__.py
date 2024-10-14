@@ -11,8 +11,9 @@ from rich.table import Table
 import platform
 
 from rapids_cli.os_checks import detect_os
-
-
+from rapids_cli.gpu_checks.gpu_memory_checks import check_memory_to_gpu_ratio
+from rapids_cli.gpu_checks.nvlink import check_nvlink_status
+from rapids_cli.gpu_checks import gpu_check, check_gpu_compute_capability
 
 CHECK_SYMBOL = "🚨"
 OK_MARK = "✅"
@@ -20,34 +21,12 @@ X_MARK = "❌"
 DOCTOR_SYMBOL = "🧑‍⚕️"
 VALID_SUBCOMMANDS = ["cudf"]
 
-def compare_version(version, requirement):
-    if str(version) >= str(requirement): 
-        return True
-    return False 
-VALID_SUBCOMMANDS = ["cudf"]
 
 def compare_version(version, requirement):
     if str(version) >= str(requirement): 
         return True
     return False 
 
-
-def gpu_check():
-    print(f"   {CHECK_SYMBOL} Checking for [italic red]GPU Availability[/italic red]")
-    try: 
-        pynvml.nvmlInit()
-        try: 
-            num_gpus = pynvml.nvmlDeviceGetCount()
-            print(f"      {OK_MARK: >6} Number of GPUs detected: {num_gpus}")
-            return True
-        except:
-            print(f"      {X_MARK: >6} GPU detected but not available")
-            return False 
-        
-        pynvml.nvmlShutdown()
-    except: 
-        print(f"      {X_MARK: >6} No available GPUs detected")
-        return False
 
 
 def cuda_check():
@@ -67,31 +46,7 @@ def cuda_check():
         return False
     
     
-def check_gpu_compute_capability(required_capability):
-    # Initialize pynvml
-    print(f"   {CHECK_SYMBOL} Checking for [italic red]GPU Compute Capability[/italic red]")
-    try: 
-        pynvml.nvmlInit()
-        meets_requirement = False 
-        num_gpus = pynvml.nvmlDeviceGetCount()
-        for i in range(num_gpus):
-            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-            major, minor = pynvml.nvmlDeviceGetCudaComputeCapability(handle)
-            compute_capability = major * 10 + minor
-            
-            print(f"      GPU {i} Compute Capability: {major}.{minor}")
-            
-            if compute_capability >= int(required_capability):
-                meets_requirement = True
-                print(f"         GPU {i} meets the required compute capability {required_capability[0]}.{required_capability[1]}")
-            else:
-                print(f"         GPU {i} does not meet the required compute capability {required_capability[0]}.{required_capability[1]}.")
-    
-        pynvml.nvmlShutdown()
-    except: 
-        print(f"       {X_MARK: >6} No GPU - cannot determineg GPU Compute Capability")
-    
-    return meets_requirement
+
 
 
 
@@ -167,70 +122,6 @@ def check_sdd_nvme():
         print(f"      {X_MARK: >6} SSD drive with preferred NVMe not detected. For optimized performance, consider switching to system with NVMe-SSD drive.")
 
 
-
-def get_system_memory():
-    virtual_memory = psutil.virtual_memory()
-    total_memory = virtual_memory.total / (1024 ** 3) #converts bytes to gigabytes
-    print("System Memory Information: \n")
-    print(f"Total Virtual Memory: {virtual_memory.total / (1024 ** 3):.2f} GB")
-    print(f"Available Virtual Memory: {virtual_memory.available / (1024 ** 3):.2f} GB")
-    print(f"Used Virtual Memory: {virtual_memory.used / (1024 ** 3):.2f} GB")
-    return total_memory
-    
-    
-def get_gpu_memory():
-    pynvml.nvmlInit()
-    gpus = pynvml.nvmlDeviceGetCount()
-    gpu_memory_total = 0
-    for i in range(gpus):
-        handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-        memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-        gpu_memory_total += memory_info.total / (1024 ** 3) #converts to gigabytes
-        print(f"GPU {i} memory: {memory_info.total / (1024 ** 3):.2f} GB")
-
-    pynvml.nvmlShutdown()
-
-    print(f"Total GPU memory: {gpu_memory_total:.2f} GB")
-    return gpu_memory_total
-
-
-#checks that approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask)
-def check_memory_to_gpu_ratio():
-    print(f"   {CHECK_SYMBOL} Checking for approximately [italic red]2:1 system Memory to total GPU memory ratio[/italic red]")
-    system_memory = get_system_memory()
-    gpu_memory = get_gpu_memory()
-    ratio = system_memory / gpu_memory
-    print(f"      System Memory to GPU Memory Ratio: {ratio:.2f}")
-    if ratio >= 1.8 and ratio <=2.2:
-        print(f"      {OK_MARK: >6} Approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask).")
-    else:
-        print(f"      {X_MARK: >6} System Memory to total GPU Memory ratio not approximately 2:1 ratio.")
-
-
-#check for NVLink with 2 or more GPUs 
-def check_nvlink_status():
-    print(f"   {CHECK_SYMBOL} Checking for [italic red]NVLink with 2 or more GPUs[/italic red]")
-
-    pynvml.nvmlInit()
-    try: 
-        device_count = pynvml.nvmlDeviceGetCount()
-        if device_count < 2:
-            print(f"      {X_MARK: >6} Less than 2 GPUs detected. NVLink status check is not applicable.")
-        for i in range(device_count):
-            print(device_count)
-            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-            for nvlink_id in range(pynvml.NVML_NVLINK_MAX_LINKS):
-                try:
-                    nvlink_state = pynvml.nvmlDeviceGetNvLinkState(handle, 0)
-                    print(f"  NVLink {nvlink_id} State: {nvlink_state}")
-                    print(pynvml.NVML_SUCCESS)
-                except pynvml.NVMLError as e:
-                    print(f"  NVLink {nvlink_id} Status Check Failed: {e}")
-
-    except pynvml.NVMLError as e:
-        print(f"NVML Error: {e}")
-
-    pynvml.nvmlShutdown()
 
 
 
