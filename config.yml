@@ -3,8 +3,11 @@ min_supported_versions:
   docker_requirement: "19.03"
   conda_requirement: "22.11"
 
-os_requirements: 
-  VALID_LINUX_OS_VERSIONS: ["Ubuntu 20.04", "Ubuntu 22.04", "Rocky Linux 8.7"] 
+valid_subcommands:
+  VALID_SUBCOMMANDS: ["cudf"]
+
+os_requirements:
+  VALID_LINUX_OS_VERSIONS: ["Ubuntu 20.04", "Ubuntu 22.04", "Rocky Linux 8.7"]
 
 cudf_requirements:
   cuda_requirement: "11.2"
@@ -16,4 +19,3 @@ symbols:
   OK_MARK: "✅"
   X_MARK: "❌"
   DOCTOR_SYMBOL: "🧑‍⚕️"
-
