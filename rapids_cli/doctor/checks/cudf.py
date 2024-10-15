@@ -1,6 +1,6 @@
 import yaml 
-from rapids_cli.cuda_driver_checks import get_cuda_version, cuda_check, get_driver_version, check_driver_compatibility
-from rapids_cli.gpu_checks import gpu_check, check_gpu_compute_capability
+from rapids_cli.doctor.checks.cuda_driver import get_cuda_version, cuda_check, get_driver_version, check_driver_compatibility
+from rapids_cli.doctor.checks.gpu import gpu_check, check_gpu_compute_capability
 
 
 

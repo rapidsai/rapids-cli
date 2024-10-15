@@ -3,7 +3,7 @@ import json
 import yaml
 import platform
 
-from rapids_cli.cuda_driver_checks import get_cuda_version
+from rapids_cli.doctor.checks.cuda_driver import get_cuda_version
 
 with open('config.yml', 'r') as file: 
     config = yaml.safe_load(file)

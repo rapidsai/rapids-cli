@@ -1,12 +1,12 @@
 import yaml
 
-from rapids_cli.os_checks import detect_os
-from rapids_cli.gpu_checks.gpu_memory_checks import check_memory_to_gpu_ratio
-from rapids_cli.gpu_checks.nvlink import check_nvlink_status
-from rapids_cli.gpu_checks import gpu_check, check_gpu_compute_capability
-from rapids_cli.cuda_driver_checks import get_cuda_version, cuda_check, get_driver_version, check_driver_compatibility
-from rapids_cli.cuda_driver_checks.sdd_nvme import check_sdd_nvme
-from rapids_cli.dependency_checks import check_conda, check_pip,check_docker, check_glb
+from rapids_cli.doctor.checks.os import detect_os
+from rapids_cli.doctor.checks.memory import check_memory_to_gpu_ratio
+from rapids_cli.doctor.checks.nvlink import check_nvlink_status
+from rapids_cli.doctor.checks.gpu import gpu_check, check_gpu_compute_capability
+from rapids_cli.doctor.checks.cuda_driver import get_cuda_version, cuda_check, get_driver_version, check_driver_compatibility
+from rapids_cli.doctor.checks.sdd_nvme import check_sdd_nvme
+from rapids_cli.doctor.checks.dependencies import check_conda, check_pip,check_docker, check_glb
 
 CHECK_SYMBOL = "🚨"
 OK_MARK = "✅"

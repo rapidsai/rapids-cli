@@ -10,14 +10,8 @@ from rich.console import Console
 from rich.table import Table
 import platform
 
-from rapids_cli.default_checks import default_checks
-from rapids_cli.cudf_checks import cudf_checks
 
-
-with open('config.yml', 'r') as file: 
-    config = yaml.safe_load(file)
-
-VALID_SUBCOMMANDS = config['valid_subcommands']['VALID_SUBCOMMANDS']
+from rapids_cli.doctor import doctor_check
 
 
 @click.group()
@@ -90,21 +84,7 @@ def doctor(arguments):
     click.echo("checking environment")
     print("\n")
 
-    if len(arguments) == 0:
-        default_checks()
-    else:
-        for argument in arguments: 
-            if argument not in VALID_SUBCOMMANDS: 
-                print(f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}")
-            if argument == "cudf":
-                with open('config.yml', 'r') as file: 
-                    config = yaml.safe_load(file)
-                cuda_requirement = config['cudf_requirements']['cuda_requirement']
-                driver_requirement = config['cudf_requirements']['driver_requirement']
-                compute_requirement = config['cudf_requirements']['compute_requirement']
-
-                cudf_checks(cuda_requirement,driver_requirement, compute_requirement)
-                
+    doctor_check(arguments)
     
 
 @rapids.command()
