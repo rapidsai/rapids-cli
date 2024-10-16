@@ -26,9 +26,9 @@ dependencies:
       - psutil==6.0.0
       - pygments==2.18.0
       - pynvml==11.5.3
-      - rapids-cli==0.1
       - rich==13.8.1
       - PyYAML==6.0.2
+      - yml==0.0.1
 prefix: /opt/miniconda3/envs/rapid-env
 variables:
   gpu_compute_requirement: "70"
