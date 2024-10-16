@@ -10,15 +10,9 @@ from rich.console import Console
 from rich.table import Table
 import platform
 
-from rapids_cli.dependency_parser import dependency_parser
-from rapids_cli.default_checks import default_checks
-from rapids_cli.cudf_checks import cudf_checks
 
-CHECK_SYMBOL = "🚨"
-OK_MARK = "✅"
-X_MARK = "❌"
-DOCTOR_SYMBOL = "🧑‍⚕️"
-VALID_SUBCOMMANDS = ["cudf"]
+
+from rapids_cli.doctor import doctor_check
 
 
 @click.group()
@@ -81,29 +75,14 @@ def help():
     console = Console()
     console.print(table)
 
-    
 
 @rapids.command()
 @click.argument('arguments', nargs=-1)
 def doctor(arguments):
     click.echo("checking environment")
     print("\n")
+    doctor_check(arguments)
 
-    if len(arguments) == 0:
-        default_checks()
-    else:
-        for argument in arguments: 
-            if argument not in VALID_SUBCOMMANDS: 
-                print(f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}")
-            if argument == "cudf":
-                with open('config.yml', 'r') as file: 
-                    config = yaml.safe_load(file)
-                cuda_requirement = config['cudf_requirements']['cuda_requirement']
-                driver_requirement = config['cudf_requirements']['driver_requirement']
-                compute_requirement = config['cudf_requirements']['compute_requirement']
-                dependicies = config['cudf_dependencies']
-                cudf_checks(cuda_requirement,driver_requirement, compute_requirement, dependicies)
-                
     
 
 @rapids.command()
@@ -129,6 +108,6 @@ def info():
     print("\n")
 
 if __name__ == '__main__':
-    rapids()
 
+    rapids()
 

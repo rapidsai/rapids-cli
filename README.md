@@ -25,3 +25,14 @@ After cloning the repository, run the following commands in your terminal:
 `pip install .`
 
 `rapids doctor`
+
+
+## Subcommands
+
+Currently RAPIDS Doctor supports the following health checks: 
+
+- `rapids doctor` (system runthrough of basic dependencies and requirements)
+- `rapids doctor cudf` (checks for cuDF specific dependencies)
+- `rapids doctor cuml` (checks for cuML specific dependencies)
+  
+

@@ -51,6 +51,7 @@ def import_cudf():
         print(f"{X_MARK: >6}  cuDF could not be imported. Please install cuDF https://docs.rapids.ai/install/")
         
 
+
 def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
 
     print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for CUDF [/bold green] \n")
@@ -78,6 +79,6 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
         else:
             print(f"{X_MARK: >6}  GPU compute not compatible with CUDF. Please upgrade to compute >={compute_requirement}") 
 
-    import_cudf()
 
+    import_cudf()
 
