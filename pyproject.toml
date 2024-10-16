@@ -6,13 +6,28 @@ build-backend = "setuptools.build_meta"
 name = "rapids_cli"
 version = "0.1"
 description = "A CLI for RAPIDS"
-requires-python = ">=3.10" 
+requires-python = ">=3.10"
 dependencies = [
     "Click",
     "nvidia-ml-py3",
     "psutil",
-    "rich"
+    "rich",
+    "importlib_metadata >= 4.13.0; python_version < '3.12' ",
 ]
 
 [project.scripts]
 rapids = "rapids_cli:rapids"
+
+[project.entry-points.rapids_doctor_check]
+driver = "rapids_cli.doctor.checks.cuda_driver:check_driver_compatibility"
+gpu = "rapids_cli.doctor.checks.gpu:gpu_check"
+gpu_compute_capability = "rapids_cli.doctor.checks.gpu:gpu_compute_capability"
+cuda = "rapids_cli.doctor.checks.cuda_driver:cuda_check"
+driver_compatibility = "rapids_cli.doctor.checks.cuda_driver:check_driver_compatibility"
+sdd_nvme = "rapids_cli.doctor.checks.sdd_nvme:check_sdd_nvme"
+memory_to_gpu_ratio = "rapids_cli.doctor.checks.memory:check_memory_to_gpu_ratio"
+nvlink_status = "rapids_cli.doctor.checks.nvlink:check_nvlink_status"
+docker = "rapids_cli.doctor.checks.dependencies:check_docker"
+conda = "rapids_cli.doctor.checks.dependencies:check_conda"
+pip = "rapids_cli.doctor.checks.dependencies:check_pip"
+glb = "rapids_cli.doctor.checks.dependencies:check_glb"
