@@ -13,9 +13,3 @@ cudf_requirements:
   cuda_requirement: "11.2"
   driver_requirement: "450.80.02"
   compute_requirement: "7.0"
-
-symbols:
-  CHECK_SYMBOL: "🚨"
-  OK_MARK: "✅"
-  X_MARK: "❌"
-  DOCTOR_SYMBOL: "🧑‍⚕️"
