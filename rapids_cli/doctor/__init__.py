@@ -3,7 +3,7 @@ import contextlib
 from rich import print 
 from rapids_cli.doctor.checks.cudf import cudf_checks
 from rapids_cli.config import config
-from rapids_cli._compatibility import importlib_metadata
+from rapids_cli._compatibility import entry_points
 from rapids_cli.constants import DOCTOR_SYMBOL
 
 
@@ -15,7 +15,7 @@ def doctor_check(arguments):
         print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
         checks = []
         print(f"Discovering checks")
-        for ep in importlib_metadata.entry_points(group="rapids_doctor_check"):
+        for ep in entry_points(group="rapids_doctor_check"):
             with contextlib.suppress(AttributeError, ImportError):
                 print(f"Found check '{ep.name}' provided by '{ep.value}'")
                 checks += [ep.load()]

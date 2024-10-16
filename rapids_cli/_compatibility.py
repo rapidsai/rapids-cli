@@ -1,8 +1,8 @@
 import sys
 
 if sys.version_info >= (3, 12):
-    import importlib.metadata as importlib_metadata
+    from importlib.metadata import entry_points
 else:
-    import importlib_metadata
+    from importlib_metadata import entry_points
 
-__all__ = ["importlib_metadata"]
+__all__ = ["entry_points"]
