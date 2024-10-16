@@ -1,13 +1,10 @@
 import yaml
 from rapids_cli.doctor.checks import default_checks
 from rapids_cli.doctor.checks.cudf import cudf_checks
+from rapids_cli.config import config
 
-
-with open('config.yml', 'r') as file: 
-    config = yaml.safe_load(file)
 
 VALID_SUBCOMMANDS = config['valid_subcommands']['VALID_SUBCOMMANDS']
-
 
 
 def doctor_check(arguments): 

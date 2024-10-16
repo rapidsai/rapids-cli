@@ -1,17 +1,9 @@
 import subprocess
 import json
-import yaml
 import platform
 
 from rapids_cli.doctor.checks.cuda_driver import get_cuda_version
-
-with open('config.yml', 'r') as file: 
-    config = yaml.safe_load(file)
-
-CHECK_SYMBOL = config['symbols']['CHECK_SYMBOL']
-OK_MARK = config['symbols']['OK_MARK']
-X_MARK = config['symbols']['X_MARK']
-DOCTOR_SYMBOL = config['symbols']['DOCTOR_SYMBOL']
+from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
 
 
 def check_conda(conda_requirement):
