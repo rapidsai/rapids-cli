@@ -45,7 +45,7 @@ def check_memory_to_gpu_ratio():
             print(f"{X_MARK: >6} System Memory to total GPU Memory ratio not approximately 2:1 ratio.")
         
         pynvml.nvmlShutdown()
-
+        return True 
     except: 
         print(f"{X_MARK: >6} GPU not found. Please ensure GPUs are installed.")
-        
+        return False

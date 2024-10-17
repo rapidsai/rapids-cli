@@ -29,8 +29,4 @@ dependencies:
       - rich==13.8.1
       - PyYAML==6.0.2
       - yml==0.0.1
-<<<<<<< HEAD
 prefix: /opt/miniconda3/envs/rapids-env
-=======
-prefix: /opt/miniconda3/envs/rapid-env
->>>>>>> 77e948a48f22c8e34c56be160d319cbc7dc6b5aa
