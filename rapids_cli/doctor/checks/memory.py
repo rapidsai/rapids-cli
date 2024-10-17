@@ -33,11 +33,19 @@ def get_gpu_memory():
 #checks that approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask)
 def check_memory_to_gpu_ratio():
     print(f"   {CHECK_SYMBOL} Checking for approximately [italic red]2:1 system Memory to total GPU memory ratio[/italic red]")
-    system_memory = get_system_memory()
-    gpu_memory = get_gpu_memory()
-    ratio = system_memory / gpu_memory
-    print(f"      System Memory to GPU Memory Ratio: {ratio:.2f}")
-    if ratio >= 1.8 and ratio <=2.2:
-        print(f"      {OK_MARK: >6} Approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask).")
-    else:
-        print(f"      {X_MARK: >6} System Memory to total GPU Memory ratio not approximately 2:1 ratio.")
+    try:
+        pynvml.nvmlInit()
+        system_memory = get_system_memory()
+        gpu_memory = get_gpu_memory()
+        ratio = system_memory / gpu_memory
+        print(f"      System Memory to GPU Memory Ratio: {ratio:.2f}")
+        if ratio >= 1.8 and ratio <=2.2:
+            print(f"      {OK_MARK: >6} Approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask).")
+        else:
+            print(f"      {X_MARK: >6} System Memory to total GPU Memory ratio not approximately 2:1 ratio.")
+        
+        pynvml.nvmlShutdown()
+
+    except: 
+        print(f"      {X_MARK: >6} GPU not found. Please ensure GPUs are installed.")
+        
