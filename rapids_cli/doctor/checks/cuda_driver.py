@@ -44,7 +44,7 @@ def get_cuda_version():
         print(version_line.split()[-1].split("/")[0][-4:])
         return version_line.split()[-1].split("/")[0][-4:]  # Extract the version number
     except Exception as e:
-        print(f"      {X_MARK: >6} CUDA not found. Please ensure CUDA toolkit is installed.")
+        print(f"{X_MARK: >6} CUDA not found. Please ensure CUDA toolkit is installed.")
         return None
     
 
