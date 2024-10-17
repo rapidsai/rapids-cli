@@ -2,11 +2,14 @@ import subprocess
 import json
 import platform
 
+from rapids_cli.doctor.checks.os import detect_os
 from rapids_cli.doctor.checks.cuda_driver import get_cuda_version
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
+from rapids_cli.config import config
 
 
-def check_conda(conda_requirement):
+def check_conda():
+    conda_requirement = config['min_supported_versions']['conda_requirement']
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Conda Version[/italic red]")
     result =  subprocess.check_output(["conda", "info", "--json"], stderr=subprocess.DEVNULL)
     result_json = json.loads(result.decode('utf-8'))
@@ -36,7 +39,8 @@ def check_pip():
         print(f"      {X_MARK: >6} Please upgrade system CUDA version to {pip_cuda_version_major}")
 
 
-def check_docker(docker_requirement):
+def check_docker():
+    docker_requirement = config['min_supported_versions']['docker_requirement']
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Docker Version[/italic red]")
     result = str(subprocess.check_output(["docker", "--version"]))
     
@@ -56,6 +60,9 @@ def check_docker(docker_requirement):
 
 
 def check_glb():
+    if detect_os() != "Ubuntu":
+        return True
+    
     print(f"   {CHECK_SYMBOL} Checking for [italic red]glb comp[/italic red]")
     glb_compatible = False
     result = subprocess.check_output(["ldd", "--version"])
