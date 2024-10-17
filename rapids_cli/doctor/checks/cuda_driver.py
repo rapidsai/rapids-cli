@@ -3,15 +3,7 @@ import yaml
 import subprocess 
 import platform 
 
-
-
-with open('config.yml', 'r') as file: 
-    config = yaml.safe_load(file)
-
-CHECK_SYMBOL = config['symbols']['CHECK_SYMBOL']
-OK_MARK = config['symbols']['OK_MARK']
-X_MARK = config['symbols']['X_MARK']
-DOCTOR_SYMBOL = config['symbols']['DOCTOR_SYMBOL']
+from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
 
 
 def cuda_check():
@@ -52,15 +44,20 @@ def get_cuda_version():
         print(version_line.split()[-1].split("/")[0][-4:])
         return version_line.split()[-1].split("/")[0][-4:]  # Extract the version number
     except Exception as e:
-        return str(e)
+        print(f"{X_MARK: >6} CUDA not found. Please ensure CUDA toolkit is installed.")
+        return None
     
 
 def get_driver_version():
     try:
         result = subprocess.run(['nvidia-smi', '--query-gpu=driver_version', '--format=csv,noheader'],
                                 capture_output=True, text=True, check=True)
+
         result_chain =  result.stdout.strip()
         return result_chain.split("\n")[0]
+    except FileNotFoundError:
+        print(f"{X_MARK: >6} nvidia-smi not found. Please ensure NVIDIA drivers are installed.")
+        return None
     except subprocess.CalledProcessError:
         return None
 
@@ -75,13 +72,17 @@ def check_driver_compatibility():
     driver_version = get_driver_version()
     print(f"Driver Version: {driver_version}")
 
-    if cuda_version >= "12.3": 
+    if not driver_version or not cuda_version: 
+        driver_compatible = False
+    elif cuda_version >= "12.3": 
         driver_compatible = True
     elif cuda_version < "11.2": 
         driver_compatible = False
     else:
         if driver_version < SUPPORTED_VERSIONS[cuda_version]:
             driver_compatible = False
+
+
 
     if driver_compatible: 
         print(f"      {OK_MARK: >6} CUDA & Driver is compatible with RAPIDS")

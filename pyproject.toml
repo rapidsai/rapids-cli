@@ -6,32 +6,28 @@ build-backend = "setuptools.build_meta"
 name = "rapids_cli"
 version = "0.1"
 description = "A CLI for RAPIDS"
-requires-python = ">=3.10" 
+requires-python = ">=3.10"
 dependencies = [
     "Click",
     "nvidia-ml-py3",
     "psutil",
     "rich",
-    "packaging"
+    "importlib_metadata >= 4.13.0; python_version < '3.12' ",
 ]
 
 [project.scripts]
 rapids = "rapids_cli:rapids"
 
 [project.entry-points.rapids_doctor_check]
-gpu_check= "rapids_cli.functions.gpu_check"
-cuda_check= "rapids_cli.functions.cuda_check"
-check_gpu_compute_capability = "rapids_cli.functions.check_gpu_compute_capability"
-check_driver_compatibility = "rapids_cli.functions.check_driver_compatibility"
-detect_os =  "rapids_cli.functions.detect_os"
-check_sdd_nvme = "rapids_cli.functions.check_sdd_nvme"
-check_memory_to_gpu_ratio = "rapids_cli.functions.check_memory_to_gpu_ratio"
-check_nvlink_status = "rapids_cli.functions.check_nvlink_status"
-check_docker = "rapids_cli.functions.check_docker"
-check_conda = "rapids_cli.functions.check_conda"
-check_pip = "rapids_cli.functions.check_pip"
-check_glb = "rapids_cli.functions.check_glb"
-compare_version = "rapids_cli.functions.compare_version"
-get_cuda_version = "rapids_cli.functions.get_cuda_version"
-get_driver_version = "rapids_cli.functions.get_driver_version"
-
+driver = "rapids_cli.doctor.checks.cuda_driver:check_driver_compatibility"
+gpu = "rapids_cli.doctor.checks.gpu:gpu_check"
+gpu_compute_capability = "rapids_cli.doctor.checks.gpu:gpu_compute_capability"
+cuda = "rapids_cli.doctor.checks.cuda_driver:cuda_check"
+driver_compatibility = "rapids_cli.doctor.checks.cuda_driver:check_driver_compatibility"
+sdd_nvme = "rapids_cli.doctor.checks.sdd_nvme:check_sdd_nvme"
+memory_to_gpu_ratio = "rapids_cli.doctor.checks.memory:check_memory_to_gpu_ratio"
+nvlink_status = "rapids_cli.doctor.checks.nvlink:check_nvlink_status"
+docker = "rapids_cli.doctor.checks.dependencies:check_docker"
+conda = "rapids_cli.doctor.checks.dependencies:check_conda"
+pip = "rapids_cli.doctor.checks.dependencies:check_pip"
+glb = "rapids_cli.doctor.checks.dependencies:check_glb"

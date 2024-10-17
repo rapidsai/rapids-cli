@@ -1,22 +1,16 @@
 import pynvml
-import yaml
 
-
-with open('config.yml', 'r') as file: 
-    config = yaml.safe_load(file)
-
-CHECK_SYMBOL = config['symbols']['CHECK_SYMBOL']
-OK_MARK = config['symbols']['OK_MARK']
-X_MARK = config['symbols']['X_MARK']
-DOCTOR_SYMBOL = config['symbols']['DOCTOR_SYMBOL']
+from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
 
 
 #check for NVLink with 2 or more GPUs 
 def check_nvlink_status():
+
     print(f"   {CHECK_SYMBOL} Checking for [italic red]NVLink with 2 or more GPUs[/italic red]")
 
-    pynvml.nvmlInit()
+    
     try: 
+        pynvml.nvmlInit()
         device_count = pynvml.nvmlDeviceGetCount()
         if device_count < 2:
             print(f"      {X_MARK: >6} Less than 2 GPUs detected. NVLink status check is not applicable.")
@@ -30,10 +24,10 @@ def check_nvlink_status():
                     print(pynvml.NVML_SUCCESS)
                 except pynvml.NVMLError as e:
                     print(f"  NVLink {nvlink_id} Status Check Failed: {e}")
+        pynvml.nvmlShutdown()
+    except:
+        print(f"{X_MARK: >6} GPU not found. Please ensure GPUs are installed.")
 
-    except pynvml.NVMLError as e:
-        print(f"NVML Error: {e}")
-
-    pynvml.nvmlShutdown()
+   
 
 
