@@ -42,7 +42,7 @@ def check_memory_to_gpu_ratio():
         if ratio >= 1.8 and ratio <=2.2:
             print(f"{OK_MARK: >6} Approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask).")
         else:
-            print(f"      {X_MARK: >6} System Memory to total GPU Memory ratio not approximately 2:1 ratio.")
+            print(f"{X_MARK: >6} System Memory to total GPU Memory ratio not approximately 2:1 ratio.")
         
         pynvml.nvmlShutdown()
 
