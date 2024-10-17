@@ -47,5 +47,5 @@ def check_memory_to_gpu_ratio():
         pynvml.nvmlShutdown()
 
     except: 
-        print(f"      {X_MARK: >6} GPU not found. Please ensure GPUs are installed.")
+        print(f"{X_MARK: >6} GPU not found. Please ensure GPUs are installed.")
         
