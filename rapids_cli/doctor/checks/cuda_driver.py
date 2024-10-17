@@ -56,7 +56,7 @@ def get_driver_version():
         result_chain =  result.stdout.strip()
         return result_chain.split("\n")[0]
     except FileNotFoundError:
-        print(f"      {X_MARK: >6} nvidia-smi not found. Please ensure NVIDIA drivers are installed.")
+        print(f"{X_MARK: >6} nvidia-smi not found. Please ensure NVIDIA drivers are installed.")
         return None
     except subprocess.CalledProcessError:
         return None
