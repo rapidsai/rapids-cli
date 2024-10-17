@@ -26,6 +26,8 @@ def check_conda():
 def check_pip():
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Pip Requirements[/italic red]")
     system_cuda_version = get_cuda_version()
+    if not system_cuda_version: 
+        return 
     print(f"      System CUDA Tookit Version: {system_cuda_version}")
     result = subprocess.check_output(["pip", "show", "cuda-python"], stderr=subprocess.DEVNULL)
     pip_cuda_version = result.decode('utf-8').strip().split("\n")[1].split(" ")[-1]
