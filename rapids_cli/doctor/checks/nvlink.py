@@ -26,7 +26,7 @@ def check_nvlink_status():
                     print(f"  NVLink {nvlink_id} Status Check Failed: {e}")
         pynvml.nvmlShutdown()
     except:
-        print(f"      {X_MARK: >6} GPU not found. Please ensure GPUs are installed.")
+        print(f"{X_MARK: >6} GPU not found. Please ensure GPUs are installed.")
 
    
 
