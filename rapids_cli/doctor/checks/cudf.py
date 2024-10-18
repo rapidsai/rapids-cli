@@ -2,16 +2,7 @@ import yaml
 from rapids_cli.doctor.checks.cuda_driver import get_cuda_version, cuda_check, get_driver_version, check_driver_compatibility
 from rapids_cli.doctor.checks.gpu import gpu_check, check_gpu_compute_capability
 
-
-
-with open('config.yml', 'r') as file: 
-    config = yaml.safe_load(file)
-
-CHECK_SYMBOL = config['symbols']['CHECK_SYMBOL']
-OK_MARK = config['symbols']['OK_MARK']
-X_MARK = config['symbols']['X_MARK']
-DOCTOR_SYMBOL = config['symbols']['DOCTOR_SYMBOL']
-
+from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
 
 
 def compare_version(version, requirement):

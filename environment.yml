@@ -1,4 +1,4 @@
-name: rapid-env
+name: rapids-env
 channels:
   - conda-forge
   - defaults
@@ -29,8 +29,11 @@ dependencies:
       - rich==13.8.1
       - PyYAML==6.0.2
       - yml==0.0.1
-prefix: /opt/miniconda3/envs/rapid-env
+    
 variables:
   gpu_compute_requirement: "70"
   docker_requirement: "19.03"
   conda_requirement: "22.11"
+
+prefix: /opt/miniconda3/envs/rapids-env
+

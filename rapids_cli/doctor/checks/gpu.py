@@ -1,13 +1,8 @@
 import pynvml
 import yaml
 
-with open('config.yml', 'r') as file: 
-    config = yaml.safe_load(file)
+from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
 
-CHECK_SYMBOL = config['symbols']['CHECK_SYMBOL']
-OK_MARK = config['symbols']['OK_MARK']
-X_MARK = config['symbols']['X_MARK']
-DOCTOR_SYMBOL = config['symbols']['DOCTOR_SYMBOL']
 
 def gpu_check():
     print(f"   {CHECK_SYMBOL} Checking for [italic red]GPU Availability[/italic red]")

@@ -1,18 +1,27 @@
 import yaml
-from rapids_cli.doctor.checks import default_checks
+import contextlib
+from rich import print 
 from rapids_cli.doctor.checks.cudf import cudf_checks
+from rapids_cli.config import config
+from rapids_cli._compatibility import entry_points
+from rapids_cli.constants import DOCTOR_SYMBOL
 
-
-with open('config.yml', 'r') as file: 
-    config = yaml.safe_load(file)
 
 VALID_SUBCOMMANDS = config['valid_subcommands']['VALID_SUBCOMMANDS']
 
 
-
 def doctor_check(arguments): 
     if len(arguments) == 0:
-            default_checks()
+        print(f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n")
+        checks = []
+        print(f"Discovering checks")
+        for ep in entry_points(group="rapids_doctor_check"):
+            with contextlib.suppress(AttributeError, ImportError):
+                print(f"Found check '{ep.name}' provided by '{ep.value}'")
+                checks += [ep.load()]
+        print(f"Running checks")
+        for check_fn in checks:
+            check_fn()
     else:
         for argument in arguments: 
             if argument not in VALID_SUBCOMMANDS: 
