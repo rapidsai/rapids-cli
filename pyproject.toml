@@ -31,3 +31,8 @@ docker = "rapids_cli.doctor.checks.dependencies:check_docker"
 conda = "rapids_cli.doctor.checks.dependencies:check_conda"
 pip = "rapids_cli.doctor.checks.dependencies:check_pip"
 glb = "rapids_cli.doctor.checks.dependencies:check_glb"
+
+
+[project.entry-points.rapids_doctor_cudf_check]
+cudf = "rapids_cli.doctor.checks.cudf:cudf_checks"
+
