@@ -18,6 +18,7 @@ dependencies:
   - tzdata=2024a=h8827d51_1
   - wheel=0.44.0=pyhd8ed1ab_0
   - xz=5.2.6=h57fd34a_0
+  - pre-commit>=3.8.0
   - pip:
       - click==8.1.7
       - markdown-it-py==3.0.0
