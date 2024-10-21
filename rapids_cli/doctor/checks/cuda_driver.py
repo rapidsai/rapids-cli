@@ -1,30 +1,30 @@
-import pynvml  
-import yaml 
-import subprocess 
-import platform 
+import pynvml
+import subprocess
+import platform
 
-from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
+from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 
 
 def cuda_check():
-    try: 
+    try:
         pynvml.nvmlInit()
-        print(f"   {CHECK_SYMBOL} Checking for [italic red]CUDA Availability[/italic red]")
-        try: 
+        print(
+            f"   {CHECK_SYMBOL} Checking for [italic red]CUDA Availability[/italic red]"
+        )
+        try:
             cuda_version = pynvml.nvmlSystemGetCudaDriverVersion()
             print(f"      {OK_MARK: >6} CUDA detected")
-            print(f'           CUDA VERSION:{cuda_version//1000}.{cuda_version % 1000}')
-            return True 
-        except: 
+            print(f"           CUDA VERSION:{cuda_version//1000}.{cuda_version % 1000}")
+            return True
+        except pynvml.NVMLError:
             print(f"      {X_MARK: >6} No CUDA is available")
-            return False 
+            return False
         pynvml.nvmlShutdown()
-    except:
+    except pynvml.NVMLError:
         return False
-    
 
 
-#CUDA Version : NVIDIA DRIVER Version
+# CUDA Version : NVIDIA DRIVER Version
 SUPPORTED_VERSIONS = {
     "11.2": "470.42.01",
     "11.4": "470.42.01",
@@ -32,63 +32,66 @@ SUPPORTED_VERSIONS = {
     "11.8": "520.61.05",
     "12.0": "525.60.13",
     "12.1": "530.30.02",
-    "12.2": "535.86.10"
+    "12.2": "535.86.10",
 }
+
 
 def get_cuda_version():
     try:
         output = subprocess.check_output(["nvcc", "--version"])
-        #print(output)
-        version_line = output.decode("utf-8").strip().split('\n')[-1]
-        #print(version_line)
+        # print(output)
+        version_line = output.decode("utf-8").strip().split("\n")[-1]
+        # print(version_line)
         print(version_line.split()[-1].split("/")[0][-4:])
         return version_line.split()[-1].split("/")[0][-4:]  # Extract the version number
-    except Exception as e:
+    except Exception:
         print(f"{X_MARK: >6} CUDA not found. Please ensure CUDA toolkit is installed.")
         return None
-    
+
 
 def get_driver_version():
     try:
-        result = subprocess.run(['nvidia-smi', '--query-gpu=driver_version', '--format=csv,noheader'],
-                                capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
 
-        result_chain =  result.stdout.strip()
+        result_chain = result.stdout.strip()
         return result_chain.split("\n")[0]
     except FileNotFoundError:
-        print(f"{X_MARK: >6} nvidia-smi not found. Please ensure NVIDIA drivers are installed.")
+        print(
+            f"{X_MARK: >6} nvidia-smi not found. Please ensure NVIDIA drivers are installed."
+        )
         return None
     except subprocess.CalledProcessError:
         return None
 
 
-#https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
+# https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
 def check_driver_compatibility():
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Driver Capability[/italic red]")
-    system = platform.system()
+    platform.system()
     driver_compatible = True
     cuda_version = get_cuda_version()
     print(f"CUDA Version: {cuda_version}")
     driver_version = get_driver_version()
     print(f"Driver Version: {driver_version}")
 
-    if not driver_version or not cuda_version: 
+    if not driver_version or not cuda_version:
         driver_compatible = False
-    elif cuda_version >= "12.3": 
+    elif cuda_version >= "12.3":
         driver_compatible = True
-    elif cuda_version < "11.2": 
+    elif cuda_version < "11.2":
         driver_compatible = False
     else:
         if driver_version < SUPPORTED_VERSIONS[cuda_version]:
             driver_compatible = False
 
-
-
-    if driver_compatible: 
+    if driver_compatible:
         print(f"      {OK_MARK: >6} CUDA & Driver is compatible with RAPIDS")
     else:
-        print(f"      {X_MARK: >6} CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatability guidance.")
-
-    
-
-
+        print(
+            f"      {X_MARK: >6} CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatability guidance."
+        )
