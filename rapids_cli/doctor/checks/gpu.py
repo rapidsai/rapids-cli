@@ -25,9 +25,9 @@ def gpu_check():
 def check_gpu_compute_capability(required_capability):
     # Initialize pynvml
     print(f"   {CHECK_SYMBOL} Checking for [italic red]GPU Compute Capability[/italic red]")
+    meets_requirement = False 
     try: 
         pynvml.nvmlInit()
-        meets_requirement = False 
         num_gpus = pynvml.nvmlDeviceGetCount()
         for i in range(num_gpus):
             handle = pynvml.nvmlDeviceGetHandleByIndex(i)
@@ -44,6 +44,6 @@ def check_gpu_compute_capability(required_capability):
     
         pynvml.nvmlShutdown()
     except: 
-        print(f"       {X_MARK: >6} No GPU - cannot determineg GPU Compute Capability")
+        print(f"       {X_MARK: >6} No GPU - cannot determine GPU Compute Capability")
     
     return meets_requirement
