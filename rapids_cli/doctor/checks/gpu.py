@@ -1,7 +1,7 @@
 import pynvml
 import yaml
 
-from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
+from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 
 
 def gpu_check():

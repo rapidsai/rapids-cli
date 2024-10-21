@@ -1,6 +1,6 @@
 import pynvml
 
-from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
+from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 
 
 #check for NVLink with 2 or more GPUs 
@@ -20,8 +20,8 @@ def check_nvlink_status():
             for nvlink_id in range(pynvml.NVML_NVLINK_MAX_LINKS):
                 try:
                     nvlink_state = pynvml.nvmlDeviceGetNvLinkState(handle, 0)
-                    print(f"  NVLink {nvlink_id} State: {nvlink_state}")
-                    print(pynvml.NVML_SUCCESS)
+                    print(f"  {OK_MARK} NVLink {nvlink_id} State: {nvlink_state}")
+                 
                 except pynvml.NVMLError as e:
                     print(f"  NVLink {nvlink_id} Status Check Failed: {e}")
         pynvml.nvmlShutdown()

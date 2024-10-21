@@ -6,3 +6,10 @@ repos:
         entry: pytype
         language: system
         types: [python]
+  - repo: local
+    hooks:
+      - id: mypy
+        name: Run mypy
+        entry: mypy --config-file mypy.ini
+        language: python
+        types: [python]

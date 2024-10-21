@@ -3,7 +3,7 @@ import yaml
 import subprocess 
 import platform 
 
-from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
+from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 
 
 def cuda_check():
