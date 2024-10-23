@@ -10,17 +10,19 @@ from rapids_cli.config import config
 
 def check_conda():
     conda_requirement = config['min_supported_versions']['conda_requirement']
+    print("HIIIIIIIIIIIIIIIII", conda_requirement)
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Conda Version[/italic red]")
     result =  subprocess.check_output(["conda", "info", "--json"], stderr=subprocess.DEVNULL)
     result_json = json.loads(result.decode('utf-8'))
     version_num = result_json["conda_version"]
 
-    
-    if version_num >= conda_requirement:
+    print("VERSION NUMBER: ", version_num)
+    if float(version_num) >= float(conda_requirement):
         print(f"      {OK_MARK: >6} CONDA Version is compatible with RAPIDS")
+        return True 
     else:
         print(f"      {X_MARK: >6} CONDA Version is not compatible with RAPIDS - please upgrade to Docker {conda_requirement}")
-
+        return False
 
 
 def check_pip():
@@ -89,3 +91,4 @@ def check_glb():
             print(f"      Please upgrade glb to 2.17 and above")
         elif machine == 'aarch64' or machine == "arm64":
             print(f"      Please upgrade glb to 2.32 and above")
+

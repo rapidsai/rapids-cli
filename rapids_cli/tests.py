@@ -1,8 +1,9 @@
 import pytest
 from unittest.mock import patch
 import subprocess 
-
+import json
 from rapids_cli.doctor.checks.cuda_driver import cuda_check, get_cuda_version, get_driver_version, check_driver_compatibility
+from rapids_cli.doctor.checks.dependencies import check_conda, check_pip, check_docker, check_glb
 
 
 #cuda_check() tests
@@ -31,7 +32,7 @@ def test_get_cuda_version_error():
 
 def test_get_driver_version_success():
     with patch('subprocess.run') as mock_run:
-        mock_run.return_value.stdout = '470.42.01\n'
+        #mock_run.return_value.stdout = '470.42.01\n'
         assert get_driver_version() == '470.42.01'
 
 def test_get_driver_version_not_found():
@@ -41,7 +42,9 @@ def test_get_driver_version_not_found():
 def test_get_driver_version_error():
     with patch('subprocess.run', side_effect=subprocess.CalledProcessError(1, 'nvidia-smi')):
         assert get_driver_version() is None
-
+'''
+    
+'''
 SUPPORTED_VERSIONS = {
     "11.2": "470.42.01",
     "11.4": "470.42.01",
@@ -72,4 +75,53 @@ def test_check_driver_compatibility_compatible():
         mock_print.assert_any_call("      X_MARK CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatibility guidance.")
     
 
+def test_incompatible_driver():
+    with patch('my_module.get_cuda_version', lambda: "11.2"), \
+         patch('my_module.get_driver_version', lambda: "460.00"), \
+         patch('builtins.print') as mock_print:
+        
+        check_driver_compatibility()
+        
+        mock_print.assert_any_call("CUDA Version: 11.2")
+        mock_print.assert_any_call("Driver Version: 460.00")
+        mock_print.assert_any_call("      X_MARK CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatibility guidance.")
 
+def test_no_cuda_version():
+    with patch('my_module.get_cuda_version', lambda: None), \
+         patch('my_module.get_driver_version', lambda: "470.42.01"), \
+         patch('builtins.print') as mock_print:
+        
+        check_driver_compatibility()
+        
+        mock_print.assert_any_call("CUDA Version: None")
+        mock_print.assert_any_call("Driver Version: 470.42.01")
+        mock_print.assert_any_call("      X_MARK CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatibility guidance.")
+
+
+# Sample config for testing
+sample_config = {
+    'min_supported_versions': {
+        'conda_requirement': '22.11',
+        'docker_requirement': '19.03'
+    }
+}
+
+# Mocking config
+@pytest.fixture(autouse=True)
+def mock_config(monkeypatch):
+    monkeypatch.setattr('rapids_cli.config.config', sample_config)
+
+# Test for check_conda function
+def test_check_conda_compatible():
+    with patch('subprocess.check_output', return_value=json.dumps({"conda_version": "22.11"}).encode('utf-8')):
+        with patch('builtins.print') as mock_print:
+            assert check_conda() is True
+
+    
+            #mock_print.assert_any_call("      OK_MARK CONDA Version is compatible with RAPIDS")
+
+def test_check_conda_incompatible():
+    with patch('subprocess.check_output', return_value=json.dumps({"conda_version": "20.00"}).encode('utf-8')):
+        with patch('builtins.print') as mock_print:
+            assert check_conda() is False
+            #mock_print.assert_any_call("      X_MARK CONDA Version is not compatible with RAPIDS - please upgrade to Docker 4.8")
