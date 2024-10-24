@@ -28,4 +28,4 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -v rapids_cli/tests
+          pytest -v rapids_cli/tests/
