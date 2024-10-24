@@ -6,19 +6,23 @@ import platform
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
 
 
+def get_cuda_version():
+    pynvml.nvmlInit()
+    return pynvml.nvmlSystemGetCudaDriverVersion()
+    pynvml.nvmlShutdown()
+
+
 def cuda_check():
     try: 
-        pynvml.nvmlInit()
         print(f"   {CHECK_SYMBOL} Checking for [italic red]CUDA Availability[/italic red]")
         try: 
-            cuda_version = pynvml.nvmlSystemGetCudaDriverVersion()
+            cuda_version = get_cuda_version()
             print(f"      {OK_MARK: >6} CUDA detected")
             print(f'           CUDA VERSION:{cuda_version//1000}.{cuda_version % 1000}')
             return True 
         except: 
             print(f"      {X_MARK: >6} No CUDA is available")
             return False 
-        pynvml.nvmlShutdown()
     except:
         return False
     
@@ -35,9 +39,12 @@ SUPPORTED_VERSIONS = {
     "12.2": "535.86.10"
 }
 
+def get_nvcc_version():
+    return subprocess.check_output(["nvcc", "--version"])
+
 def get_cuda_version():
     try:
-        output = subprocess.check_output(["nvcc", "--version"])
+        output = get_nvcc_version()
         #print(output)
         version_line = output.decode("utf-8").strip().split('\n')[-1]
         #print(version_line)

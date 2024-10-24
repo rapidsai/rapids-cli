@@ -5,10 +5,12 @@ import json
 from rapids_cli.doctor.checks.cuda_driver import cuda_check, get_cuda_version, get_driver_version, check_driver_compatibility
 from rapids_cli.doctor.checks.dependencies import check_conda, check_pip, check_docker, check_glb
 
-
+def mock_nvml_get_cuda_driver_version():
+    return 12050
+    
 #cuda_check() tests
 def test_cuda_check_available():
-    with patch('pynvml.nvmlInit'), patch('pynvml.nvmlSystemGetCudaDriverVersion', return_value=11000):
+    with patch('pynvml.nvmlInit'), patch('pynvml.nvmlSystemGetCudaDriverVersion',  return_value= mock_nvml_get_cuda_driver_version()):
         assert cuda_check() is True
 
 def test_cuda_check_unavailable():
@@ -32,7 +34,7 @@ def test_get_cuda_version_error():
 
 def test_get_driver_version_success():
     with patch('subprocess.run') as mock_run:
-        #mock_run.return_value.stdout = '470.42.01\n'
+        mock_run.return_value.stdout = '470.42.01\n'
         assert get_driver_version() == '470.42.01'
 
 def test_get_driver_version_not_found():
@@ -42,9 +44,9 @@ def test_get_driver_version_not_found():
 def test_get_driver_version_error():
     with patch('subprocess.run', side_effect=subprocess.CalledProcessError(1, 'nvidia-smi')):
         assert get_driver_version() is None
-'''
+
     
-'''
+
 SUPPORTED_VERSIONS = {
     "11.2": "470.42.01",
     "11.4": "470.42.01",
@@ -61,7 +63,7 @@ def mock_get_cuda_version():
 def mock_get_driver_version():
     return "470.42.01"
 
-def test_check_driver_compatibility_compatible():
+def test_check_driver_compatibility_compatible(caplog):
     #print("HIIIIIIIIIIIII")
     #print(dir('rapids_cli.doctor.checks.cuda_driver.get_cuda_version'))
     with patch('rapids_cli.doctor.checks.cuda_driver.get_cuda_version', mock_get_cuda_version), \
@@ -70,6 +72,7 @@ def test_check_driver_compatibility_compatible():
         
         check_driver_compatibility()
 
+        assert "CUDA Version: 11.2" in caplog.text
         mock_print.assert_any_call("CUDA Version: 11.2")
         mock_print.assert_any_call("Driver Version: 460.00")
         mock_print.assert_any_call("      X_MARK CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatibility guidance.")
@@ -96,6 +99,7 @@ def test_no_cuda_version():
         mock_print.assert_any_call("CUDA Version: None")
         mock_print.assert_any_call("Driver Version: 470.42.01")
         mock_print.assert_any_call("      X_MARK CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatibility guidance.")
+
 
 
 # Sample config for testing
@@ -125,3 +129,22 @@ def test_check_conda_incompatible():
         with patch('builtins.print') as mock_print:
             assert check_conda() is False
             #mock_print.assert_any_call("      X_MARK CONDA Version is not compatible with RAPIDS - please upgrade to Docker 4.8")
+
+
+def test_check_docker_compatible():
+    with patch('subprocess.check_output', side_effect=[
+        b'Docker version 20.10.0, build 3946899\n',
+        b'{"Client":{"Version":"20.10.0"}}'
+    ]):
+        with patch('builtins.print') as mock_print:
+            assert check_docker() is True 
+            #mock_print.assert_any_call("      OK_MARK DOCKER Version is compatible with RAPIDS")
+
+def test_check_docker_incompatible():
+    with patch('subprocess.check_output', side_effect=[
+        b'Docker version 18.09.0, build 4d60db4\n',
+        b'{"Client":{"Version":"18.09.0"}}'
+    ]):
+        with patch('builtins.print') as mock_print:
+            assert check_docker() is False
+            #mock_print.assert_any_call("      X_MARK DOCKER Version is not compatible with RAPIDS - please upgrade to Docker 19.03")

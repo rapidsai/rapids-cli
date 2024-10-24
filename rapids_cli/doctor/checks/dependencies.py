@@ -44,23 +44,26 @@ def check_pip():
 
 
 def check_docker():
-    docker_requirement = config['min_supported_versions']['docker_requirement']
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Docker Version[/italic red]")
-    result = str(subprocess.check_output(["docker", "--version"]))
-    
-    version_num = result.split(",")[0].split(" ")[-1]
-    if version_num >= docker_requirement:
-        print(f"      {OK_MARK: >6} DOCKER Version is compatible with RAPIDS")
-    else:
-        print(f"      {X_MARK: >6} DOCKER Version is not compatible with RAPIDS - please upgrade to Docker {docker_requirement}")
-    
+
     try:
         docker_version_data = json.loads(subprocess.check_output(["docker", "version", "-f", "json"]))
         print(docker_version_data)
     except:
         print(f"      {X_MARK: >6} NVIDIA Docker Runtime not available - please install here : https://github.com/NVIDIA/nvidia-container-toolkit")
 
-
+    docker_requirement = config['min_supported_versions']['docker_requirement']
+    
+    result = str(subprocess.check_output(["docker", "--version"]))
+    
+    version_num = result.split(",")[0].split(" ")[-1]
+    if float(version_num) >= float(docker_requirement):
+        print(f"      {OK_MARK: >6} DOCKER Version is compatible with RAPIDS")
+        return True
+    else:
+        print(f"      {X_MARK: >6} DOCKER Version is not compatible with RAPIDS - please upgrade to Docker {docker_requirement}")
+        return False
+    
 
 
 def check_glb():
