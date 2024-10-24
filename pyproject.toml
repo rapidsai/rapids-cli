@@ -33,4 +33,4 @@ pip = "rapids_cli.doctor.checks.dependencies:check_pip"
 glb = "rapids_cli.doctor.checks.dependencies:check_glb"
 
 [tool.pytest]
-testpaths = ["rapids_cli.tests"]
+testpaths = ["tests"]
