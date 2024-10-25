@@ -1,6 +1,6 @@
 .. _doctor:
 
-Dcotor
+Doctor
 =========
 
 Overview of Doctor.

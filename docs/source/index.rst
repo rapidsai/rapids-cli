@@ -16,3 +16,12 @@ documentation for details.
    :caption: Contents:
 
    doctor
+   cuda_driver
+
+
+Indices and tables
+===================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
