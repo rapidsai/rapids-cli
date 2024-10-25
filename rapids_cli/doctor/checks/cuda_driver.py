@@ -37,6 +37,7 @@ SUPPORTED_VERSIONS = {
 
 
 def get_cuda_version():
+
     try:
         output = subprocess.check_output(["nvcc", "--version"])
         # print(output)
@@ -50,6 +51,7 @@ def get_cuda_version():
 
 
 def get_driver_version():
+
     try:
         result = subprocess.run(
             ["nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"],
