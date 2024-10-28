@@ -15,6 +15,22 @@ dependencies = [
     "importlib_metadata >= 4.13.0; python_version < '3.12' ",
 ]
 
+[project.optional-dependencies]
+test = [
+    "click",
+    "markdown-it-py",
+    "mdurl",
+    "nvidia-ml-py3",
+    "psutil",
+    "pygments",
+    "pynvml",
+    "rich",
+    "PyYAML",
+    "yml",
+    "pytest",
+    "importlib_metadata",
+]
+
 [project.scripts]
 rapids = "rapids_cli:rapids"
 
@@ -31,3 +47,6 @@ docker = "rapids_cli.doctor.checks.dependencies:check_docker"
 conda = "rapids_cli.doctor.checks.dependencies:check_conda"
 pip = "rapids_cli.doctor.checks.dependencies:check_pip"
 glb = "rapids_cli.doctor.checks.dependencies:check_glb"
+
+[tool.pytest]
+testpaths = ["tests"]
