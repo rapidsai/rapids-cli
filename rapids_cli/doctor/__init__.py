@@ -11,6 +11,35 @@ VALID_SUBCOMMANDS = config["valid_subcommands"]["VALID_SUBCOMMANDS"]
 
 
 def doctor_check(arguments):
+    """
+    Perform a health check for RAPIDS.
+
+    This function runs a series of checks based on the provided arguments.
+    If no arguments are provided, it executes all available health checks.
+    If specific subcommands are given, it validates them against valid
+    subcommands and executes corresponding checks.
+
+    Parameters:
+    ----------
+    arguments : list
+        A list of subcommands for specific checks. If empty, runs all checks.
+
+    Raises:
+    -------
+    ValueError:
+        If an invalid subcommand is provided.
+
+    Notes:
+    -----
+    The function discovers and loads check functions defined in entry points
+    under the 'rapids_doctor_check' group. It also checks specific
+    configurations related to a corresponding subcommand if given.
+
+    Example:
+    --------
+    > doctor_check([])  # Run all health checks
+    > doctor_check(['cudf'])  # Run 'cudf' specific checks
+    """
     if len(arguments) == 0:
         print(
             f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n"
