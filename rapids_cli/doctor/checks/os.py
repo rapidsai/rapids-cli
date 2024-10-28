@@ -4,6 +4,8 @@ import subprocess
 from rapids_cli.config import config
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 
+from rich import print
+
 VALID_LINUX_OS_VERSIONS = config["os_requirements"]["VALID_LINUX_OS_VERSIONS"]
 
 
