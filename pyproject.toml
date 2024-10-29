@@ -43,6 +43,7 @@ driver_compatibility = "rapids_cli.doctor.checks.cuda_driver:check_driver_compat
 sdd_nvme = "rapids_cli.doctor.checks.sdd_nvme:check_sdd_nvme"
 memory_to_gpu_ratio = "rapids_cli.doctor.checks.memory:check_memory_to_gpu_ratio"
 nvlink_status = "rapids_cli.doctor.checks.nvlink:check_nvlink_status"
+os = "rapids_cli.doctor.checks.nvlink:detect_os"
 docker = "rapids_cli.doctor.checks.dependencies:check_docker"
 conda = "rapids_cli.doctor.checks.dependencies:check_conda"
 pip = "rapids_cli.doctor.checks.dependencies:check_pip"
