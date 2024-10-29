@@ -5,7 +5,7 @@ import platform
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 
 
-def cuda_check():
+def cuda_check(VERBOSE_MODE=False):
     try:
         pynvml.nvmlInit()
         print(
@@ -36,21 +36,21 @@ SUPPORTED_VERSIONS = {
 }
 
 
-def get_cuda_version():
+def get_cuda_version(VERBOSE_MODE=False):
 
     try:
         output = subprocess.check_output(["nvcc", "--version"])
         # print(output)
         version_line = output.decode("utf-8").strip().split("\n")[-1]
         # print(version_line)
-        print(version_line.split()[-1].split("/")[0][-4:])
+        # print(version_line.split()[-1].split("/")[0][-4:])
         return version_line.split()[-1].split("/")[0][-4:]  # Extract the version number
     except Exception:
         print(f"{X_MARK: >6} CUDA not found. Please ensure CUDA toolkit is installed.")
         return None
 
 
-def get_driver_version():
+def get_driver_version(VERBOSE_MODE=False):
 
     try:
         result = subprocess.run(
@@ -72,7 +72,7 @@ def get_driver_version():
 
 
 # https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
-def check_driver_compatibility():
+def check_driver_compatibility(VERBOSE_MODE=False):
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Driver Capability[/italic red]")
     platform.system()
     driver_compatible = True

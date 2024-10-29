@@ -31,7 +31,7 @@ def get_gpu_memory():
 
 
 # checks that approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask)
-def check_memory_to_gpu_ratio():
+def check_memory_to_gpu_ratio(VERBOSE_MODE=True):
     print(
         f"   {CHECK_SYMBOL} Checking for approximately [italic red]2:1 system Memory to total GPU memory ratio[/italic red]"
     )

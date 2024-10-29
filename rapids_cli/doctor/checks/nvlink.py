@@ -4,7 +4,7 @@ from rapids_cli.constants import CHECK_SYMBOL, X_MARK
 
 
 # check for NVLink with 2 or more GPUs
-def check_nvlink_status():
+def check_nvlink_status(VERBOSE_MODE=True):
 
     print(
         f"   {CHECK_SYMBOL} Checking for [italic red]NVLink with 2 or more GPUs[/italic red]"

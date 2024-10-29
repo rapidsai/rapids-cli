@@ -1,4 +1,3 @@
-import yaml
 import contextlib
 from rich import print
 from rapids_cli.doctor.checks.cudf import cudf_checks
@@ -40,7 +39,8 @@ def doctor_check(arguments):
     > doctor_check([])  # Run all health checks
     > doctor_check(['cudf'])  # Run 'cudf' specific checks
     """
-    if len(arguments) == 0:
+
+    if len(arguments) == 0 or (len(arguments) == 1 and arguments[-1] == "-v"):
         print(
             f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n"
         )
@@ -52,16 +52,24 @@ def doctor_check(arguments):
                 checks += [ep.load()]
         print("Running checks")
         for check_fn in checks:
-            check_fn()
+            if len(arguments) == 1:
+                VERBOSE_MODE = True
+            else:
+                VERBOSE_MODE = False
+            check_fn(VERBOSE_MODE)
+
+    elif len(arguments) == 1:
+        if arguments[-1] == "-v":
+            VERBOSE_MODE = True
+
     else:
+
         for argument in arguments:
             if argument not in VALID_SUBCOMMANDS:
                 print(
                     f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}"
                 )
             if argument == "cudf":
-                with open("config.yml", "r") as file:
-                    config = yaml.safe_load(file)
                 cuda_requirement = config["cudf_requirements"]["cuda_requirement"]
                 driver_requirement = config["cudf_requirements"]["driver_requirement"]
                 compute_requirement = config["cudf_requirements"]["compute_requirement"]

@@ -8,7 +8,7 @@ from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 from rapids_cli.config import config
 
 
-def check_conda():
+def check_conda(VERBOSE_MODE=False):
     conda_requirement = config["min_supported_versions"]["conda_requirement"]
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Conda Version[/italic red]")
     result = subprocess.check_output(
@@ -25,7 +25,7 @@ def check_conda():
         )
 
 
-def check_pip():
+def check_pip(VERBOSE_MODE=False):
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Pip Requirements[/italic red]")
     system_cuda_version = get_cuda_version()
     if not system_cuda_version:
@@ -54,7 +54,7 @@ def check_pip():
         )
 
 
-def check_docker():
+def check_docker(VERBOSE_MODE=False):
     docker_requirement = config["min_supported_versions"]["docker_requirement"]
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Docker Version[/italic red]")
     result = str(subprocess.check_output(["docker", "--version"]))
@@ -80,7 +80,7 @@ def check_docker():
         print(f"      {X_MARK: >6} Failed to parse Docker version data: {e}")
 
 
-def check_glb():
+def check_glb(VERBOSE_MODE=False):
     if detect_os() != "Ubuntu":
         return True
 

@@ -3,7 +3,7 @@ import pynvml
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 
 
-def gpu_check():
+def gpu_check(VERBOSE_MODE=False):
     print(f"   {CHECK_SYMBOL} Checking for [italic red]GPU Availability[/italic red]")
     try:
         pynvml.nvmlInit()
