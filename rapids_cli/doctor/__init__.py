@@ -40,7 +40,7 @@ def doctor_check(arguments):
     > doctor_check(['cudf'])  # Run 'cudf' specific checks
     """
 
-    if len(arguments) == 0 or (len(arguments) == 1 and arguments[-1] == "-v"):
+    if len(arguments) == 0 or (len(arguments) == 1 and arguments[-1] == "v"):
         print(
             f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n"
         )
@@ -64,7 +64,7 @@ def doctor_check(arguments):
             check_fn(VERBOSE_MODE)
 
     else:
-        if arguments[-1] == "-v":
+        if arguments[-1] == "v":
             VERBOSE_MODE = True
         else:
             VERBOSE_MODE = False
