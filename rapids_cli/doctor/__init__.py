@@ -9,7 +9,7 @@ from rapids_cli.constants import DOCTOR_SYMBOL
 VALID_SUBCOMMANDS = config["valid_subcommands"]["VALID_SUBCOMMANDS"]
 
 
-def doctor_check(arguments):
+def doctor_check(verbose, arguments):
     """
     Perform a health check for RAPIDS.
 
@@ -40,34 +40,25 @@ def doctor_check(arguments):
     > doctor_check(['cudf'])  # Run 'cudf' specific checks
     """
 
-    if len(arguments) == 0 or (len(arguments) == 1 and arguments[-1] == "v"):
+    if len(arguments) == 0:
         print(
             f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n"
         )
 
-        if len(arguments) == 1:
-            VERBOSE_MODE = True
-        else:
-            VERBOSE_MODE = False
-
         checks = []
-        if VERBOSE_MODE:
+        if verbose:
             print("Discovering checks")
         for ep in entry_points(group="rapids_doctor_check"):
             with contextlib.suppress(AttributeError, ImportError):
-                if VERBOSE_MODE:
+                if verbose:
                     print(f"Found check '{ep.name}' provided by '{ep.value}'")
                 checks += [ep.load()]
-        if VERBOSE_MODE:
+        if verbose:
             print("Running checks")
         for check_fn in checks:
-            check_fn(VERBOSE_MODE)
+            check_fn(verbose)
 
     else:
-        if arguments[-1] == "v":
-            VERBOSE_MODE = True
-        else:
-            VERBOSE_MODE = False
         for argument in arguments:
             if argument not in VALID_SUBCOMMANDS:
                 print(
@@ -82,5 +73,5 @@ def doctor_check(arguments):
                     cuda_requirement,
                     driver_requirement,
                     compute_requirement,
-                    VERBOSE_MODE,
+                    verbose,
                 )

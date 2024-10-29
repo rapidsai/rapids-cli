@@ -4,7 +4,7 @@ from rapids_cli.constants import CHECK_SYMBOL, X_MARK, OK_MARK
 
 
 # check for NVLink with 2 or more GPUs
-def check_nvlink_status(VERBOSE_MODE=True):
+def check_nvlink_status(verbose=True):
 
     print(
         f"   {CHECK_SYMBOL} Checking for [italic red]NVLink with 2 or more GPUs[/italic red]"
@@ -14,7 +14,7 @@ def check_nvlink_status(VERBOSE_MODE=True):
         pynvml.nvmlInit()
         device_count = pynvml.nvmlDeviceGetCount()
         if device_count < 2:
-            if VERBOSE_MODE:
+            if verbose:
                 print(
                     f"      {X_MARK: >6} Less than 2 GPUs detected. NVLink status check is not applicable."
                 )
@@ -26,18 +26,18 @@ def check_nvlink_status(VERBOSE_MODE=True):
             for nvlink_id in range(pynvml.NVML_NVLINK_MAX_LINKS):
                 try:
                     nvlink_state = pynvml.nvmlDeviceGetNvLinkState(handle, 0)
-                    if VERBOSE_MODE:
+                    if verbose:
                         print(f"  NVLink {nvlink_id} State: {nvlink_state}")
                     else:
                         print(f"{OK_MARK: >6}")
                 except pynvml.NVMLError as e:
-                    if VERBOSE_MODE:
+                    if verbose:
                         print(f"  NVLink {nvlink_id} Status Check Failed: {e}")
                     else:
                         print(f"{X_MARK: >6}")
         pynvml.nvmlShutdown()
     except pynvml.NVMLError:
-        if VERBOSE_MODE:
+        if verbose:
             print(f"{X_MARK: >6} GPU not found. Please ensure GPUs are installed.")
         else:
             print(f"{X_MARK: >6}")

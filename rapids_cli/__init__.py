@@ -82,12 +82,15 @@ def help():
 
 
 @rapids.command()
+@click.option(
+    "--verbose", is_flag=True, help="Enable verbose mode for detailed output."
+)
 @click.argument("arguments", nargs=-1)
-def doctor(arguments):
+def doctor(verbose, arguments):
     click.echo("Running Doctor Health Checks")
     print("\n")
 
-    doctor_check(arguments)
+    doctor_check(verbose, arguments)
 
 
 @rapids.command()

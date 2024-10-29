@@ -8,7 +8,7 @@ from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 from rapids_cli.config import config
 
 
-def check_conda(VERBOSE_MODE=False):
+def check_conda(verbose=False):
     conda_requirement = config["min_supported_versions"]["conda_requirement"]
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Conda Version[/italic red]")
     result = subprocess.check_output(
@@ -18,12 +18,12 @@ def check_conda(VERBOSE_MODE=False):
     version_num = result_json["conda_version"]
 
     if version_num >= conda_requirement:
-        if VERBOSE_MODE:
+        if verbose:
             print(f"{OK_MARK: >6} CONDA Version is compatible with RAPIDS")
         else:
             print(f"{X_MARK: >6}")
     else:
-        if VERBOSE_MODE:
+        if verbose:
             print(
                 f"      {X_MARK: >6} CONDA Version is not compatible with RAPIDS - please upgrade to Docker {conda_requirement}"
             )
@@ -31,18 +31,18 @@ def check_conda(VERBOSE_MODE=False):
             print(f"{X_MARK: >6}")
 
 
-def check_pip(VERBOSE_MODE=False):
+def check_pip(verbose=False):
     system_cuda_version = get_cuda_version()
     if not system_cuda_version:
         return
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Pip Requirements[/italic red]")
-    if VERBOSE_MODE:
+    if verbose:
         print(f"      System CUDA Tookit Version: {system_cuda_version}")
     result = subprocess.check_output(
         ["pip", "show", "cuda-python"], stderr=subprocess.DEVNULL
     )
     pip_cuda_version = result.decode("utf-8").strip().split("\n")[1].split(" ")[-1]
-    if VERBOSE_MODE:
+    if verbose:
         print(f"      pip CUDA Version: {pip_cuda_version}")
     system_cuda_version_major, pip_cuda_version_major = (
         system_cuda_version.split(".")[0],
@@ -50,14 +50,14 @@ def check_pip(VERBOSE_MODE=False):
     )
     print(system_cuda_version_major, pip_cuda_version_major)
     if system_cuda_version_major == pip_cuda_version_major:
-        if VERBOSE_MODE:
+        if verbose:
             print(
                 f"      {OK_MARK: >6} System and pip CUDA Versions are compatible with each other"
             )
         else:
             print(f"{OK_MARK: >6}")
     elif system_cuda_version_major > pip_cuda_version_major:
-        if VERBOSE_MODE:
+        if verbose:
             print(
                 f"      {X_MARK: >6} Please upgrade pip CUDA version to {system_cuda_version_major}"
             )
@@ -65,7 +65,7 @@ def check_pip(VERBOSE_MODE=False):
             print(f"{X_MARK: >6}")
 
     else:
-        if VERBOSE_MODE:
+        if verbose:
             print(
                 f"      {X_MARK: >6} Please upgrade system CUDA version to {pip_cuda_version_major}"
             )
@@ -73,7 +73,7 @@ def check_pip(VERBOSE_MODE=False):
             print(f"{X_MARK: >6}")
 
 
-def check_docker(VERBOSE_MODE=False):
+def check_docker(verbose=False):
     docker_requirement = config["min_supported_versions"]["docker_requirement"]
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Docker Version[/italic red]")
     result = str(
@@ -82,12 +82,12 @@ def check_docker(VERBOSE_MODE=False):
 
     version_num = result.split(",")[0].split(" ")[-1]
     if version_num >= docker_requirement:
-        if VERBOSE_MODE:
+        if verbose:
             print(f"      {OK_MARK: >6} DOCKER Version is compatible with RAPIDS")
         else:
             print(f"{OK_MARK: >6}")
     else:
-        if VERBOSE_MODE:
+        if verbose:
             print(
                 f"      {X_MARK: >6} DOCKER Version is not compatible with RAPIDS - please upgrade to Docker {docker_requirement}"
             )
@@ -100,23 +100,23 @@ def check_docker(VERBOSE_MODE=False):
                 ["docker", "version", "-f", "json"], stderr=subprocess.DEVNULL
             )
         )
-        if VERBOSE_MODE:
+        if verbose:
             print(docker_version_data)
     except subprocess.CalledProcessError:
-        if VERBOSE_MODE:
+        if verbose:
             print(
                 f"      {X_MARK: >6} NVIDIA Docker Runtime not available - please install here : https://github.com/NVIDIA/nvidia-container-toolkit"
             )
         else:
             print(f"{X_MARK: >6}")
     except json.JSONDecodeError as e:
-        if VERBOSE_MODE:
+        if verbose:
             print(f"      {X_MARK: >6} Failed to parse Docker version data: {e}")
         else:
             print(f"{X_MARK: >6}")
 
 
-def check_glb(VERBOSE_MODE=False):
+def check_glb(verbose=False):
     if detect_os() != "Ubuntu":
         return True
 
@@ -136,14 +136,14 @@ def check_glb(VERBOSE_MODE=False):
     else:
         print(f"      {X_MARK: >6} Please only use x86_64 or arm64 architectures")
     if glb_compatible:
-        if VERBOSE_MODE:
+        if verbose:
             print(
                 f"      {OK_MARK: >6} GLB version and CPU architecture are compatible with each other. "
             )
         else:
             print(f"{OK_MARK: >6}")
     else:
-        if VERBOSE_MODE:
+        if verbose:
             print(
                 f"      {X_MARK: >6} GLB version and CPU architecture are NOT compatible with each other."
             )

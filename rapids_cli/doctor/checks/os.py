@@ -7,9 +7,9 @@ from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 VALID_LINUX_OS_VERSIONS = config["os_requirements"]["VALID_LINUX_OS_VERSIONS"]
 
 
-def check_os_version(os_attributes, VERBOSE_MODE=False):
+def check_os_version(os_attributes, verbose=False):
     os_name = os_attributes["NAME"] + " " + os_attributes["VERSION_ID"]
-    if VERBOSE_MODE:
+    if verbose:
         print(f"Current OS Version: {os_name}")
     return os_name in VALID_LINUX_OS_VERSIONS
 
@@ -36,14 +36,14 @@ def get_linux_os_version():
         return "OS release file not found."
 
 
-def detect_os(VERBOSE_MODE=False):
+def detect_os(verbose=False):
     print(f"   {CHECK_SYMBOL} Checking for [italic red]OS Capability[/italic red]")
     system = platform.system()
     release = platform.release()
     version = platform.version()
     os = ""
 
-    if VERBOSE_MODE:
+    if verbose:
         print(f"        System: {system}")
         print(f"        Release: {release}")
         print(f"        Version: {version}")
@@ -58,10 +58,10 @@ def detect_os(VERBOSE_MODE=False):
                 if "Version 2" in result:
                     validOS = True
             except FileNotFoundError:
-                if VERBOSE_MODE:
+                if verbose:
                     print("WSL is not installed")
             except subprocess.CalledProcessError as e:
-                if VERBOSE_MODE:
+                if verbose:
                     print(f"Error checking WSL version: {e}")
     elif system == "Linux":
 
@@ -71,28 +71,28 @@ def detect_os(VERBOSE_MODE=False):
                 os_release = f.read()
                 os_attributes = get_os_attributes(os_release)
                 os = get_os_attributes(os_release)["NAME"]
-                validOS = check_os_version(os_attributes, VERBOSE_MODE)
+                validOS = check_os_version(os_attributes, verbose)
         except FileNotFoundError:
-            if VERBOSE_MODE:
+            if verbose:
                 print(
                     "/etc/os-release file not found. This might not be a typical Linux environment."
                 )
             else:
                 print(f"{X_MARK: >6}")
     else:
-        if VERBOSE_MODE:
+        if verbose:
             print(f"      {X_MARK: >6} Operating System not recognized")
         else:
             print(f"{X_MARK: >6}")
         os = None
 
     if validOS:
-        if VERBOSE_MODE:
+        if verbose:
             print(f"      {OK_MARK: >6} OS is compatible with RAPIDS")
         else:
             print(f"{OK_MARK: >6}")
     else:
-        if VERBOSE_MODE:
+        if verbose:
             print(
                 f"      {X_MARK: >6} OS is not compatible with RAPIDS. Please see https://docs.rapids.ai/install for system requirements."
             )
