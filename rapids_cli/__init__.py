@@ -84,7 +84,7 @@ def help():
 @rapids.command()
 @click.argument("arguments", nargs=-1)
 def doctor(arguments):
-    click.echo("checking environment")
+    click.echo("Running Doctor Health Checks")
     print("\n")
 
     doctor_check(arguments)

@@ -44,26 +44,30 @@ def doctor_check(arguments):
         print(
             f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n"
         )
+
+        if len(arguments) == 1:
+            VERBOSE_MODE = True
+        else:
+            VERBOSE_MODE = False
+
         checks = []
-        print("Discovering checks")
+        if VERBOSE_MODE:
+            print("Discovering checks")
         for ep in entry_points(group="rapids_doctor_check"):
             with contextlib.suppress(AttributeError, ImportError):
-                print(f"Found check '{ep.name}' provided by '{ep.value}'")
+                if VERBOSE_MODE:
+                    print(f"Found check '{ep.name}' provided by '{ep.value}'")
                 checks += [ep.load()]
-        print("Running checks")
+        if VERBOSE_MODE:
+            print("Running checks")
         for check_fn in checks:
-            if len(arguments) == 1:
-                VERBOSE_MODE = True
-            else:
-                VERBOSE_MODE = False
             check_fn(VERBOSE_MODE)
 
-    elif len(arguments) == 1:
+    else:
         if arguments[-1] == "-v":
             VERBOSE_MODE = True
-
-    else:
-
+        else:
+            VERBOSE_MODE = False
         for argument in arguments:
             if argument not in VALID_SUBCOMMANDS:
                 print(
@@ -74,4 +78,9 @@ def doctor_check(arguments):
                 driver_requirement = config["cudf_requirements"]["driver_requirement"]
                 compute_requirement = config["cudf_requirements"]["compute_requirement"]
 
-                cudf_checks(cuda_requirement, driver_requirement, compute_requirement)
+                cudf_checks(
+                    cuda_requirement,
+                    driver_requirement,
+                    compute_requirement,
+                    VERBOSE_MODE,
+                )

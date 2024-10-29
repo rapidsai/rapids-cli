@@ -13,11 +13,19 @@ def cuda_check(VERBOSE_MODE=False):
         )
         try:
             cuda_version = pynvml.nvmlSystemGetCudaDriverVersion()
-            print(f"      {OK_MARK: >6} CUDA detected")
-            print(f"           CUDA VERSION:{cuda_version//1000}.{cuda_version % 1000}")
+            if VERBOSE_MODE:
+                print(f"      {OK_MARK: >6} CUDA detected")
+                print(
+                    f"           CUDA VERSION:{cuda_version//1000}.{cuda_version % 1000}"
+                )
+            else:
+                print(f"{OK_MARK: >6}")
             return True
         except pynvml.NVMLError:
-            print(f"      {X_MARK: >6} No CUDA is available")
+            if VERBOSE_MODE:
+                print(f"      {X_MARK: >6} No CUDA its available")
+            else:
+                print(f"{X_MARK: >6}")
             return False
         pynvml.nvmlShutdown()
     except pynvml.NVMLError:
@@ -46,7 +54,10 @@ def get_cuda_version(VERBOSE_MODE=False):
         # print(version_line.split()[-1].split("/")[0][-4:])
         return version_line.split()[-1].split("/")[0][-4:]  # Extract the version number
     except Exception:
-        print(f"{X_MARK: >6} CUDA not found. Please ensure CUDA toolkit is installed.")
+        if VERBOSE_MODE:
+            print(
+                f"{X_MARK: >6} CUDA not found. Please ensure CUDA toolkit is installed."
+            )
         return None
 
 
@@ -63,9 +74,10 @@ def get_driver_version(VERBOSE_MODE=False):
         result_chain = result.stdout.strip()
         return result_chain.split("\n")[0]
     except FileNotFoundError:
-        print(
-            f"{X_MARK: >6} nvidia-smi not found. Please ensure NVIDIA drivers are installed."
-        )
+        if VERBOSE_MODE:
+            print(
+                f"{X_MARK: >6} nvidia-smi not found. Please ensure NVIDIA drivers are installed."
+            )
         return None
     except subprocess.CalledProcessError:
         return None
@@ -77,9 +89,11 @@ def check_driver_compatibility(VERBOSE_MODE=False):
     platform.system()
     driver_compatible = True
     cuda_version = get_cuda_version()
-    print(f"CUDA Version: {cuda_version}")
+    if VERBOSE_MODE:
+        print(f"CUDA Version: {cuda_version}")
     driver_version = get_driver_version()
-    print(f"Driver Version: {driver_version}")
+    if VERBOSE_MODE:
+        print(f"Driver Version: {driver_version}")
 
     if not driver_version or not cuda_version:
         driver_compatible = False
@@ -92,8 +106,14 @@ def check_driver_compatibility(VERBOSE_MODE=False):
             driver_compatible = False
 
     if driver_compatible:
-        print(f"      {OK_MARK: >6} CUDA & Driver is compatible with RAPIDS")
+        if VERBOSE_MODE:
+            print(f"      {OK_MARK: >6} CUDA & Driver is compatible with RAPIDS")
+        else:
+            print(f"{OK_MARK: >6}")
     else:
-        print(
-            f"      {X_MARK: >6} CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatability guidance."
-        )
+        if VERBOSE_MODE:
+            print(
+                f"      {X_MARK: >6} CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatability guidance."
+            )
+        else:
+            print(f"{X_MARK: >6}")

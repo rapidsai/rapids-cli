@@ -14,7 +14,9 @@ def compare_version(version, requirement):
     return False
 
 
-def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
+def cudf_checks(
+    cuda_requirement, driver_requirement, compute_requirement, VERBOSE_MODE
+):
 
     print(
         f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for CUDF [/bold green] \n"
@@ -24,29 +26,51 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
     if compare_version(
         get_cuda_version(), cuda_requirement
     ):  # when the other branch gets merged, will move the magic numbers to their yaml file
-        print(f"{OK_MARK: >6}  CUDA version compatible with CUDF")
+        if VERBOSE_MODE:
+            print(f"{OK_MARK: >6}  CUDA version compatible with CUDF")
+        else:
+            print(f"{OK_MARK: >6}")
     else:
-        print(
-            f"{X_MARK: >6}  CUDA version not compatible with CUDF. Please upgrade to {cuda_requirement}"
-        )
+        if VERBOSE_MODE:
+            print(
+                f"{X_MARK: >6}  CUDA version not compatible with CUDF. Please upgrade to {cuda_requirement}"
+            )
+        else:
+            print(f"{X_MARK: >6}")
 
     print(
         f"   {CHECK_SYMBOL} Checking for [italic red]Driver Availability[/italic red]"
     )
     if cuda_check():
         if compare_version(get_driver_version(), driver_requirement):
-            print(f"{OK_MARK: >6}  Nvidia Driver version compatible with CUDF")
+            if VERBOSE_MODE:
+                print(f"{OK_MARK: >6}  Nvidia Driver version compatible with CUDF")
+            else:
+                print(f"{OK_MARK: >6}")
+
         else:
-            print(
-                f"{X_MARK: >6}  Nvidia Driver version not compatible with CUDF. Please upgrade to {driver_requirement}"
-            )
+            if VERBOSE_MODE:
+                print(
+                    f"{X_MARK: >6}  Nvidia Driver version not compatible with CUDF. Please upgrade to {driver_requirement}"
+                )
+            else:
+                print(f"{X_MARK: >6}")
     else:
-        print(f"{X_MARK: >6} No Nvidia Driver Detected")
+        if VERBOSE_MODE:
+            print(f"{X_MARK: >6} No Nvidia Driver Detected")
+        else:
+            print(f"{X_MARK: >6}")
 
     if gpu_check():
-        if check_gpu_compute_capability(compute_requirement):
-            print(f"{OK_MARK: >6}  GPU compute compatible with CUDF")
+        if check_gpu_compute_capability(compute_requirement, VERBOSE_MODE):
+            if VERBOSE_MODE:
+                print(f"{OK_MARK: >6}  GPU compute compatible with CUDF")
+            else:
+                print(f"{OK_MARK: >6}")
         else:
-            print(
-                f"{X_MARK: >6}  GPU compute not compatible with CUDF. Please upgrade to compute >={compute_requirement}"
-            )
+            if VERBOSE_MODE:
+                print(
+                    f"{X_MARK: >6}  GPU compute not compatible with CUDF. Please upgrade to compute >={compute_requirement}"
+                )
+            else:
+                print(f"{X_MARK: >6}")
