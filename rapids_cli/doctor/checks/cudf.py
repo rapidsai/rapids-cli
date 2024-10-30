@@ -6,6 +6,8 @@ from rapids_cli.doctor.checks.cuda_driver import (
 from rapids_cli.doctor.checks.gpu import gpu_check, check_gpu_compute_capability
 
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
+import time
+from rich.progress import Progress
 
 
 def compare_version(version, requirement):
@@ -21,6 +23,15 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement):
     )
 
     print(f"   {CHECK_SYMBOL} Checking for [italic red]CUDA dependencies[/italic red]")
+
+    total_steps = 5
+
+    with Progress() as progress:
+        task = progress.add_task("       CUDF checking...", total=total_steps)
+        for i in range(total_steps):
+            time.sleep(0.2)
+            progress.update(task, advance=1)
+
     if compare_version(
         get_cuda_version(), cuda_requirement
     ):  # when the other branch gets merged, will move the magic numbers to their yaml file

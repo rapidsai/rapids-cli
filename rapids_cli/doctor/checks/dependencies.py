@@ -1,7 +1,8 @@
 import subprocess
 import json
 import platform
-
+import time
+from rich.progress import Progress
 from rapids_cli.doctor.checks.os import detect_os
 from rapids_cli.doctor.checks.cuda_driver import get_cuda_version
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
@@ -11,12 +12,15 @@ from rapids_cli.config import config
 def check_conda():
     conda_requirement = config["min_supported_versions"]["conda_requirement"]
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Conda Version[/italic red]")
+
     result = subprocess.check_output(
         ["conda", "info", "--json"], stderr=subprocess.DEVNULL
     )
     result_json = json.loads(result.decode("utf-8"))
     version_num = result_json["conda_version"]
-
+    with Progress() as progress:
+        task = progress.add_task("       Conda checking...", total=1)
+        progress.update(task, advance=1)
     if version_num >= conda_requirement:
         print(f"      {OK_MARK: >6} CONDA Version is compatible with RAPIDS")
     else:
@@ -27,6 +31,14 @@ def check_conda():
 
 def check_pip():
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Pip Requirements[/italic red]")
+    total_steps = 5
+
+    with Progress() as progress:
+        task = progress.add_task("       Pip checking...", total=total_steps)
+        for i in range(total_steps):
+            time.sleep(0.2)
+            progress.update(task, advance=1)
+
     system_cuda_version = get_cuda_version()
     if not system_cuda_version:
         return
@@ -57,6 +69,15 @@ def check_pip():
 def check_docker():
     docker_requirement = config["min_supported_versions"]["docker_requirement"]
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Docker Version[/italic red]")
+
+    total_steps = 5
+
+    with Progress() as progress:
+        task = progress.add_task("       Docker checking...", total=total_steps)
+        for i in range(total_steps):
+            time.sleep(0.2)
+            progress.update(task, advance=1)
+
     result = str(subprocess.check_output(["docker", "--version"]))
 
     version_num = result.split(",")[0].split(" ")[-1]
@@ -85,6 +106,14 @@ def check_glb():
         return True
 
     print(f"   {CHECK_SYMBOL} Checking for [italic red]glb comp[/italic red]")
+    total_steps = 5
+
+    with Progress() as progress:
+        task = progress.add_task("       GLB checking...", total=total_steps)
+        for i in range(total_steps):
+            time.sleep(0.5)
+            progress.update(task, advance=1)
+
     glb_compatible = False
     result = subprocess.check_output(["ldd", "--version"])
     glb_version = result.decode("utf-8").strip().split("\n")[0].split(" ")[-1]

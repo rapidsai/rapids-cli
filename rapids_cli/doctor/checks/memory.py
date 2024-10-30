@@ -2,6 +2,8 @@ import psutil
 import pynvml
 
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
+from rich.progress import Progress
+import time
 
 
 def get_system_memory():
@@ -35,6 +37,17 @@ def check_memory_to_gpu_ratio():
     print(
         f"   {CHECK_SYMBOL} Checking for approximately [italic red]2:1 system Memory to total GPU memory ratio[/italic red]"
     )
+
+    total_steps = 5
+
+    with Progress() as progress:
+        task = progress.add_task(
+            "       System to GPU Memory Ratio checking...", total=total_steps
+        )
+        for i in range(total_steps):
+            time.sleep(0.2)
+            progress.update(task, advance=1)
+
     try:
         pynvml.nvmlInit()
         system_memory = get_system_memory()

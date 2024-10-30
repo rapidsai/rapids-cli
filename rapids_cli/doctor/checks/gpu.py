@@ -1,10 +1,21 @@
 import pynvml
 
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
+from rich.progress import Progress
+import time
 
 
 def gpu_check():
     print(f"   {CHECK_SYMBOL} Checking for [italic red]GPU Availability[/italic red]")
+    total_steps = 5
+
+    with Progress() as progress:
+        task = progress.add_task(
+            "       GPU Availability checking...", total=total_steps
+        )
+        for i in range(total_steps):
+            time.sleep(0.2)
+            progress.update(task, advance=1)
     try:
         pynvml.nvmlInit()
         try:
@@ -26,6 +37,14 @@ def check_gpu_compute_capability(required_capability):
     print(
         f"   {CHECK_SYMBOL} Checking for [italic red]GPU Compute Capability[/italic red]"
     )
+    total_steps = 5
+
+    with Progress() as progress:
+        task = progress.add_task("       GPU Compute checking...", total=total_steps)
+        for i in range(total_steps):
+            time.sleep(0.2)
+            progress.update(task, advance=1)
+
     try:
         pynvml.nvmlInit()
         meets_requirement = False

@@ -1,11 +1,21 @@
 import psutil
 
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
+from rich.progress import Progress
+import time
 
 
 def check_sdd_nvme():
     # checks if the system has NVMe SSDs
     print(f"   {CHECK_SYMBOL} Checking for [italic red]NVME SSDs[/italic red]")
+    total_steps = 5
+
+    with Progress() as progress:
+        task = progress.add_task("       NVME SSD checking...", total=total_steps)
+        for i in range(total_steps):
+            time.sleep(0.2)
+            progress.update(task, advance=1)
+
     has_nvme = False
     for disk in psutil.disk_partitions():
         if "nvme" in disk.device.lower():

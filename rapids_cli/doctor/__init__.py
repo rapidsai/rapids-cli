@@ -1,6 +1,7 @@
 import yaml
 import contextlib
 from rich import print
+from rich.progress import Progress
 from rapids_cli.doctor.checks.cudf import cudf_checks
 from rapids_cli.config import config
 from rapids_cli._compatibility import entry_points
@@ -51,14 +52,23 @@ def doctor_check(arguments):
                 print(f"Found check '{ep.name}' provided by '{ep.value}'")
                 checks += [ep.load()]
         print("Running checks")
+
+        with Progress() as progress:
+            task = progress.add_task("Running health checks...", total=len(checks))
         for check_fn in checks:
             check_fn()
+            progress.update(task, advance=1)
     else:
+        with Progress() as progress:
+            task = progress.add_task("Validating Subcommands...", total=len(arguments))
         for argument in arguments:
             if argument not in VALID_SUBCOMMANDS:
                 print(
                     f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}"
                 )
+                progress.update(task, advance=1)
+                continue
+
             if argument == "cudf":
                 with open("config.yml", "r") as file:
                     config = yaml.safe_load(file)
@@ -67,3 +77,5 @@ def doctor_check(arguments):
                 compute_requirement = config["cudf_requirements"]["compute_requirement"]
 
                 cudf_checks(cuda_requirement, driver_requirement, compute_requirement)
+
+                progress.update(task, advance=1)

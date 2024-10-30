@@ -1,6 +1,7 @@
 import platform
 import subprocess
-
+from rich.progress import Progress
+import time
 from rapids_cli.config import config
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 
@@ -37,6 +38,15 @@ def get_linux_os_version():
 
 def detect_os():
     print(f"   {CHECK_SYMBOL} Checking for [italic red]OS Capability[/italic red]")
+
+    total_steps = 5
+
+    with Progress() as progress:
+        task = progress.add_task("       OS checking...", total=total_steps)
+        for i in range(total_steps):
+            time.sleep(0.2)
+            progress.update(task, advance=1)
+
     system = platform.system()
     release = platform.release()
     version = platform.version()

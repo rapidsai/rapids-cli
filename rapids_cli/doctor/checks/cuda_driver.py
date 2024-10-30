@@ -1,7 +1,8 @@
 import pynvml
 import subprocess
 import platform
-
+import time
+from rich.progress import Progress
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 
 
@@ -74,6 +75,15 @@ def get_driver_version():
 # https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
 def check_driver_compatibility():
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Driver Capability[/italic red]")
+
+    total_steps = 5
+
+    with Progress() as progress:
+        task = progress.add_task("       Driver checking...", total=total_steps)
+        for i in range(total_steps):
+            time.sleep(0.2)
+            progress.update(task, advance=1)
+
     platform.system()
     driver_compatible = True
     cuda_version = get_cuda_version()
