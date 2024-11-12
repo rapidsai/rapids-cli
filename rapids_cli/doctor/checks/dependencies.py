@@ -6,6 +6,7 @@ from rapids_cli.doctor.checks.os import detect_os
 from rapids_cli.doctor.checks.cuda_driver import get_cuda_version
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 from rapids_cli.config import config
+from rich import print
 
 
 def check_conda():
