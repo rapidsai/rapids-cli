@@ -3,8 +3,12 @@ from rich import print
 from rich.console import Console
 from rich.table import Table
 
-
+import click_completion
 from rapids_cli.doctor import doctor_check
+
+
+# Enable autocompletion for click
+click_completion.init()
 
 
 @click.group()
