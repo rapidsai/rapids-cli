@@ -5,6 +5,7 @@ def setup_completion():
     shell = "zsh"
     cli_command = "rapids"
     rc_file = os.path.expanduser(f"~/.{shell}rc")
+    autoload_line = "autoload -U compinit && compinit"
     completion_line = f'eval "$(_{cli_command.upper().replace("-", "_")}_COMPLETE={shell}_source {cli_command})"'
 
     if os.path.exists(rc_file):
@@ -12,7 +13,9 @@ def setup_completion():
             if completion_line in file.read():
                 return
     with open(rc_file, "a") as file:
-        file.write(f"\n# Added by {cli_command} installer\n{completion_line}\n")
+        file.write(
+            f"\n# Added by {cli_command} installer\n{completion_line}\n {autoload_line} \n"
+        )
 
     print(f"[INFO] Added shell completion for {cli_command} to {rc_file}")
 
