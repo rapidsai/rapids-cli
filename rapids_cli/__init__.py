@@ -5,7 +5,9 @@ from rich.table import Table
 
 import click_completion
 from rapids_cli.doctor import doctor_check
-
+from rapids_cli._compatibility import entry_points
+import contextlib
+from rapids_cli.install import setup_completion
 
 # Enable autocompletion for click
 click_completion.init()
@@ -95,6 +97,12 @@ def doctor(arguments):
 
 
 @rapids.command()
+def install():
+    click.echo("Setting up additional installation requirements \n")
+    setup_completion()
+
+
+@rapids.command()
 def info():
     click.echo("Information about RAPIDS subcommands \n")
 
@@ -136,4 +144,14 @@ def info():
 
 
 if __name__ == "__main__":
+    checks = []
+    print("Discovering Installation")
+    for ep in entry_points(group="installation"):
+        with contextlib.suppress(AttributeError, ImportError):
+            print(f"Found check '{ep.name}' provided by '{ep.value}'")
+            checks += [ep.load()]
+    print("Running checks")
+    for check_fn in checks:
+        check_fn()
+
     rapids()
