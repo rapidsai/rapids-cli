@@ -49,9 +49,6 @@ pip = "rapids_cli.doctor.checks.dependencies:check_pip"
 glb = "rapids_cli.doctor.checks.dependencies:check_glb"
 
 
-[project.entry-points.installation]
-setup_completion = "rapids_cli.install.setup_completion"
-
 
 [tool.pytest]
 testpaths = ["tests"]
