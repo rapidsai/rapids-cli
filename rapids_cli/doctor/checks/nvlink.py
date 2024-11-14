@@ -1,8 +1,11 @@
 import pynvml
 
 from rapids_cli.constants import CHECK_SYMBOL, X_MARK
+
 from rich.progress import Progress
 import time
+from rich import print
+
 
 
 # check for NVLink with 2 or more GPUs

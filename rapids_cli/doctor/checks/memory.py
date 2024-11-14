@@ -2,8 +2,10 @@ import psutil
 import pynvml
 
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
+
 from rich.progress import Progress
 import time
+from rich import print
 
 
 def get_system_memory():
