@@ -1,13 +1,36 @@
 import os
+import subprocess
+
+
+def get_current_shell():
+    try:
+        pid = os.getppid()
+        shell = (
+            subprocess.check_output(["ps", "-p", str(pid), "-o", "comm="])
+            .decode()
+            .strip()
+        )
+        shell = shell.split("/")[-1]
+        return shell
+    except Exception as e:
+        print(f"Error detecting shell: {e}")
+        return None
+
+
+current_shell = get_current_shell()
+print("Current shell:", current_shell)
 
 
 def setup_completion():
-    shell = "zsh"
+    shell = get_current_shell()
+    print(shell)
     cli_command = "rapids"
     rc_file = os.path.expanduser(f"~/.{shell}rc")
-    autoload_line = "autoload -U compinit && compinit"
-    completion_line = f'eval "$(_{cli_command.upper().replace("-", "_")}_COMPLETE={shell}_source {cli_command})"'
+    autoload_line = ""
+    if shell == "zsh":
+        autoload_line = "autoload -U compinit && compinit"
 
+    completion_line = f'eval "$(_{cli_command.upper().replace("-", "_")}_COMPLETE={shell}_source {cli_command})"'
     if os.path.exists(rc_file):
         with open(rc_file, "r") as file:
             if completion_line in file.read():
