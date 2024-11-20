@@ -52,6 +52,15 @@ def doctor_check(arguments):
         print("Running checks")
         for check_fn in checks:
             check_fn()
+    elif arguments[-1] == "info":
+
+        name = arguments[0]
+        print(f"[bold green]{name} [/bold green]")
+        description = config[name]["description"]
+        print(f"{description}\n \nHere are some helpful links to get started:")
+        for link in config[name]["links"]:
+            print(f"{link} \n")
+
     else:
         for argument in arguments:
             if argument not in VALID_SUBCOMMANDS:
@@ -59,8 +68,8 @@ def doctor_check(arguments):
                     f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}"
                 )
             if argument == "cudf":
-                cuda_requirement = config["cudf_requirements"]["cuda_requirement"]
-                driver_requirement = config["cudf_requirements"]["driver_requirement"]
-                compute_requirement = config["cudf_requirements"]["compute_requirement"]
+                cuda_requirement = config["cudf"]["cuda_requirement"]
+                driver_requirement = config["cudf"]["driver_requirement"]
+                compute_requirement = config["cudf"]["compute_requirement"]
 
                 cudf_checks(cuda_requirement, driver_requirement, compute_requirement)

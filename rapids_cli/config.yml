@@ -9,7 +9,18 @@ valid_subcommands:
 os_requirements:
   VALID_LINUX_OS_VERSIONS: ["Ubuntu 20.04", "Ubuntu 22.04", "Rocky Linux 8.7"]
 
-cudf_requirements:
+cudf:
   cuda_requirement: "11.2"
   driver_requirement: "450.80.02"
   compute_requirement: "7.0"
+  links:
+    [
+      "https://docs.rapids.ai/api/cudf/stable/",
+      "https://github.com/NVIDIA/accelerated-computing-hub/blob/main/Accelerated_Python_User_Guide/notebooks/Chapter_6_Intro_to_cuDF.ipynb",
+      "https://github.com/rapidsai/cudf",
+    ]
+  description:
+    "cuDF is a Python GPU DataFrame library for loading, joining, aggregating, filtering, and otherwise
+    manipulating data. cuDF also provides a pandas-like API that will be familiar to data engineers &
+    data scientists, so they can use it to easily accelerate their workflows without going into the
+    details of CUDA programming. "
