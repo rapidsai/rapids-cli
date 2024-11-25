@@ -5,6 +5,7 @@ from rich.table import Table
 
 
 from rapids_cli.doctor import doctor_check
+from rapids_cli.info import info_check
 
 
 @click.group()
@@ -91,7 +92,8 @@ def doctor(arguments):
 
 
 @rapids.command()
-def info():
+@click.argument("arguments", nargs=-1)
+def info(arguments):
     click.echo("Information about RAPIDS subcommands \n")
 
     table = Table(title="[bold] doctor [/bold]")
@@ -129,6 +131,8 @@ def info():
     console = Console()
     console.print(table)
     print("\n")
+
+    info_check(arguments)
 
 
 if __name__ == "__main__":
