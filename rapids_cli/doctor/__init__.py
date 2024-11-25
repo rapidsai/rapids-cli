@@ -52,9 +52,8 @@ def doctor_check(arguments):
         print("Running checks")
         for check_fn in checks:
             check_fn()
-    elif arguments[-1] == "info":
-
-        name = arguments[0]
+    elif arguments[0] == "info":
+        name = arguments[1]
         print(f"[bold green]{name} [/bold green]")
         description = config[name]["description"]
         print(f"{description}\n \nHere are some helpful links to get started:")
