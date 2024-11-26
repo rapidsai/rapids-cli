@@ -17,13 +17,10 @@ def get_current_shell():
         return None
 
 
-current_shell = get_current_shell()
-print("Current shell:", current_shell)
-
-
 def setup_completion():
+
     shell = get_current_shell()
-    print(shell)
+
     cli_command = "rapids"
     rc_file = os.path.expanduser(f"~/.{shell}rc")
     autoload_line = ""
@@ -37,7 +34,7 @@ def setup_completion():
                 return
     with open(rc_file, "a") as file:
         file.write(
-            f"\n# Added by {cli_command} installer\n{completion_line}\n {autoload_line} \n"
+            f"\n# Added by {cli_command} installer\n{autoload_line}\n {completion_line} \n"
         )
 
     print(f"[INFO] Added shell completion for {cli_command} to {rc_file}")
