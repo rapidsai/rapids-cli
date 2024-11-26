@@ -21,7 +21,8 @@ def setup_completion():
 
     shell = get_current_shell()
 
-    cli_command = "rapids"
+    cli_command = "/opt/miniconda3/envs/rapids-env/bin/rapids"
+
     rc_file = os.path.expanduser(f"~/.{shell}rc")
     autoload_line = ""
     if shell == "zsh":
