@@ -1,4 +1,3 @@
-import yaml
 import contextlib
 from rich import print
 from rich.progress import Progress
@@ -58,6 +57,7 @@ def doctor_check(arguments):
         for check_fn in checks:
             check_fn()
             progress.update(task, advance=1)
+
     else:
         with Progress() as progress:
             task = progress.add_task("Validating Subcommands...", total=len(arguments))
@@ -70,11 +70,9 @@ def doctor_check(arguments):
                 continue
 
             if argument == "cudf":
-                with open("config.yml", "r") as file:
-                    config = yaml.safe_load(file)
-                cuda_requirement = config["cudf_requirements"]["cuda_requirement"]
-                driver_requirement = config["cudf_requirements"]["driver_requirement"]
-                compute_requirement = config["cudf_requirements"]["compute_requirement"]
+                cuda_requirement = config["cudf"]["cuda_requirement"]
+                driver_requirement = config["cudf"]["driver_requirement"]
+                compute_requirement = config["cudf"]["compute_requirement"]
 
                 cudf_checks(cuda_requirement, driver_requirement, compute_requirement)
 
