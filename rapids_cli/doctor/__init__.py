@@ -1,4 +1,3 @@
-import yaml
 import contextlib
 from rich import print
 from rapids_cli.doctor.checks.cudf import cudf_checks
@@ -53,6 +52,7 @@ def doctor_check(arguments):
         print("Running checks")
         for check_fn in checks:
             check_fn()
+
     else:
         for argument in arguments:
             if argument not in VALID_SUBCOMMANDS:
@@ -60,10 +60,8 @@ def doctor_check(arguments):
                     f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}"
                 )
             if argument == "cudf":
-                with open("config.yml", "r") as file:
-                    config = yaml.safe_load(file)
-                cuda_requirement = config["cudf_requirements"]["cuda_requirement"]
-                driver_requirement = config["cudf_requirements"]["driver_requirement"]
-                compute_requirement = config["cudf_requirements"]["compute_requirement"]
+                cuda_requirement = config["cudf"]["cuda_requirement"]
+                driver_requirement = config["cudf"]["driver_requirement"]
+                compute_requirement = config["cudf"]["compute_requirement"]
 
                 cudf_checks(cuda_requirement, driver_requirement, compute_requirement)
