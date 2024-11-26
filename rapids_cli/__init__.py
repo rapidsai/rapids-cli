@@ -5,12 +5,14 @@ from rich.table import Table
 
 import click_completion
 from rapids_cli.doctor import doctor_check
+
 from rapids_cli._compatibility import entry_points
 import contextlib
 from rapids_cli.install import setup_completion
 
 # Enable autocompletion for click
 click_completion.init()
+
 
 
 @click.group()
@@ -102,8 +104,8 @@ def install():
     setup_completion()
 
 
-@rapids.command()
-def info():
+@click.argument("arguments", nargs=-1)
+def info(arguments):
     click.echo("Information about RAPIDS subcommands \n")
 
     table = Table(title="[bold] doctor [/bold]")

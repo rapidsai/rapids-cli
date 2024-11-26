@@ -9,7 +9,32 @@ valid_subcommands:
 os_requirements:
   VALID_LINUX_OS_VERSIONS: ["Ubuntu 20.04", "Ubuntu 22.04", "Rocky Linux 8.7"]
 
-cudf_requirements:
+cudf:
   cuda_requirement: "11.2"
   driver_requirement: "450.80.02"
   compute_requirement: "7.0"
+  links:
+    [
+      "https://docs.rapids.ai/api/cudf/stable/",
+      "https://github.com/NVIDIA/accelerated-computing-hub/blob/main/gpu-python-tutorial/6.0_cuDF.ipynb",
+      "https://github.com/NVIDIA/accelerated-computing-hub/blob/main/Accelerated_Python_User_Guide/notebooks/Chapter_6_Intro_to_cuDF.ipynb",
+      "https://github.com/rapidsai/cudf",
+    ]
+  description:
+    "cuDF is a Python GPU DataFrame library for loading, joining, aggregating, filtering, and otherwise
+    manipulating data. cuDF also provides a pandas-like API that will be familiar to data engineers &
+    data scientists, so they can use it to easily accelerate their workflows without going into the
+    details of CUDA programming. "
+
+cuml:
+  links:
+    [
+      "https://docs.rapids.ai/api/cuml/stable/",
+      "https://github.com/NVIDIA/accelerated-computing-hub/blob/main/gpu-python-tutorial/7.0_cuML.ipynb",
+      "https://github.com/NVIDIA/accelerated-computing-hub/blob/main/Accelerated_Python_User_Guide/notebooks/Chapter_7_Intro_to_cuML.ipynb",
+      "https://github.com/rapidsai/cuml",
+    ]
+  description:
+    "cuML is a Python GPU Machine Learning library that implement machine learning algorithms and mathematical primitives functions that share compatible APIs
+    with other RAPIDS projects.  cuML allows users to run traditional tabular ML tasks on GPUs without going into the details of CUDA programming.
+    In most cases, cuML's Python API matches the API from scikit-learn."
