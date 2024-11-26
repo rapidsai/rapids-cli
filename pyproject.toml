@@ -9,6 +9,7 @@ description = "A CLI for RAPIDS"
 requires-python = ">=3.10"
 dependencies = [
     "Click",
+    "click_completion",
     "nvidia-ml-py3",
     "psutil",
     "rich",
@@ -18,6 +19,7 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "click",
+    "click_completion",
     "markdown-it-py",
     "mdurl",
     "nvidia-ml-py3",
