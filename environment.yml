@@ -20,6 +20,7 @@ dependencies:
   - xz=5.2.6=h57fd34a_0
   - pip:
       - click==8.1.7
+      - click-completion==0.5.2
       - markdown-it-py==3.0.0
       - mdurl==0.1.2
       - nvidia-ml-py3==7.352.0
