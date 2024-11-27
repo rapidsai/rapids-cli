@@ -22,7 +22,7 @@ def test_cuda_check_success(capfd):
         patch("pynvml.nvmlInit"),
         patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12050),
     ):
-        assert cuda_check() is True
+        assert cuda_check(verbose=True) is True
         captured = capfd.readouterr()
         assert "CUDA detected" in captured.out
         assert "CUDA VERSION:12.50" in captured.out
