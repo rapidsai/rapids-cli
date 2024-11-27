@@ -1,6 +1,7 @@
 import psutil
 
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
+from rich import print
 
 
 def check_sdd_nvme(verbose=False):

@@ -6,6 +6,14 @@ from rich.table import Table
 
 from rapids_cli.doctor import doctor_check
 
+from rich.traceback import install
+
+console = Console()
+install(show_locals=True)
+
+from rapids_cli.info import info_check
+
+
 
 @click.group()
 def rapids():
@@ -94,7 +102,8 @@ def doctor(verbose, arguments):
 
 
 @rapids.command()
-def info():
+@click.argument("arguments", nargs=-1)
+def info(arguments):
     click.echo("Information about RAPIDS subcommands \n")
 
     table = Table(title="[bold] doctor [/bold]")
@@ -132,6 +141,8 @@ def info():
     console = Console()
     console.print(table)
     print("\n")
+
+    info_check(arguments)
 
 
 if __name__ == "__main__":

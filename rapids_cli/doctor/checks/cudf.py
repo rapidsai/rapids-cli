@@ -6,6 +6,7 @@ from rapids_cli.doctor.checks.cuda_driver import (
 from rapids_cli.doctor.checks.gpu import gpu_check, check_gpu_compute_capability
 
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
+from rich import print
 
 
 def compare_version(version, requirement):

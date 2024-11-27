@@ -3,6 +3,7 @@ import subprocess
 import platform
 
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
+from rich import print
 
 
 def cuda_check(verbose=False):

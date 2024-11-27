@@ -58,6 +58,7 @@ def doctor_check(verbose, arguments):
         for check_fn in checks:
             check_fn(verbose)
 
+
     else:
         for argument in arguments:
             if argument not in VALID_SUBCOMMANDS:
@@ -65,6 +66,7 @@ def doctor_check(verbose, arguments):
                     f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}"
                 )
             if argument == "cudf":
+
                 cuda_requirement = config["cudf_requirements"]["cuda_requirement"]
                 driver_requirement = config["cudf_requirements"]["driver_requirement"]
                 compute_requirement = config["cudf_requirements"]["compute_requirement"]
