@@ -3,16 +3,30 @@ import subprocess
 
 from rapids_cli.config import config
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
-
+from packaging.version import Version
 from rich import print
 
 VALID_LINUX_OS_VERSIONS = config["os_requirements"]["VALID_LINUX_OS_VERSIONS"]
+OS_TO_MIN_SUPPORTED_VERSION = config["os_requirements"]["OS_TO_MIN_SUPPORTED_VERSION"]
+
+
+def compare_version(version, requirement):
+    v1, v2 = Version(version), Version(requirement)
+    if v1 >= v2:
+        return True
+    return False
 
 
 def check_os_version(os_attributes):
     os_name = os_attributes["NAME"] + " " + os_attributes["VERSION_ID"]
     print(f"Current OS Version: {os_name}")
-    return os_name in VALID_LINUX_OS_VERSIONS
+    if os_attributes["NAME"] not in OS_TO_MIN_SUPPORTED_VERSION:
+        return False
+    min_version = OS_TO_MIN_SUPPORTED_VERSION[os_attributes["NAME"]]
+    if not compare_version(os_attributes["VERSION_ID"], min_version):
+        return False
+
+    return True
 
 
 def get_os_attributes(os_release):
