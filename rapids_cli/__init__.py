@@ -5,7 +5,14 @@ from rich.table import Table
 
 
 from rapids_cli.doctor import doctor_check
+
+from rich.traceback import install
+
+console = Console()
+install(show_locals=True)
+
 from rapids_cli.info import info_check
+
 
 
 @click.group()
