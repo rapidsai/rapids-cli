@@ -44,12 +44,12 @@ def doctor_check(arguments):
             f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n"
         )
         checks = []
-        print("Discovering checks")
+        #print("Discovering checks")
         for ep in entry_points(group="rapids_doctor_check"):
             with contextlib.suppress(AttributeError, ImportError):
                 print(f"Found check '{ep.name}' provided by '{ep.value}'")
                 checks += [ep.load()]
-        print("Running checks")
+       # print("Running checks")
         for check_fn in checks:
             check_fn()
 

@@ -11,7 +11,7 @@ VALID_LINUX_OS_VERSIONS = config["os_requirements"]["VALID_LINUX_OS_VERSIONS"]
 
 def check_os_version(os_attributes):
     os_name = os_attributes["NAME"] + " " + os_attributes["VERSION_ID"]
-    print(f"Current OS Version: {os_name}")
+    #print(f"Current OS Version: {os_name}")
     return os_name in VALID_LINUX_OS_VERSIONS
 
 
@@ -62,8 +62,6 @@ def detect_os():
             except subprocess.CalledProcessError as e:
                 print(f"Error checking WSL version: {e}")
     elif system == "Linux":
-        print("Running on Linux")
-
         # Check for specific Linux distributions
         try:
             with open("/etc/os-release") as f:

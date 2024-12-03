@@ -19,13 +19,12 @@ def check_nvlink_status():
                 f"      {X_MARK: >6} Less than 2 GPUs detected. NVLink status check is not applicable."
             )
         for i in range(device_count):
-            print(device_count)
             handle = pynvml.nvmlDeviceGetHandleByIndex(i)
             for nvlink_id in range(pynvml.NVML_NVLINK_MAX_LINKS):
                 try:
                     nvlink_state = pynvml.nvmlDeviceGetNvLinkState(handle, 0)
-                    print(f"  NVLink {nvlink_id} State: {nvlink_state}")
-                    print(pynvml.NVML_SUCCESS)
+                    #print(f"  NVLink {nvlink_id} State: {nvlink_state}")
+                    #print(pynvml.NVML_SUCCESS)
                 except pynvml.NVMLError as e:
                     print(f"  NVLink {nvlink_id} Status Check Failed: {e}")
         pynvml.nvmlShutdown()

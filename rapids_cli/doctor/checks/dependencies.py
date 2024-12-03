@@ -31,29 +31,33 @@ def check_pip():
     system_cuda_version = get_cuda_version()
     if not system_cuda_version:
         return
-    print(f"      System CUDA Tookit Version: {system_cuda_version}")
-    result = subprocess.check_output(
-        ["pip", "show", "cuda-python"], stderr=subprocess.DEVNULL
-    )
-    pip_cuda_version = result.decode("utf-8").strip().split("\n")[1].split(" ")[-1]
-    print(f"      pip CUDA Version: {pip_cuda_version}")
-    system_cuda_version_major, pip_cuda_version_major = (
-        system_cuda_version.split(".")[0],
-        pip_cuda_version.split(".")[0],
-    )
-    if system_cuda_version_major == pip_cuda_version_major:
-        print(
-            f"      {OK_MARK: >6} System and pip CUDA Versions are compatible with each other"
+    print(f"            System CUDA Tookit Version: {system_cuda_version}")
+    try: 
+        result = subprocess.check_output(
+            ["pip", "show", "cuda-python"], stderr=subprocess.DEVNULL
         )
-    elif system_cuda_version_major > pip_cuda_version_major:
-        print(
-            f"      {X_MARK: >6} Please upgrade pip CUDA version to {system_cuda_version_major}"
+        pip_cuda_version = result.decode("utf-8").strip().split("\n")[1].split(" ")[-1]
+        print(f"            pip CUDA Version: {pip_cuda_version}")
+        system_cuda_version_major, pip_cuda_version_major = (
+            system_cuda_version.split(".")[0],
+            pip_cuda_version.split(".")[0],
         )
-    else:
+        if system_cuda_version_major == pip_cuda_version_major:
+            print(
+                f"      {OK_MARK: >6} System and pip CUDA Versions are compatible with each other"
+            )
+        elif system_cuda_version_major > pip_cuda_version_major:
+            print(
+                f"      {X_MARK: >6} Please upgrade pip CUDA version to {system_cuda_version_major}"
+            )
+        else:
+            print(
+                f"      {X_MARK: >6} Please upgrade system CUDA version to {pip_cuda_version_major}"
+            )
+    except: 
         print(
-            f"      {X_MARK: >6} Please upgrade system CUDA version to {pip_cuda_version_major}"
+                f"      {X_MARK: >6} Pip cuda not found "
         )
-
 
 def check_docker():
     docker_requirement = config["min_supported_versions"]["docker_requirement"]
@@ -72,7 +76,7 @@ def check_docker():
         docker_version_data = json.loads(
             subprocess.check_output(["docker", "version", "-f", "json"])
         )
-        print(docker_version_data)
+
     except subprocess.CalledProcessError:
         print(
             f"      {X_MARK: >6} NVIDIA Docker Runtime not available - please install here : https://github.com/NVIDIA/nvidia-container-toolkit"

@@ -8,10 +8,10 @@ from rich import print
 def get_system_memory():
     virtual_memory = psutil.virtual_memory()
     total_memory = virtual_memory.total / (1024**3)  # converts bytes to gigabytes
-    print("System Memory Information: \n")
-    print(f"Total Virtual Memory: {virtual_memory.total / (1024 ** 3):.2f} GB")
-    print(f"Available Virtual Memory: {virtual_memory.available / (1024 ** 3):.2f} GB")
-    print(f"Used Virtual Memory: {virtual_memory.used / (1024 ** 3):.2f} GB")
+    print("            System Memory Information:")
+    print(f"                  Total Virtual Memory: {virtual_memory.total / (1024 ** 3):.2f} GB")
+    print(f"                  Available Virtual Memory: {virtual_memory.available / (1024 ** 3):.2f} GB")
+    print(f"                  Used Virtual Memory: {virtual_memory.used / (1024 ** 3):.2f} GB")
     return total_memory
 
 
@@ -23,11 +23,11 @@ def get_gpu_memory():
         handle = pynvml.nvmlDeviceGetHandleByIndex(i)
         memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
         gpu_memory_total += memory_info.total / (1024**3)  # converts to gigabytes
-        print(f"GPU {i} memory: {memory_info.total / (1024 ** 3):.2f} GB")
+        #print(f"GPU {i} memory: {memory_info.total / (1024 ** 3):.2f} GB")
 
     pynvml.nvmlShutdown()
 
-    print(f"Total GPU memory: {gpu_memory_total:.2f} GB")
+    print(f"            Total GPU memory: {gpu_memory_total:.2f} GB")
     return gpu_memory_total
 
 
@@ -44,11 +44,11 @@ def check_memory_to_gpu_ratio():
         print(f"      System Memory to GPU Memory Ratio: {ratio:.2f}")
         if ratio >= 1.8 and ratio <= 2.2:
             print(
-                f"{OK_MARK: >6} Approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask)."
+                f"{OK_MARK: >12} Approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask)."
             )
         else:
             print(
-                f"{X_MARK: >6} System Memory to total GPU Memory ratio not approximately 2:1 ratio."
+                f"{X_MARK: >12} System Memory to total GPU Memory ratio not approximately 2:1 ratio."
             )
 
         pynvml.nvmlShutdown()

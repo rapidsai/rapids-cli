@@ -44,10 +44,9 @@ def get_cuda_version():
         # print(output)
         version_line = output.decode("utf-8").strip().split("\n")[-1]
         # print(version_line)
-        print(version_line.split()[-1].split("/")[0][-4:])
         return version_line.split()[-1].split("/")[0][-4:]  # Extract the version number
     except Exception:
-        print(f"{X_MARK: >6} CUDA not found. Please ensure CUDA toolkit is installed.")
+        print(f"      {X_MARK: >6} CUDA not found. Please ensure CUDA toolkit is installed.")
         return None
 
 
@@ -78,9 +77,9 @@ def check_driver_compatibility():
     platform.system()
     driver_compatible = True
     cuda_version = get_cuda_version()
-    print(f"CUDA Version: {cuda_version}")
+    print(f"            CUDA Version: {cuda_version}")
     driver_version = get_driver_version()
-    print(f"Driver Version: {driver_version}")
+    print(f"            Driver Version: {driver_version}")
 
     if not driver_version or not cuda_version:
         driver_compatible = False
