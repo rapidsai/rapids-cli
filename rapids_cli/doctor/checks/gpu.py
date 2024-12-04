@@ -4,52 +4,74 @@ from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 from rich import print
 
 
-def gpu_check():
+def gpu_check(verbose=False):
     print(f"   {CHECK_SYMBOL} Checking for [italic red]GPU Availability[/italic red]")
     try:
         pynvml.nvmlInit()
         try:
             num_gpus = pynvml.nvmlDeviceGetCount()
-            print(f"      {OK_MARK: >6} Number of GPUs detected: {num_gpus}")
+            if verbose:
+                print(f"      {OK_MARK: >6} Number of GPUs detected: {num_gpus}")
+            else:
+                print(f"{OK_MARK: >6}")
             return True
         except pynvml.NVMLError:
-            print(f"      {X_MARK: >6} GPU detected but not available")
+            if verbose:
+                print(f"      {X_MARK: >6} GPU detected but not available")
+            else:
+                print(f"{X_MARK: >6}")
             return False
 
         pynvml.nvmlShutdown()
     except pynvml.NVMLError:
-        print(f"      {X_MARK: >6} No available GPUs detected")
+        if verbose:
+            print(f"      {X_MARK: >6} No available GPUs detected")
+        else:
+            print(f"{X_MARK: >6}")
         return False
 
 
-def check_gpu_compute_capability(required_capability):
+def check_gpu_compute_capability(verbose):
     # Initialize pynvml
     print(
         f"   {CHECK_SYMBOL} Checking for [italic red]GPU Compute Capability[/italic red]"
     )
+    meets_requirement = False
     try:
+        required_capability = None
         pynvml.nvmlInit()
-        meets_requirement = False
+
         num_gpus = pynvml.nvmlDeviceGetCount()
         for i in range(num_gpus):
             handle = pynvml.nvmlDeviceGetHandleByIndex(i)
             major, minor = pynvml.nvmlDeviceGetCudaComputeCapability(handle)
             compute_capability = major * 10 + minor
-
-            print(f"      GPU {i} Compute Capability: {major}.{minor}")
+            if verbose:
+                print(f"      GPU {i} Compute Capability: {major}.{minor}")
 
             if compute_capability >= int(required_capability):
                 meets_requirement = True
-                print(
-                    f"         GPU {i} meets the required compute capability {required_capability[0]}.{required_capability[1]}"
-                )
+                if verbose:
+                    print(
+                        f"         GPU {i} meets the required compute capability {required_capability[0]}.{required_capability[1]}"
+                    )
+                else:
+                    print(f"{OK_MARK: >6}")
             else:
-                print(
-                    f"         GPU {i} does not meet the required compute capability {required_capability[0]}.{required_capability[1]}."
-                )
+                if verbose:
+                    print(
+                        f"         GPU {i} does not meet the required compute capability {required_capability[0]}.{required_capability[1]}."
+                    )
+                else:
+                    print(f"{X_MARK: >6}")
 
         pynvml.nvmlShutdown()
     except pynvml.NVMLError:
-        print(f"       {X_MARK: >6} No GPU - cannot determineg GPU Compute Capability")
+        if verbose:
+            print(
+                f"       {X_MARK: >6} No GPU - cannot determineg GPU Compute Capability"
+            )
+        else:
+            print(f"{X_MARK: >6}")
 
     return meets_requirement

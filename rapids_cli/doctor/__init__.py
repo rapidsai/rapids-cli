@@ -9,7 +9,7 @@ from rapids_cli.constants import DOCTOR_SYMBOL
 VALID_SUBCOMMANDS = config["valid_subcommands"]["VALID_SUBCOMMANDS"]
 
 
-def doctor_check(arguments):
+def doctor_check(verbose, arguments):
     """
     Perform a health check for RAPIDS.
 
@@ -39,19 +39,25 @@ def doctor_check(arguments):
     > doctor_check([])  # Run all health checks
     > doctor_check(['cudf'])  # Run 'cudf' specific checks
     """
+
     if len(arguments) == 0:
         print(
             f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n"
         )
+
         checks = []
-        print("Discovering checks")
+        if verbose:
+            print("Discovering checks")
         for ep in entry_points(group="rapids_doctor_check"):
             with contextlib.suppress(AttributeError, ImportError):
-                print(f"Found check '{ep.name}' provided by '{ep.value}'")
+                if verbose:
+                    print(f"Found check '{ep.name}' provided by '{ep.value}'")
                 checks += [ep.load()]
-        print("Running checks")
+        if verbose:
+            print("Running checks")
         for check_fn in checks:
-            check_fn()
+            check_fn(verbose)
+
 
     else:
         for argument in arguments:
@@ -60,8 +66,14 @@ def doctor_check(arguments):
                     f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}"
                 )
             if argument == "cudf":
-                cuda_requirement = config["cudf"]["cuda_requirement"]
-                driver_requirement = config["cudf"]["driver_requirement"]
-                compute_requirement = config["cudf"]["compute_requirement"]
 
-                cudf_checks(cuda_requirement, driver_requirement, compute_requirement)
+                cuda_requirement = config["cudf_requirements"]["cuda_requirement"]
+                driver_requirement = config["cudf_requirements"]["driver_requirement"]
+                compute_requirement = config["cudf_requirements"]["compute_requirement"]
+
+                cudf_checks(
+                    cuda_requirement,
+                    driver_requirement,
+                    compute_requirement,
+                    verbose,
+                )

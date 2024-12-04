@@ -6,7 +6,7 @@ from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 from rich import print
 
 
-def cuda_check():
+def cuda_check(verbose=False):
     try:
         pynvml.nvmlInit()
         print(
@@ -14,11 +14,19 @@ def cuda_check():
         )
         try:
             cuda_version = pynvml.nvmlSystemGetCudaDriverVersion()
-            print(f"      {OK_MARK: >6} CUDA detected")
-            print(f"           CUDA VERSION:{cuda_version//1000}.{cuda_version % 1000}")
+            if verbose:
+                print(f"      {OK_MARK: >6} CUDA detected")
+                print(
+                    f"           CUDA VERSION:{cuda_version//1000}.{cuda_version % 1000}"
+                )
+            else:
+                print(f"{OK_MARK: >6}")
             return True
         except pynvml.NVMLError:
-            print(f"      {X_MARK: >6} No CUDA is available")
+            if verbose:
+                print(f"      {X_MARK: >6} No CUDA its available")
+            else:
+                print(f"{X_MARK: >6}")
             return False
         pynvml.nvmlShutdown()
     except pynvml.NVMLError:
@@ -37,21 +45,24 @@ SUPPORTED_VERSIONS = {
 }
 
 
-def get_cuda_version():
+def get_cuda_version(verbose=False):
 
     try:
         output = subprocess.check_output(["nvcc", "--version"])
         # print(output)
         version_line = output.decode("utf-8").strip().split("\n")[-1]
         # print(version_line)
-        print(version_line.split()[-1].split("/")[0][-4:])
+        # print(version_line.split()[-1].split("/")[0][-4:])
         return version_line.split()[-1].split("/")[0][-4:]  # Extract the version number
     except Exception:
-        print(f"{X_MARK: >6} CUDA not found. Please ensure CUDA toolkit is installed.")
+        if verbose:
+            print(
+                f"{X_MARK: >6} CUDA not found. Please ensure CUDA toolkit is installed."
+            )
         return None
 
 
-def get_driver_version():
+def get_driver_version(verbose=False):
 
     try:
         result = subprocess.run(
@@ -64,23 +75,26 @@ def get_driver_version():
         result_chain = result.stdout.strip()
         return result_chain.split("\n")[0]
     except FileNotFoundError:
-        print(
-            f"{X_MARK: >6} nvidia-smi not found. Please ensure NVIDIA drivers are installed."
-        )
+        if verbose:
+            print(
+                f"{X_MARK: >6} nvidia-smi not found. Please ensure NVIDIA drivers are installed."
+            )
         return None
     except subprocess.CalledProcessError:
         return None
 
 
 # https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
-def check_driver_compatibility():
+def check_driver_compatibility(verbose=False):
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Driver Capability[/italic red]")
     platform.system()
     driver_compatible = True
     cuda_version = get_cuda_version()
-    print(f"CUDA Version: {cuda_version}")
+    if verbose:
+        print(f"CUDA Version: {cuda_version}")
     driver_version = get_driver_version()
-    print(f"Driver Version: {driver_version}")
+    if verbose:
+        print(f"Driver Version: {driver_version}")
 
     if not driver_version or not cuda_version:
         driver_compatible = False
@@ -93,8 +107,14 @@ def check_driver_compatibility():
             driver_compatible = False
 
     if driver_compatible:
-        print(f"      {OK_MARK: >6} CUDA & Driver is compatible with RAPIDS")
+        if verbose:
+            print(f"      {OK_MARK: >6} CUDA & Driver is compatible with RAPIDS")
+        else:
+            print(f"{OK_MARK: >6}")
     else:
-        print(
-            f"      {X_MARK: >6} CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatability guidance."
-        )
+        if verbose:
+            print(
+                f"      {X_MARK: >6} CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatability guidance."
+            )
+        else:
+            print(f"{X_MARK: >6}")
