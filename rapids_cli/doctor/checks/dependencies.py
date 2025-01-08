@@ -1,15 +1,19 @@
-import subprocess
+"""Check the system for compatibility with RAPIDS dependencies."""
+
 import json
 import platform
+import subprocess
 
-from rapids_cli.doctor.checks.os import detect_os
-from rapids_cli.doctor.checks.cuda_driver import get_cuda_version
-from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
-from rapids_cli.config import config
 from rich import print
+
+from rapids_cli.config import config
+from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
+from rapids_cli.doctor.checks.cuda_driver import get_cuda_version
+from rapids_cli.doctor.checks.os import detect_os
 
 
 def check_conda(verbose=False):
+    """Check the system for Conda compatibility."""
     conda_requirement = config["min_supported_versions"]["conda_requirement"]
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Conda Version[/italic red]")
     result = subprocess.check_output(
@@ -26,13 +30,15 @@ def check_conda(verbose=False):
     else:
         if verbose:
             print(
-                f"      {X_MARK: >6} CONDA Version is not compatible with RAPIDS - please upgrade to Docker {conda_requirement}"
+                f"      {X_MARK: >6} CONDA Version is not compatible with RAPIDS - "
+                f"please upgrade to Docker {conda_requirement}"
             )
         else:
             print(f"{X_MARK: >6}")
 
 
 def check_pip(verbose=False):
+    """Check the system for Pip compatibility."""
     system_cuda_version = get_cuda_version()
     if not system_cuda_version:
         return
@@ -75,6 +81,7 @@ def check_pip(verbose=False):
 
 
 def check_docker(verbose=False):
+    """Check the system for Docker compatibility."""
     docker_requirement = config["min_supported_versions"]["docker_requirement"]
     print(f"   {CHECK_SYMBOL} Checking for [italic red]Docker Version[/italic red]")
     result = str(
@@ -90,7 +97,8 @@ def check_docker(verbose=False):
     else:
         if verbose:
             print(
-                f"      {X_MARK: >6} DOCKER Version is not compatible with RAPIDS - please upgrade to Docker {docker_requirement}"
+                f"      {X_MARK: >6} DOCKER Version is not compatible with RAPIDS - "
+                f"please upgrade to Docker {docker_requirement}"
             )
         else:
             print(f"{X_MARK: >6}")
@@ -118,6 +126,7 @@ def check_docker(verbose=False):
 
 
 def check_glb(verbose=False):
+    """Check the system for GLB compatibility."""
     if detect_os() != "Ubuntu":
         return True
 

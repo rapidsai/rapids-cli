@@ -1,11 +1,13 @@
+"""Checks for NVMe SSDs."""
+
 import psutil
+from rich import print
 
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
-from rich import print
 
 
 def check_sdd_nvme(verbose=False):
-    # checks if the system has NVMe SSDs
+    """Checks if the system has NVMe SSDs."""
     print(f"   {CHECK_SYMBOL} Checking for [italic red]NVME SSDs[/italic red]")
     has_nvme = False
     for disk in psutil.disk_partitions():
@@ -21,7 +23,8 @@ def check_sdd_nvme(verbose=False):
     else:
         if verbose:
             print(
-                f"      {X_MARK: >6} SSD drive with preferred NVMe not detected. For optimized performance, consider switching to system with NVMe-SSD drive."
+                f"      {X_MARK: >6} SSD drive with preferred NVMe not detected. "
+                "For optimized performance, consider switching to system with NVMe-SSD drive."
             )
         else:
             print(f"{X_MARK: >6}")

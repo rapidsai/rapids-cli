@@ -1,6 +1,5 @@
 from unittest.mock import patch
 
-
 from rapids_cli.doctor.checks.cuda_driver import cuda_check
 
 
