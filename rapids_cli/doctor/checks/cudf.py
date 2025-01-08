@@ -1,22 +1,25 @@
+"""Check the system for CUDF compatibility."""
+
+from rich import print
+
+from rapids_cli.constants import CHECK_SYMBOL, DOCTOR_SYMBOL, OK_MARK, X_MARK
 from rapids_cli.doctor.checks.cuda_driver import (
-    get_cuda_version,
     cuda_check,
+    get_cuda_version,
     get_driver_version,
 )
-from rapids_cli.doctor.checks.gpu import gpu_check, check_gpu_compute_capability
-
-from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK, DOCTOR_SYMBOL
-from rich import print
+from rapids_cli.doctor.checks.gpu import check_gpu_compute_capability, gpu_check
 
 
 def compare_version(version, requirement):
+    """Compare the version of the installed package with the required version."""
     if str(version) >= str(requirement):
         return True
     return False
 
 
 def cudf_checks(cuda_requirement, driver_requirement, compute_requirement, verbose):
-
+    """Check the system for CUDF compatibility."""
     print(
         f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for CUDF [/bold green] \n"
     )
@@ -50,7 +53,8 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement, verbo
         else:
             if verbose:
                 print(
-                    f"{X_MARK: >6}  Nvidia Driver version not compatible with CUDF. Please upgrade to {driver_requirement}"
+                    f"{X_MARK: >6}  Nvidia Driver version not compatible with CUDF. "
+                    f"Please upgrade to {driver_requirement}"
                 )
             else:
                 print(f"{X_MARK: >6}")
@@ -69,7 +73,8 @@ def cudf_checks(cuda_requirement, driver_requirement, compute_requirement, verbo
         else:
             if verbose:
                 print(
-                    f"{X_MARK: >6}  GPU compute not compatible with CUDF. Please upgrade to compute >={compute_requirement}"
+                    f"{X_MARK: >6}  GPU compute not compatible with CUDF. "
+                    f"Please upgrade to compute >={compute_requirement}"
                 )
             else:
                 print(f"{X_MARK: >6}")

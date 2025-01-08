@@ -1,9 +1,10 @@
+"""The Rapids CLI is a command-line interface for RAPIDS."""
+
 import rich_click as click
 from rich.console import Console
 from rich.traceback import install
 
 from rapids_cli.doctor import doctor_check
-
 
 console = Console()
 install(show_locals=True)
@@ -11,6 +12,7 @@ install(show_locals=True)
 
 @click.group()
 def rapids():
+    """The Rapids CLI is a command-line interface for RAPIDS."""
     pass
 
 

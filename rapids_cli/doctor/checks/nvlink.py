@@ -1,13 +1,13 @@
+"""Check for NVLink status."""
+
 import pynvml
-
-
-from rapids_cli.constants import CHECK_SYMBOL, X_MARK, OK_MARK
 from rich import print
 
+from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 
-# check for NVLink with 2 or more GPUs
+
 def check_nvlink_status(verbose=True):
-
+    """Check the system for NVLink with 2 or more GPUs."""
     print(
         f"   {CHECK_SYMBOL} Checking for [italic red]NVLink with 2 or more GPUs[/italic red]"
     )

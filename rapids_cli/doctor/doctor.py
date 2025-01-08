@@ -1,17 +1,19 @@
-import contextlib
-from rich import print
-from rapids_cli.doctor.checks.cudf import cudf_checks
-from rapids_cli.config import config
-from rapids_cli._compatibility import entry_points
-from rapids_cli.constants import DOCTOR_SYMBOL
+"""Health check for RAPIDS."""
 
+import contextlib
+
+from rich import print
+
+from rapids_cli._compatibility import entry_points
+from rapids_cli.config import config
+from rapids_cli.constants import DOCTOR_SYMBOL
+from rapids_cli.doctor.checks.cudf import cudf_checks
 
 VALID_SUBCOMMANDS = config["valid_subcommands"]["VALID_SUBCOMMANDS"]
 
 
 def doctor_check(verbose, arguments):
-    """
-    Perform a health check for RAPIDS.
+    """Perform a health check for RAPIDS.
 
     This function runs a series of checks based on the provided arguments.
     If no arguments are provided, it executes all available health checks.
@@ -39,7 +41,6 @@ def doctor_check(verbose, arguments):
     > doctor_check([])  # Run all health checks
     > doctor_check(['cudf'])  # Run 'cudf' specific checks
     """
-
     if len(arguments) == 0:
         print(
             f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n"

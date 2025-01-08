@@ -1,10 +1,13 @@
+"""GPU checks for the doctor command."""
+
 import pynvml
+from rich import print
 
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
-from rich import print
 
 
 def gpu_check(verbose=False):
+    """Check GPU availability."""
     print(f"   {CHECK_SYMBOL} Checking for [italic red]GPU Availability[/italic red]")
     try:
         pynvml.nvmlInit()
@@ -32,6 +35,7 @@ def gpu_check(verbose=False):
 
 
 def check_gpu_compute_capability(verbose):
+    """Check the system for GPU Compute Capability."""
     # Initialize pynvml
     print(
         f"   {CHECK_SYMBOL} Checking for [italic red]GPU Compute Capability[/italic red]"
@@ -53,14 +57,16 @@ def check_gpu_compute_capability(verbose):
                 meets_requirement = True
                 if verbose:
                     print(
-                        f"         GPU {i} meets the required compute capability {required_capability[0]}.{required_capability[1]}"
+                        f"         GPU {i} meets the required compute capability "
+                        f"{required_capability[0]}.{required_capability[1]}"
                     )
                 else:
                     print(f"{OK_MARK: >6}")
             else:
                 if verbose:
                     print(
-                        f"         GPU {i} does not meet the required compute capability {required_capability[0]}.{required_capability[1]}."
+                        f"         GPU {i} does not meet the required compute "
+                        f"capability {required_capability[0]}.{required_capability[1]}."
                     )
                 else:
                     print(f"{X_MARK: >6}")

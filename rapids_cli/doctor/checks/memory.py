@@ -1,11 +1,14 @@
+"""Memory checks."""
+
 import psutil
 import pynvml
+from rich import print
 
 from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
-from rich import print
 
 
 def get_system_memory(verbose=False):
+    """Get the total system memory."""
     virtual_memory = psutil.virtual_memory()
     total_memory = virtual_memory.total / (1024**3)  # converts bytes to gigabytes
     if verbose:
@@ -19,6 +22,7 @@ def get_system_memory(verbose=False):
 
 
 def get_gpu_memory(verbose=False):
+    """Get the total GPU memory."""
     pynvml.nvmlInit()
     gpus = pynvml.nvmlDeviceGetCount()
     gpu_memory_total = 0
@@ -35,10 +39,15 @@ def get_gpu_memory(verbose=False):
     return gpu_memory_total
 
 
-# checks that approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask)
 def check_memory_to_gpu_ratio(verbose=True):
+    """Check the system for a 2:1 ratio of system Memory to total GPU Memory.
+
+    This is especially useful for Dask.
+
+    """
     print(
-        f"   {CHECK_SYMBOL} Checking for approximately [italic red]2:1 system Memory to total GPU memory ratio[/italic red]"
+        f"   {CHECK_SYMBOL} Checking for approximately "
+        "[italic red]2:1 system Memory to total GPU memory ratio[/italic red]"
     )
     try:
         pynvml.nvmlInit()
@@ -50,7 +59,8 @@ def check_memory_to_gpu_ratio(verbose=True):
         if ratio >= 1.8 and ratio <= 2.2:
             if verbose:
                 print(
-                    f"{OK_MARK: >6} Approximately 2:1 ratio of system Memory to total GPU Memory (especially useful for Dask)."
+                    f"{OK_MARK: >6} Approximately 2:1 ratio of system Memory to total "
+                    "GPU Memory (especially useful for Dask)."
                 )
             else:
                 print(f"{OK_MARK: >6}")
