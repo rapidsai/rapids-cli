@@ -1,28 +1,22 @@
-import pynvml
-import subprocess
+"""Check for CUDA and driver compatibility."""
+
 import platform
+import subprocess
 
-from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
-from rich import print
+import pynvml
 
 
-def cuda_check():
+def cuda_check(verbose=False):
+    """Check CUDA availability."""
     try:
         pynvml.nvmlInit()
-        print(
-            f"   {CHECK_SYMBOL} Checking for [italic red]CUDA Availability[/italic red]"
-        )
         try:
             cuda_version = pynvml.nvmlSystemGetCudaDriverVersion()
-            print(f"      {OK_MARK: >6} CUDA detected")
-            print(f"           CUDA VERSION:{cuda_version//1000}.{cuda_version % 1000}")
-            return True
-        except pynvml.NVMLError:
-            print(f"      {X_MARK: >6} No CUDA is available")
-            return False
-        pynvml.nvmlShutdown()
-    except pynvml.NVMLError:
-        return False
+            return cuda_version
+        except pynvml.NVMLError as e:
+            raise ValueError("Unable to look up CUDA version") from e
+    except pynvml.NVMLError as e:
+        raise ValueError("Unable to look up CUDA version") from e
 
 
 # CUDA Version : NVIDIA DRIVER Version
@@ -37,22 +31,18 @@ SUPPORTED_VERSIONS = {
 }
 
 
-def get_cuda_version():
-
+def get_cuda_version(verbose=False):
+    """Get the CUDA version."""
     try:
         output = subprocess.check_output(["nvcc", "--version"])
-        # print(output)
         version_line = output.decode("utf-8").strip().split("\n")[-1]
-        # print(version_line)
-        print(version_line.split()[-1].split("/")[0][-4:])
         return version_line.split()[-1].split("/")[0][-4:]  # Extract the version number
     except Exception:
-        print(f"{X_MARK: >6} CUDA not found. Please ensure CUDA toolkit is installed.")
         return None
 
 
-def get_driver_version():
-
+def get_driver_version(verbose=False):
+    """Get the driver version."""
     try:
         result = subprocess.run(
             ["nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"],
@@ -64,23 +54,18 @@ def get_driver_version():
         result_chain = result.stdout.strip()
         return result_chain.split("\n")[0]
     except FileNotFoundError:
-        print(
-            f"{X_MARK: >6} nvidia-smi not found. Please ensure NVIDIA drivers are installed."
-        )
         return None
     except subprocess.CalledProcessError:
         return None
 
 
 # https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
-def check_driver_compatibility():
-    print(f"   {CHECK_SYMBOL} Checking for [italic red]Driver Capability[/italic red]")
+def check_driver_compatibility(verbose=False):
+    """Check if the driver is compatible with the installed CUDA toolkit."""
     platform.system()
     driver_compatible = True
     cuda_version = get_cuda_version()
-    print(f"CUDA Version: {cuda_version}")
     driver_version = get_driver_version()
-    print(f"Driver Version: {driver_version}")
 
     if not driver_version or not cuda_version:
         driver_compatible = False
@@ -93,8 +78,10 @@ def check_driver_compatibility():
             driver_compatible = False
 
     if driver_compatible:
-        print(f"      {OK_MARK: >6} CUDA & Driver is compatible with RAPIDS")
+        return True
     else:
-        print(
-            f"      {X_MARK: >6} CUDA & Driver is not compatible with RAPIDS. Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html for CUDA compatability guidance."
+        raise ValueError(
+            "CUDA & Driver is not compatible with RAPIDS. "
+            "Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html "
+            "for CUDA compatability guidance."
         )

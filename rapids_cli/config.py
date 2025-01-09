@@ -1,6 +1,8 @@
-import pathlib
-import yaml
+"""Config loader for the CLI."""
 
+import pathlib
+
+import yaml
 
 _ROOT_DIR = pathlib.Path(__file__).parent
 
