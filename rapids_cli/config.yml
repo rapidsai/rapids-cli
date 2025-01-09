@@ -8,7 +8,17 @@ valid_subcommands:
 
 os_requirements:
   VALID_LINUX_OS_VERSIONS: ["Ubuntu 20.04", "Ubuntu 22.04", "Rocky Linux 8.7"]
-
+  OS_TO_MIN_SUPPORTED_VERSION:
+    {
+      "Arch Linux": "2018.08.02",
+      "Debian": "10.0",
+      "Fedora": "29",
+      "Linux Mint": "20.1",
+      "Rocky Linux": "8.3",
+      "Alma Linux": "8.3",
+      "RHEL": "8.3",
+      "Ubuntu": "20.04",
+    }
 cudf:
   cuda_requirement: "11.2"
   driver_requirement: "450.80.02"
