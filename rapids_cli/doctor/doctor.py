@@ -1,18 +1,29 @@
 """Health check for RAPIDS."""
 
 import contextlib
+import warnings
+from dataclasses import dataclass
+from typing import Optional
 
-from rich import print
+from rich.console import Console
 
 from rapids_cli._compatibility import entry_points
-from rapids_cli.config import config
 from rapids_cli.constants import DOCTOR_SYMBOL
-from rapids_cli.doctor.checks.cudf import cudf_checks
 
-VALID_SUBCOMMANDS = config["valid_subcommands"]["VALID_SUBCOMMANDS"]
+console = Console()
 
 
-def doctor_check(verbose, arguments):
+@dataclass
+class CheckResult:
+    name: str
+    description: str
+    status: bool
+    value: str = None
+    error: Exception = None
+    warnings: list[Warning] = None
+
+
+def doctor_check(verbose: bool, filters: Optional[list[str]] = None) -> bool:
     """Perform a health check for RAPIDS.
 
     This function runs a series of checks based on the provided arguments.
@@ -22,8 +33,8 @@ def doctor_check(verbose, arguments):
 
     Parameters:
     ----------
-    arguments : list
-        A list of subcommands for specific checks. If empty, runs all checks.
+    filters : list (optional)
+        A list of filters to run specific checks.
 
     Raises:
     -------
@@ -41,39 +52,70 @@ def doctor_check(verbose, arguments):
     > doctor_check([])  # Run all health checks
     > doctor_check(['cudf'])  # Run 'cudf' specific checks
     """
-    if len(arguments) == 0:
-        print(
-            f"[bold green] {DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green] \n"
-        )
+    filters = [] if not filters else filters
+    console.print(
+        f"[bold green]{DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green]"
+    )
 
-        checks = []
-        if verbose:
-            print("Discovering checks")
-        for ep in entry_points(group="rapids_doctor_check"):
-            with contextlib.suppress(AttributeError, ImportError):
-                if verbose:
-                    print(f"Found check '{ep.name}' provided by '{ep.value}'")
-                checks += [ep.load()]
-        if verbose:
-            print("Running checks")
-        for check_fn in checks:
-            check_fn(verbose)
+    checks = []
+    if verbose:
+        console.print("Discovering checks")
+    for ep in entry_points(group="rapids_doctor_check"):
+        with contextlib.suppress(AttributeError, ImportError):
+            if verbose:
+                console.print(f"Found check '{ep.name}' provided by '{ep.value}'")
+            if filters and not any(f in ep.value for f in filters):
+                continue
+            checks += [ep.load()]
+    if verbose:
+        console.print(f"Discovered {len(checks)} checks")
+        console.print("Running checks")
 
+    results: list[CheckResult] = []
+    with console.status("[bold green]Running checks...") as ui_status:
+        for i, check_fn in enumerate(checks):
+            error = None
+            caught_warnings = None
+            ui_status.update(f"Running [{i}/{len(checks)}] {check_fn.__name__}")
+
+            try:
+                with warnings.catch_warnings(record=True) as w:
+                    warnings.simplefilter("always")
+                    status = check_fn(verbose)
+                    caught_warnings = w
+
+            except Exception as e:
+                error = e
+                status = False
+
+            results.append(
+                CheckResult(
+                    name=check_fn.__name__,
+                    description=check_fn.__doc__.strip().split("\n")[0],
+                    status=bool(status),
+                    value=status if isinstance(status, str) else None,
+                    error=error,
+                    warnings=caught_warnings,
+                )
+            )
+
+    # Print warnings
+    for result in results:
+        if result.warnings:
+            for warning in result.warnings:
+                console.print(f"[bold yellow]Warning[/bold yellow]: {warning.message}")
+
+    if all(result.status for result in results):
+        console.print("[bold green]All checks passed![/bold green]")
+        return True
     else:
-        for argument in arguments:
-            if argument not in VALID_SUBCOMMANDS:
-                print(
-                    f"Not a valid subcommand - please use one of the following: {str(VALID_SUBCOMMANDS)}"
-                )
-            if argument == "cudf":
-
-                cuda_requirement = config["cudf_requirements"]["cuda_requirement"]
-                driver_requirement = config["cudf_requirements"]["driver_requirement"]
-                compute_requirement = config["cudf_requirements"]["compute_requirement"]
-
-                cudf_checks(
-                    cuda_requirement,
-                    driver_requirement,
-                    compute_requirement,
-                    verbose,
-                )
+        for result in results:
+            if not result.status:
+                console.print(f"[bold red]{result.name} failed[/bold red]")
+                console.print(f"  {result.error}")
+                if verbose and result.error:
+                    try:
+                        raise result.error
+                    except Exception:
+                        console.print_exception()
+        return False
