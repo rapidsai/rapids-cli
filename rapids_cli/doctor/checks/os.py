@@ -3,10 +3,7 @@
 import platform
 import subprocess
 
-from rich import print
-
 from rapids_cli.config import config
-from rapids_cli.constants import CHECK_SYMBOL, OK_MARK, X_MARK
 
 VALID_LINUX_OS_VERSIONS = config["os_requirements"]["VALID_LINUX_OS_VERSIONS"]
 
@@ -14,8 +11,6 @@ VALID_LINUX_OS_VERSIONS = config["os_requirements"]["VALID_LINUX_OS_VERSIONS"]
 def check_os_version(os_attributes, verbose=False):
     """Check the OS version for compatibility with RAPIDS."""
     os_name = os_attributes["NAME"] + " " + os_attributes["VERSION_ID"]
-    if verbose:
-        print(f"Current OS Version: {os_name}")
     return os_name in VALID_LINUX_OS_VERSIONS
 
 
@@ -25,7 +20,6 @@ def get_os_attributes(os_release):
     for attribute in os_release.split("\n"):
         if len(attribute) < 2:
             continue
-        # print(attribute.split("="))
         key, value = attribute.split("=")[0], attribute.split("=")[1]
         os_attributes[key] = value[1:-1]
 
@@ -45,16 +39,10 @@ def get_linux_os_version():
 
 def detect_os(verbose=False):
     """Detect the OS and check for compatibility with RAPIDS."""
-    print(f"   {CHECK_SYMBOL} Checking for [italic red]OS Capability[/italic red]")
     system = platform.system()
     release = platform.release()
-    version = platform.version()
     os = ""
 
-    if verbose:
-        print(f"        System: {system}")
-        print(f"        Release: {release}")
-        print(f"        Version: {version}")
     valid_os = False
     if system == "Windows":
         os = "Windows"
@@ -65,12 +53,10 @@ def detect_os(verbose=False):
                 )
                 if "Version 2" in result:
                     valid_os = True
-            except FileNotFoundError:
-                if verbose:
-                    print("WSL is not installed")
+            except FileNotFoundError as e:
+                raise ValueError("WSL is not installed") from e
             except subprocess.CalledProcessError as e:
-                if verbose:
-                    print(f"Error checking WSL version: {e}")
+                raise ValueError("Error checking WSL version") from e
     elif system == "Linux":
 
         # Check for specific Linux distributions
@@ -80,32 +66,17 @@ def detect_os(verbose=False):
                 os_attributes = get_os_attributes(os_release)
                 os = get_os_attributes(os_release)["NAME"]
                 valid_os = check_os_version(os_attributes, verbose)
-        except FileNotFoundError:
-            if verbose:
-                print(
-                    "/etc/os-release file not found. This might not be a typical Linux environment."
-                )
-            else:
-                print(f"{X_MARK: >6}")
+        except FileNotFoundError as e:
+            raise ValueError(
+                "/etc/os-release file not found. This might not be a typical Linux environment."
+            ) from e
     else:
-        if verbose:
-            print(f"      {X_MARK: >6} Operating System not recognized")
-        else:
-            print(f"{X_MARK: >6}")
-        os = None
+        raise ValueError("Operating System not recognized")
 
     if valid_os:
-        if verbose:
-            print(f"      {OK_MARK: >6} OS is compatible with RAPIDS")
-        else:
-            print(f"{OK_MARK: >6}")
+        return True
     else:
-        if verbose:
-            print(
-                f"      {X_MARK: >6} OS is not compatible with RAPIDS. "
-                "Please see https://docs.rapids.ai/install for system requirements."
-            )
-        else:
-            print(f"{X_MARK: >6}")
-
-    return os
+        raise ValueError(
+            f"OS {os} is not compatible with RAPIDS. "
+            "Please see https://docs.rapids.ai/install for system requirements."
+        )

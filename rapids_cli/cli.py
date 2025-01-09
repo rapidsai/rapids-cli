@@ -20,11 +20,12 @@ def rapids():
 @click.option(
     "--verbose", is_flag=True, help="Enable verbose mode for detailed output."
 )
-@click.argument("arguments", nargs=-1)
-def doctor(verbose, arguments):
+@click.argument("filters", nargs=-1)
+def doctor(verbose, filters):
     """Run health checks to ensure RAPIDS is installed correctly."""
-    console.print("Running Doctor Health Checks\n")
-    doctor_check(verbose, arguments)
+    status = doctor_check(verbose, filters)
+    if not status:
+        raise click.ClickException("Health checks failed.")
 
 
 if __name__ == "__main__":
