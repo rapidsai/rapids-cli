@@ -1,10 +1,9 @@
 click==8.1.7
 markdown-it-py==3.0.0
 mdurl==0.1.2
-nvidia-ml-py3==7.352.0
 psutil==6.0.0
 pygments==2.18.0
-pynvml==11.5.3
+pynvml==12.0.0
 rich==13.8.1
 PyYAML==6.0.2
 yml==0.0.1
