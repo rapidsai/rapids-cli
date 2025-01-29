@@ -5,17 +5,19 @@ in a quick and scriptable way.
 
 ```console
 $ rapids --help
+                                                                                      
+ Usage: rapids [OPTIONS] COMMAND [ARGS]...                                            
+                                                                                      
+ The Rapids CLI is a command-line interface for RAPIDS.                               
+                                                                                      
+╭─ Options ──────────────────────────────────────────────────────────────────────────╮
+│ --help      Show this message and exit.                                            │
+╰────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ─────────────────────────────────────────────────────────────────────────╮
+│ doctor    Run health checks to ensure RAPIDS is installed correctly.               │
+│ run       Run a Python script with RAPIDS Accelerator Modes enabled.               │
+╰────────────────────────────────────────────────────────────────────────────────────╯
 
- Usage: rapids [OPTIONS] COMMAND [ARGS]...                                             
-
- The Rapids CLI is a command-line interface for RAPIDS.
-
-╭─ Options ───────────────────────────────────────────────────────────────────────────╮
-│ --help      Show this message and exit.                                             │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Commands ──────────────────────────────────────────────────────────────────────────╮
-│ doctor    Run health checks to ensure RAPIDS is installed correctly.                │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## RAPIDS Doctor
