@@ -42,7 +42,8 @@ def check_memory_to_gpu_ratio(verbose=True):
             return True
         else:
             warnings.warn(
-                "System Memory to total GPU Memory ratio not approximately 2:1 ratio.",
+                "System Memory to total GPU Memory ratio not at least 2:1 ratio. "
+                "It is recommended to have double the system memory to GPU memory for optimal performance.",
                 stacklevel=2,
             )
             return True

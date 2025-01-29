@@ -81,7 +81,8 @@ def doctor_check(verbose: bool, filters: Optional[list[str]] = None) -> bool:
             try:
                 with warnings.catch_warnings(record=True) as w:
                     warnings.simplefilter("always")
-                    status = check_fn(verbose)
+                    status = True
+                    check_fn(verbose=verbose)
                     caught_warnings = w
 
             except Exception as e:
