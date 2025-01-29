@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION & AFFILIATES.
+# All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
 from unittest.mock import patch
 
 from rapids_cli.doctor.checks.cuda_driver import cuda_check
