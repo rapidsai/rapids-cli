@@ -2,7 +2,6 @@ recursive-include rapids_cli *.py
 recursive-include rapids_cli *.yml
 
 include README.md
-include requirements.txt
 include MANIFEST.in
 
 recursive-exclude * __pycache__
