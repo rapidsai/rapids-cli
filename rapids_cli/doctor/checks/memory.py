@@ -38,17 +38,16 @@ def check_memory_to_gpu_ratio(verbose=True):
     """
     try:
         pynvml.nvmlInit()
-        system_memory = get_system_memory(verbose)
-        gpu_memory = get_gpu_memory(verbose)
-        ratio = system_memory / gpu_memory
-        if ratio >= 1.8:
-            return True
-        else:
-            warnings.warn(
-                "System Memory to total GPU Memory ratio not at least 2:1 ratio. "
-                "It is recommended to have double the system memory to GPU memory for optimal performance.",
-                stacklevel=2,
-            )
-            return True
     except pynvml.NVMLError as e:
         raise ValueError("GPU not found. Please ensure GPUs are installed.") from e
+
+    system_memory = get_system_memory(verbose)
+    gpu_memory = get_gpu_memory(verbose)
+    ratio = system_memory / gpu_memory
+    if ratio < 1.8:
+        warnings.warn(
+            "System Memory to total GPU Memory ratio not at least 2:1 ratio. "
+            "It is recommended to have double the system memory to GPU memory for optimal performance.",
+            stacklevel=2,
+        )
+    return True
