@@ -1,3 +1,9 @@
 MD013:
   # Number of characters
   line_length: 120
+
+# Ignore MD040 (fenced code blocks should have a language specified)
+MD040: false
+  
+  
+  
