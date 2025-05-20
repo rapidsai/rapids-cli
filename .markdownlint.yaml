@@ -4,6 +4,3 @@ MD013:
 
 # Ignore MD040 (fenced code blocks should have a language specified)
 MD040: false
-  
-  
-  

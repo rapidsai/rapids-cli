@@ -30,7 +30,7 @@ platform linux -- Python 3.12.10, pytest-8.3.5, pluggy-1.5.0
 rootdir: /home/jtomlinson/Projects/rapids/rapids-cli
 configfile: pyproject.toml
 plugins: anyio-4.9.0
-collected 2 items                                            
+collected 2 items
 
 rapids_cli/tests/test_cuda.py ..                       [100%]
 
@@ -95,7 +95,7 @@ work, or you have rights to submit it under the same license, or a compatible li
     whole or in part by me, under the same open source license (unless I am permitted to submit under a different license),
     as indicated in the file; or
 
-    (c) The contribution was provided directly to me by some other person who certified (a), (b) or (c) and 
+    (c) The contribution was provided directly to me by some other person who certified (a), (b) or (c) and
     I have not modified it.
 
     (d) I understand and agree that this project and the contribution are public and that a record of the contribution
