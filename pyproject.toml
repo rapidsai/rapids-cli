@@ -53,7 +53,6 @@ glb = "rapids_cli.doctor.checks.dependencies:check_glb"
 [tool.pytest]
 testpaths = ["tests"]
 
-
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -95,7 +94,6 @@ ignore = [
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 fixable = ["I"]
-# unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
@@ -111,3 +109,4 @@ convention = "google"
 
 [tool.mypy]
 exclude = ["examples", "venv", "ci", "docs", "conftest.py"]
+ignore_missing_imports = true

@@ -6,7 +6,7 @@ in a quick and scriptable way.
 ```console
 $ rapids --help
 
- Usage: rapids [OPTIONS] COMMAND [ARGS]...                                             
+ Usage: rapids [OPTIONS] COMMAND [ARGS]...
 
  The Rapids CLI is a command-line interface for RAPIDS.
 
@@ -27,8 +27,8 @@ The core command has checks based on the standard [setup requirements](https://d
 Other packages in the RAPIDS ecosystem can also register additional checks via a plugin system.
 
 ```console
-$ rapids doctor                    
-🧑‍⚕️ Performing REQUIRED health check for RAPIDS 
+$ rapids doctor
+🧑‍⚕️ Performing REQUIRED health check for RAPIDS
 All checks passed!
 ```
 
@@ -46,7 +46,7 @@ pip install -e .
 
 # Run rapids doctor
 rapids doctor
-# 🧑‍⚕️ Performing REQUIRED health check for RAPIDS 
+# 🧑‍⚕️ Performing REQUIRED health check for RAPIDS
 # All checks passed!
 ```
 
@@ -64,7 +64,7 @@ pytest
 # configfile: pyproject.toml
 # plugins: anyio-4.8.0
 # collected 2 items
-# 
+#
 # rapids_cli/tests/test_cuda.py ..
 # ========================== 2 passed in 0.08s ==========================
 ```
@@ -118,7 +118,7 @@ quick_cudf_check = "doctor_check_example.check:my_awesome_check"
 Now we can install our new package, which will register the entrypoint.
 
 ```console
-$ pip install -e .      
+$ pip install -e .
 Successfully installed doctor-check-example-0.0.1
 ```
 
@@ -126,8 +126,8 @@ Then if we run `rapids doctor` with the `--verbose` flag we can see our new chec
 list of checks.
 
 ```console
-$ rapids doctor --verbose                                      
-🧑‍⚕️ Performing REQUIRED health check for RAPIDS 
+$ rapids doctor --verbose
+🧑‍⚕️ Performing REQUIRED health check for RAPIDS
 Discovering checks
 Found check 'quick_cudf_check' provided by 'doctor_check_example.check:my_awesome_check'
 ...
@@ -165,7 +165,7 @@ but warnings will be caught and presented to the user.
 
 ```console
 $ rapids doctor
-🧑‍⚕️ Performing REQUIRED health check for RAPIDS 
+🧑‍⚕️ Performing REQUIRED health check for RAPIDS
 Warning: System Memory to total GPU Memory ratio not at least 2:1 ratio.
 It is recommended to have double the system memory to GPU memory for optimal performance.
 All checks passed!
