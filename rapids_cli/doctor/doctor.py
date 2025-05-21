@@ -55,7 +55,9 @@ def doctor_check(verbose: bool, filters: list[str] | None = None) -> bool:
     > doctor_check(['cudf'])  # Run 'cudf' specific checks
     """
     filters = [] if not filters else filters
-    console.print(f"[bold green]{DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green]")
+    console.print(
+        f"[bold green]{DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green]"
+    )
 
     checks = []
     if verbose:

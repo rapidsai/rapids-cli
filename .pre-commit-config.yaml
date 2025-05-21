@@ -10,6 +10,10 @@ repos:
       - id: destroyed-symlinks
       - id: end-of-file-fixer
       - id: trailing-whitespace
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+      - id: black
   - repo: https://github.com/adamchainz/blacken-docs
     rev: 1.19.1
     hooks:
@@ -26,7 +30,6 @@ repos:
     hooks:
       - id: ruff
         args: ["--fix", "--exit-non-zero-on-fix"]
-      - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: 'v1.13.0'
     hooks:

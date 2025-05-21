@@ -39,6 +39,10 @@ conda = "rapids_cli.doctor.checks.dependencies:check_conda"
 pip = "rapids_cli.doctor.checks.dependencies:check_pip"
 glb = "rapids_cli.doctor.checks.dependencies:check_glb"
 
+[tool.black]
+# this should match the oldest version of Python the library supports
+target-version = ["py310"]
+
 [tool.pytest]
 testpaths = ["tests"]
 

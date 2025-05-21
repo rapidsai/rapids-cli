@@ -15,14 +15,18 @@ from rapids_cli.doctor.checks.os import detect_os
 def check_conda(verbose=False):
     """Check the system for Conda compatibility."""
     conda_requirement = config["min_supported_versions"]["conda_requirement"]
-    result = subprocess.check_output(["conda", "info", "--json"], stderr=subprocess.DEVNULL)
+    result = subprocess.check_output(
+        ["conda", "info", "--json"], stderr=subprocess.DEVNULL
+    )
     result_json = json.loads(result.decode("utf-8"))
     version_num = result_json["conda_version"]
 
     if version_num >= conda_requirement:
         return True
     else:
-        raise ValueError(f"CONDA Version is not compatible with RAPIDS - please upgrade to conda {conda_requirement}")
+        raise ValueError(
+            f"CONDA Version is not compatible with RAPIDS - please upgrade to conda {conda_requirement}"
+        )
 
 
 def check_pip(verbose=False):
@@ -30,7 +34,9 @@ def check_pip(verbose=False):
     system_cuda_version = get_cuda_version()
     if not system_cuda_version:
         return
-    result = subprocess.check_output(["pip", "show", "cuda-python"], stderr=subprocess.DEVNULL)
+    result = subprocess.check_output(
+        ["pip", "show", "cuda-python"], stderr=subprocess.DEVNULL
+    )
     pip_cuda_version = result.decode("utf-8").strip().split("\n")[1].split(" ")[-1]
     system_cuda_version_major, pip_cuda_version_major = (
         system_cuda_version.split(".")[0],
@@ -39,14 +45,18 @@ def check_pip(verbose=False):
     if system_cuda_version_major >= pip_cuda_version_major:
         return True
     else:
-        raise ValueError(f"Please upgrade pip CUDA version to {system_cuda_version_major}")
+        raise ValueError(
+            f"Please upgrade pip CUDA version to {system_cuda_version_major}"
+        )
 
 
 def check_docker(verbose=False):
     """Check the system for Docker compatibility."""
     docker_requirement = config["min_supported_versions"]["docker_requirement"]
     docker_version_data = json.loads(
-        subprocess.check_output(["docker", "version", "-f", "json"], stderr=subprocess.DEVNULL)
+        subprocess.check_output(
+            ["docker", "version", "-f", "json"], stderr=subprocess.DEVNULL
+        )
     )
     if docker_version_data["Server"]["Version"] >= docker_requirement:
         return True
