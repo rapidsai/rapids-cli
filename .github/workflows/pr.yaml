@@ -1,10 +1,14 @@
-name: Python Tests
+name: pr
 
 on:
   push:
     branches:
-      - main
-  pull_request:
+      - "pull-request/[0-9]+"
+
+# automatically cancel in-progress CI runs if a new commit is pushed to the same ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
 
 jobs:
   build-wheel:
@@ -21,6 +25,7 @@ jobs:
   wheel-tests:
     secrets: inherit
     uses: rapidsai/shared-workflows/.github/workflows/wheels-test.yaml@branch-25.06
+    needs: [build-wheel]
     with:
       build_type: pull-request
       script: ci/test_wheel.sh
