@@ -5,6 +5,6 @@ WHEELHOUSE=$(RAPIDS_PY_WHEEL_NAME="rapids_cli" RAPIDS_PY_WHEEL_PURE="1" rapids-d
 
 # echo to expand wildcard before adding `[extra]` requires for pip
 rapids-pip-retry install \
-    "$(echo "${WHEELHOUSE}/rapids_cli"*.whl)[test]"
+    $(echo "${WHEELHOUSE}/rapids_cli"*.whl)[test]
 
 python -m pytest
