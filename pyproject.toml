@@ -42,6 +42,10 @@ conda = "rapids_cli.doctor.checks.dependencies:check_conda"
 pip = "rapids_cli.doctor.checks.dependencies:check_pip"
 glb = "rapids_cli.doctor.checks.dependencies:check_glb"
 
+[tool.black]
+# this should match the oldest version of Python the library supports
+target-version = ["py310"]
+
 [tool.pytest]
 testpaths = ["tests"]
 
@@ -72,32 +76,49 @@ exclude = [
 
 line-length = 120
 
-# Assume Python 3.10.
+# this should be set to the oldest version of Python the package supports
 target-version = "py310"
 
 [tool.ruff.lint]
-
-# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
-select = ["D", "E", "W", "F", "I", "N", "B"]
-ignore = [
-    "D101", # Missing docstring in public class
-    "D212", # Multi-line docstring summary should start at the first line
+select = [
+    # flake8-bugbear
+    "B",
+    # pydocstyle
+    "D",
+    # pycodestyle (errors)
+    "E",
+    # isort
+    "I",
+    # pyflakes
+    "F",
+    # pep8-naming
+    "N",
+    # pyupgrade
+    "UP",
+    # pycodestyle (warnings)
+    "W",
 ]
+fixable = ["ALL"]
 
-# Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["I"]
-
-# Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+ignore = [
+    # (pydocstyle) Missing docstring in public class
+    "D101",
+    # (pydocstyle) Multi-line docstring summary should start at the first line
+    "D212",
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
-"rapids_cli/tests/*" = ["D", "N", "B"]
-"conftest.py" = ["D", "N", "B"]
-"docs/*" = ["D", "N", "B"]
-"ci/*" = ["D", "N", "B"]
+"rapids_cli/tests/*" = [
+    # pydocstyle
+    "D",
+]
+"docs/*" = [
+    # pydocstyle
+    "D",
+]
 
 [tool.mypy]
 exclude = ["examples", "venv", "ci", "docs", "conftest.py"]

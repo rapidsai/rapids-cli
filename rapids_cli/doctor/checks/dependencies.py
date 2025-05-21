@@ -25,8 +25,7 @@ def check_conda(verbose=False):
         return True
     else:
         raise ValueError(
-            "CONDA Version is not compatible with RAPIDS - "
-            f"please upgrade to conda {conda_requirement}"
+            f"CONDA Version is not compatible with RAPIDS - please upgrade to conda {conda_requirement}"
         )
 
 
@@ -63,8 +62,7 @@ def check_docker(verbose=False):
         return True
     else:
         raise ValueError(
-            f"Docker Version is not compatible with RAPIDS - "
-            f"please upgrade to Docker {docker_requirement}"
+            f"Docker Version is not compatible with RAPIDS - please upgrade to Docker {docker_requirement}"
         )
 
 
