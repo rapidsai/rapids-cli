@@ -22,11 +22,12 @@ jobs:
       pure-wheel: true
       append-cuda-suffix: false
   wheel-tests:
+    needs: [conda-cpp-build, changed-files]
     secrets: inherit
-    uses: rapidsai/shared-workflows/.github/workflows/wheels-test.yaml@branch-25.06
-    needs: [build-wheel]
+    uses: rapidsai/shared-workflows/.github/workflows/custom-job.yaml@branch-25.06
     with:
       build_type: pull-request
-      script: ci/test_wheel.sh
-      # run just 1 amd64 and 1 arm64 test job (using the oldest-supported Python and the latest-supported CUDA)
-      matrix_filter: group_by(.CUDA_VER|split(".")|map(tonumber)|.[0]) | map(max_by([(.PY_VER|split(".")|map(tonumber)), (.CUDA_VER|split(".")|map(tonumber))]))
+      node_type: "gpu-l4-latest-1"
+      arch: "amd64"
+      container_image: "rapidsai/citestwheel:latest"
+      run_script: "ci/test_wheel.sh"
