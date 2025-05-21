@@ -7,15 +7,22 @@ on:
   pull_request:
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .[test]
-      - name: Run tests
-        run: pytest
+  build-wheel:
+    uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@branch-25.06
+    with:
+      build_type: pull-request
+      script: ci/build_wheel.sh
+      # only need 1 build: amd64, oldest-supported Python, latest-supported CUDA
+      matrix_filter: '[map(select(.ARCH == "amd64")) | min_by((.PY_VER | split(".") | map(tonumber)), (.CUDA_VER | split(".") | map(-tonumber)))]'
+      package-name: rapids-cli
+      package-type: python
+      pure-wheel: true
+      append-cuda-suffix: false
+  wheel-tests:
+    secrets: inherit
+    uses: rapidsai/shared-workflows/.github/workflows/wheels-test.yaml@branch-25.06
+    with:
+      build_type: pull-request
+      script: ci/test_wheel.sh
+      # run just 1 amd64 and 1 arm64 test job (using the oldest-supported Python and the latest-supported CUDA)
+      matrix_filter: group_by(.CUDA_VER|split(".")|map(tonumber)|.[0]) | map(max_by([(.PY_VER|split(".")|map(tonumber)), (.CUDA_VER|split(".")|map(tonumber))]))

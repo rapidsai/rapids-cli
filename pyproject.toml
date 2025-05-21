@@ -1,9 +1,12 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = [
+    "setuptools>=64.0.0",
+    "wheel",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rapids_cli"
+name = "rapids-cli"
 version = "0.1"
 description = "A CLI for RAPIDS"
 requires-python = ">=3.10"
