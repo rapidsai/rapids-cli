@@ -5,6 +5,7 @@ on:
     branches:
       - "pull-request/[0-9]+"
 
+# automatically cancel in-progress CI runs if a new commit is pushed to the same ref
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
