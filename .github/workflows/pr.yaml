@@ -1,21 +1,29 @@
-name: Python Tests
+name: pr
 
 on:
   push:
     branches:
-      - main
-  pull_request:
+      - "pull-request/[0-9]+"
+
+# automatically cancel in-progress CI runs if a new commit is pushed to the same ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
 
 jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install -e .[test]
       - name: Run tests
         run: pytest
