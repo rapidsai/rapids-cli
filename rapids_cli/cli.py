@@ -20,9 +20,7 @@ def rapids():
 
 
 @rapids.command()
-@click.option(
-    "--verbose", is_flag=True, help="Enable verbose mode for detailed output."
-)
+@click.option("--verbose", is_flag=True, help="Enable verbose mode for detailed output.")
 @click.argument("filters", nargs=-1)
 def doctor(verbose, filters):
     """Run health checks to ensure RAPIDS is installed correctly."""

@@ -6,7 +6,6 @@
 import contextlib
 import warnings
 from dataclasses import dataclass
-from typing import Optional
 
 from rich.console import Console
 
@@ -26,7 +25,7 @@ class CheckResult:
     warnings: list[Warning] = None
 
 
-def doctor_check(verbose: bool, filters: Optional[list[str]] = None) -> bool:
+def doctor_check(verbose: bool, filters: list[str] | None = None) -> bool:
     """Perform a health check for RAPIDS.
 
     This function runs a series of checks based on the provided arguments.
@@ -56,9 +55,7 @@ def doctor_check(verbose: bool, filters: Optional[list[str]] = None) -> bool:
     > doctor_check(['cudf'])  # Run 'cudf' specific checks
     """
     filters = [] if not filters else filters
-    console.print(
-        f"[bold green]{DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green]"
-    )
+    console.print(f"[bold green]{DOCTOR_SYMBOL} Performing REQUIRED health check for RAPIDS [/bold green]")
 
     checks = []
     if verbose:

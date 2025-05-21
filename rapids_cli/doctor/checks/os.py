@@ -67,9 +67,7 @@ def detect_os(verbose=False):
         os = "Windows"
         if release == "11":
             try:
-                result = subprocess.check_output(
-                    ["wsl", "--list", "--verbose"], text=True
-                )
+                result = subprocess.check_output(["wsl", "--list", "--verbose"], text=True)
             except FileNotFoundError as e:
                 raise ValueError("WSL is not installed") from e
             except subprocess.CalledProcessError as e:
@@ -82,9 +80,7 @@ def detect_os(verbose=False):
             with open("/etc/os-release") as f:
                 os_release = f.read()
         except FileNotFoundError as e:
-            raise ValueError(
-                "/etc/os-release file not found. This might not be a typical Linux environment."
-            ) from e
+            raise ValueError("/etc/os-release file not found. This might not be a typical Linux environment.") from e
         os_attributes = get_os_attributes(os_release)
         os = get_os_attributes(os_release)["NAME"]
         valid_os = check_os_version(os_attributes, verbose)
