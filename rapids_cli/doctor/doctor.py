@@ -20,9 +20,9 @@ class CheckResult:
     name: str
     description: str
     status: bool
-    value: str = None
-    error: Exception = None
-    warnings: list[Warning] = None
+    value: str | None
+    error: Exception | None
+    warnings: list[warnings.WarningMessage] | None
 
 
 def doctor_check(verbose: bool, filters: list[str] | None = None) -> bool:

@@ -27,6 +27,18 @@ repos:
       - id: ruff
         args: ["--fix", "--exit-non-zero-on-fix"]
       - id: ruff-format
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.13.0'
+    hooks:
+      - id: mypy
+        additional_dependencies: [
+          types-PyYAML,
+        ]
+        args: [
+          "--config-file=pyproject.toml",
+          "rapids_cli/"
+        ]
+        pass_filenames: false
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.10.0.1
     hooks:
