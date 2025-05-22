@@ -1,0 +1,36 @@
+name: build
+
+on:
+  push:
+    # run on every new commit pushed to 'main'
+    branches:
+      - main
+    # run whenever a new tag is created following one of the following patterns
+    tags:
+      - v[0-9][0-9].[0-9][0-9].[0-9][0-9]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  wheel-build:
+    secrets: inherit
+    uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@branch-25.06
+    with:
+      build_type: branch
+      script: ci/build_wheel.sh
+      # only need 1 build: amd64, oldest-supported Python, latest-supported CUDA
+      matrix_filter: '[map(select(.ARCH == "amd64")) | min_by((.PY_VER | split(".") | map(tonumber)), (.CUDA_VER | split(".") | map(-tonumber)))]'
+      package-name: rapids-cli
+      package-type: python
+      pure-wheel: true
+      append-cuda-suffix: false
+  wheel-publish:
+    needs: wheel-build
+    secrets: inherit
+    uses: rapidsai/shared-workflows/.github/workflows/wheels-publish.yaml@branch-25.06
+    with:
+      build_type: branch
+      package-name: rapids-cli
+      package-type: python

@@ -17,13 +17,25 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Install dependencies
-        run: |
-          pip install -e .[test]
-      - name: Run tests
-        run: pytest
+  build-wheel:
+    uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@branch-25.06
+    needs: [checks]
+    with:
+      build_type: pull-request
+      script: ci/build_wheel.sh
+      # only need 1 build (pure Python): amd64, oldest-supported Python, latest-supported CUDA is fine
+      matrix_filter: '[map(select(.ARCH == "amd64")) | min_by((.PY_VER | split(".") | map(tonumber)), (.CUDA_VER | split(".") | map(-tonumber)))]'
+      package-name: rapids-cli
+      package-type: python
+      pure-wheel: true
+      append-cuda-suffix: false
+  wheel-tests:
+    needs: [build-wheel]
+    secrets: inherit
+    uses: rapidsai/shared-workflows/.github/workflows/custom-job.yaml@branch-25.06
+    with:
+      build_type: pull-request
+      node_type: "gpu-l4-latest-1"
+      arch: "amd64"
+      container_image: "rapidsai/citestwheel:latest"
+      run_script: ci/test_wheel.sh

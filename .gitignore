@@ -1,5 +1,10 @@
+*.bz2
+*.conda
 .mypy_cache/
 .ruff_cache/
+*.tar.gz
+*.whl
+*.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
