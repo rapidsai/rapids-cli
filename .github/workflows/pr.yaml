@@ -38,4 +38,4 @@ jobs:
       node_type: "gpu-l4-latest-1"
       arch: "amd64"
       container_image: "rapidsai/citestwheel:latest"
-      run_script: ci/test_wheel.sh
+      script: ci/test_wheel.sh
