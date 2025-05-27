@@ -18,7 +18,7 @@ jobs:
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
   build-wheel:
-    uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@branch-25.06
+    uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@branch-25.08
     needs: [checks]
     with:
       build_type: pull-request
@@ -32,7 +32,7 @@ jobs:
   wheel-tests:
     needs: [build-wheel]
     secrets: inherit
-    uses: rapidsai/shared-workflows/.github/workflows/custom-job.yaml@branch-25.06
+    uses: rapidsai/shared-workflows/.github/workflows/custom-job.yaml@branch-25.08
     with:
       build_type: pull-request
       node_type: "gpu-l4-latest-1"
