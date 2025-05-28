@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "setuptools>=64.0.0",
+    "setuptools>=77.0.0",
     "wheel",
 ]
 build-backend = "setuptools.build_meta"
@@ -9,7 +9,8 @@ build-backend = "setuptools.build_meta"
 name = "rapids-cli"
 description = "A CLI for RAPIDS"
 dynamic = ["version"]
-license = { text = "Apache-2.0" }
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = [
     "importlib_metadata >= 4.13.0; python_version < '3.12' ",
@@ -43,11 +44,11 @@ os = "rapids_cli.doctor.checks.os:detect_os"
 Homepage = "https://github.com/rapidsai/rapids-cli"
 Source = "https://github.com/rapidsai/rapids-cli"
 
-[tool.setuptools]
-license-files = ["LICENSE"]
-
 [tool.setuptools.dynamic]
 version = {file = "VERSION"}
+
+[tool.setuptools]
+packages = { "find" = { where = ["rapids_cli"] } }
 
 [tool.black]
 # this should match the oldest version of Python the library supports

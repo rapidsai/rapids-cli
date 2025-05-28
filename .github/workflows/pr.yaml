@@ -24,6 +24,8 @@ jobs:
     with:
       build_type: pull-request
       script: ci/build_python.sh
+      # only need 1 build (noarch package): this selects amd64, oldest-supported Python, latest-supported CUDA
+      matrix_filter: '[map(select(.ARCH == "amd64")) | min_by((.PY_VER | split(".") | map(tonumber)), (.CUDA_VER | split(".") | map(-tonumber)))]'
   conda-python-tests:
     needs: [conda-python-build]
     secrets: inherit
@@ -40,7 +42,7 @@ jobs:
     with:
       build_type: pull-request
       script: ci/build_wheel.sh
-      # only need 1 build (pure Python): amd64, oldest-supported Python, latest-supported CUDA is fine
+      # only need 1 build (noarch package): this selects amd64, oldest-supported Python, latest-supported CUDA
       matrix_filter: '[map(select(.ARCH == "amd64")) | min_by((.PY_VER | split(".") | map(tonumber)), (.CUDA_VER | split(".") | map(-tonumber)))]'
       package-name: rapids-cli
       package-type: python
