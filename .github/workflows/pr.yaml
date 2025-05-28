@@ -17,8 +17,25 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
-  build-wheel:
-    uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@branch-25.06
+  conda-python-build:
+    needs: [checks]
+    secrets: inherit
+    uses: rapidsai/shared-workflows/.github/workflows/conda-python-build.yaml@branch-25.08
+    with:
+      build_type: pull-request
+      script: ci/build_python.sh
+  conda-python-tests:
+    needs: [conda-python-build]
+    secrets: inherit
+    uses: rapidsai/shared-workflows/.github/workflows/custom-job.yaml@branch-25.08
+    with:
+      build_type: pull-request
+      node_type: "gpu-l4-latest-1"
+      arch: "amd64"
+      container_image: "rapidsai/ci-conda:latest"
+      script: ci/test_python.sh
+  wheel-build:
+    uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@branch-25.08
     needs: [checks]
     with:
       build_type: pull-request
@@ -30,9 +47,9 @@ jobs:
       pure-wheel: true
       append-cuda-suffix: false
   wheel-tests:
-    needs: [build-wheel]
+    needs: [wheel-build]
     secrets: inherit
-    uses: rapidsai/shared-workflows/.github/workflows/custom-job.yaml@branch-25.06
+    uses: rapidsai/shared-workflows/.github/workflows/custom-job.yaml@branch-25.08
     with:
       build_type: pull-request
       node_type: "gpu-l4-latest-1"
