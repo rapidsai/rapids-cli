@@ -8,6 +8,9 @@ set -euo pipefail
 rapids-logger "Downloading artifacts from previous jobs"
 PYTHON_CHANNEL=$(rapids-download-conda-from-github python)
 
+# ensure we always install the just-built-in-CI package, instead of falling back to earlier ones
+conda config --set channel_priority strict
+
 rapids-logger "Generating Python testing dependencies"
 rapids-dependency-file-generator \
   --output conda \
