@@ -16,7 +16,7 @@ concurrency:
 jobs:
   wheel-build:
     secrets: inherit
-    uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@branch-25.06
+    uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@branch-25.08
     with:
       build_type: branch
       script: ci/build_wheel.sh
@@ -29,7 +29,7 @@ jobs:
   wheel-publish:
     needs: wheel-build
     secrets: inherit
-    uses: rapidsai/shared-workflows/.github/workflows/wheels-publish.yaml@branch-25.06
+    uses: rapidsai/shared-workflows/.github/workflows/wheels-publish.yaml@branch-25.08
     with:
       build_type: branch
       package-name: rapids-cli
