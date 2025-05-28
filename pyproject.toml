@@ -47,8 +47,11 @@ Source = "https://github.com/rapidsai/rapids-cli"
 [tool.setuptools.dynamic]
 version = {file = "VERSION"}
 
-[tool.setuptools]
-packages = { "find" = { where = ["rapids_cli"] } }
+[tool.setuptools.packages.find]
+include = [
+    "rapids_cli*",
+    "rapids_cli.*",
+]
 
 [tool.black]
 # this should match the oldest version of Python the library supports
