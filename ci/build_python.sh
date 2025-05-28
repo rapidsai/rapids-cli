@@ -15,9 +15,9 @@ source rapids-rattler-channel-string
 
 rapids-logger "Building rapids-cli"
 
-rattler-build build                  \
-    --recipe conda/recipes/dask-cuda \
-    "${RATTLER_ARGS[@]}"             \
+rattler-build build                   \
+    --recipe conda/recipes/rapids-cli \
+    "${RATTLER_ARGS[@]}"              \
     "${RATTLER_CHANNELS[@]}"
 
 # remove build_cache directory to avoid uploading the entire source tree
