@@ -3,6 +3,7 @@ files:
   test_python:
     output: none
     includes:
+      - depends_on_rapids_cli
       - py_version
       - test_python
 channels:
