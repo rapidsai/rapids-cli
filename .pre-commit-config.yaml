@@ -46,6 +46,8 @@ repos:
     rev: v0.10.0.1
     hooks:
       - id: shellcheck
+        # --severity=warning suppresses INFO-level findings complaining about
+        # not being able to follow things that are source'd
         args: ["--severity=warning"]
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
