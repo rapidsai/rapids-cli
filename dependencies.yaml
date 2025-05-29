@@ -1,5 +1,20 @@
 # Dependency list for https://github.com/rapidsai/dependency-file-generator
 files:
+  py_run_rapids_cli:
+    output: pyproject
+    pyproject_dir: .
+    extras:
+      table: project
+    includes:
+      - run_python
+  py_test_rapids_cli:
+    output: pyproject
+    pyproject_dir: .
+    extras:
+      table: project.optional-dependencies
+      key: test
+    includes:
+      - test_python
   test_python:
     output: none
     includes:
@@ -39,6 +54,22 @@ dependencies:
           - matrix:
             packages:
               - python>=3.10,<3.14
+  run_python:
+    common:
+      - output_types: [conda, requirements, pyproject]
+        packages:
+          - nvidia-ml-py>=12.0
+          - packaging
+          - psutil
+          - rich
+          - rich-click
+      - output_types: [conda]
+        packages:
+          - importlib-metadata >=4.13.0
+      # "python_version" specifier is a 'pip'-specific thing, so this needs its own group
+      - output_types: [pyproject, requirements]
+        packages:
+          - importlib-metadata >= 4.13.0; python_version < '3.12'
   test_python:
     common:
       - output_types: [conda, requirements, pyproject]
