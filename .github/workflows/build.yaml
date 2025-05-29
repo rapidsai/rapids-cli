@@ -7,7 +7,7 @@ on:
       - main
     # run whenever a new tag is created following one of the following patterns
     tags:
-      - v[0-9][0-9].[0-9][0-9].[0-9][0-9]
+      - v[0-9]+.[0-9]+.[0-9]+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
