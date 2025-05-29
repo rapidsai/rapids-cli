@@ -69,7 +69,7 @@ dependencies:
       # "python_version" specifier is a 'pip'-specific thing, so this needs its own group
       - output_types: [pyproject, requirements]
         packages:
-          - importlib_metadata >= 4.13.0; python_version < '3.12'
+          - importlib-metadata >= 4.13.0; python_version < '3.12'
   test_python:
     common:
       - output_types: [conda, requirements, pyproject]
