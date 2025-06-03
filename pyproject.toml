@@ -1,10 +1,3 @@
-[build-system]
-requires = [
-    "setuptools>=77.0.0",
-    "wheel",
-]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "rapids-cli"
 description = "A CLI for RAPIDS"
@@ -44,8 +37,15 @@ os = "rapids_cli.doctor.checks.os:detect_os"
 Homepage = "https://github.com/rapidsai/rapids-cli"
 Source = "https://github.com/rapidsai/rapids-cli"
 
-[tool.setuptools.dynamic]
-version = {file = "VERSION"}
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "rapids_cli/_version.py"
+
+[tool.hatch.version]
+source = "vcs"
 
 [tool.setuptools.packages.find]
 include = [
