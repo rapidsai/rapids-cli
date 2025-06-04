@@ -5,6 +5,8 @@
 
 import pynvml
 
+REQUIRED_COMPUTE_CAPABILITY = 7
+
 
 def gpu_check(verbose=False):
     """Check GPU availability."""
@@ -23,18 +25,14 @@ def check_gpu_compute_capability(verbose):
     except pynvml.NVMLError as e:
         raise ValueError("No GPU - cannot determineg GPU Compute Capability") from e
 
-    required_capability = 7
-    num_gpus = pynvml.nvmlDeviceGetCount()
-    for i in range(num_gpus):
+    for i in range(pynvml.nvmlDeviceGetCount()):
         handle = pynvml.nvmlDeviceGetHandleByIndex(i)
         major, minor = pynvml.nvmlDeviceGetCudaComputeCapability(handle)
-        compute_capability = major * 10 + minor
-
-        if compute_capability >= required_capability:
+        if major >= REQUIRED_COMPUTE_CAPABILITY:
             continue
         else:
             raise ValueError(
-                f"GPU {i} does not meet the required compute "
-                f"capability {required_capability[0]}.{required_capability[1]}."
+                f"GPU {i} requires compute capability {REQUIRED_COMPUTE_CAPABILITY} "
+                f"or higher but only has {major}.{minor}."
             )
     return True
