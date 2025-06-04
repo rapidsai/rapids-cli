@@ -30,7 +30,6 @@ test = [
 rapids = "rapids_cli.cli:rapids"
 
 [project.entry-points.rapids_doctor_check]
-driver = "rapids_cli.doctor.checks.cuda_driver:check_driver_compatibility"
 gpu = "rapids_cli.doctor.checks.gpu:gpu_check"
 gpu_compute_capability = "rapids_cli.doctor.checks.gpu:check_gpu_compute_capability"
 cuda = "rapids_cli.doctor.checks.cuda_driver:cuda_check"
