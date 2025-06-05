@@ -31,5 +31,8 @@ rapids-print-env
 rapids-logger "Check GPU usage"
 nvidia-smi
 
+rapids-logger "Checking CLI is available"
+rapids --help
+
 rapids-logger "running tests"
 python -m pytest
