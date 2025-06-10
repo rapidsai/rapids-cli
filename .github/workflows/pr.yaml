@@ -11,6 +11,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pr-builder:
+    needs:
+      - checks
+      - conda-python-build
+      - conda-python-tests
+      - wheel-build
+      - wheel-tests
+    secrets: inherit
+    uses: rapidsai/shared-workflows/.github/workflows/pr-builder.yaml@branch-25.08
+    if: always()
+    with:
+      needs: ${{ toJSON(needs) }}
   checks:
     runs-on: ubuntu-latest
     steps:
