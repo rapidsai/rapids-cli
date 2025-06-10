@@ -76,6 +76,8 @@ def sync_entrypoints():
 
     # Write back with ruamel.yaml to preserve comments
     yaml = YAML()
+    yaml.width = 4096  # Disable line wrapping
+    yaml.indent(mapping=2, sequence=4, offset=2)
     with open(RECIPE_PATH, "w") as f:
         yaml.dump(yaml_data, f)
     print(f"Updated {RECIPE_PATH} with missing entry points.")
