@@ -57,6 +57,12 @@ include = [
 # this should match the oldest version of Python the library supports
 target-version = ["py310"]
 
+[tool.codespell]
+# NOTE: pre-commit passes explicit lists of files here, which this skip file list doesn't override.
+#       This is just here for IDEs.
+skip = "./.git,./pyproject.toml,./.ruff_cache"
+quiet-level = 3
+
 [tool.pytest]
 testpaths = ["tests"]
 

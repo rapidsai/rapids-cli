@@ -86,5 +86,5 @@ def check_driver_compatibility(verbose=False):
         raise ValueError(
             "CUDA & Driver is not compatible with RAPIDS. "
             "Please see https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html "
-            "for CUDA compatability guidance."
+            "for CUDA compatibility guidance."
         )

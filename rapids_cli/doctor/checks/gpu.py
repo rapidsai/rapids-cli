@@ -21,7 +21,7 @@ def check_gpu_compute_capability(verbose):
     try:
         pynvml.nvmlInit()
     except pynvml.NVMLError as e:
-        raise ValueError("No GPU - cannot determineg GPU Compute Capability") from e
+        raise ValueError("No GPU - cannot determine GPU Compute Capability") from e
 
     required_capability = 7
     num_gpus = pynvml.nvmlDeviceGetCount()
