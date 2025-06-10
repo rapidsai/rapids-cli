@@ -31,5 +31,11 @@ rapids-print-env
 rapids-logger "Check GPU usage"
 nvidia-smi
 
+rapids-logger "Checking CLI is available and check discovery is working"
+if ! rapids doctor --verbose --dry-run | grep -q "Found check"; then
+  echo "Error: 'Found check' not found in output"
+  exit 1
+fi
+
 rapids-logger "running tests"
 python -m pytest
