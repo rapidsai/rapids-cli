@@ -34,5 +34,6 @@ def check_gpu_compute_capability(verbose):
             raise ValueError(
                 f"GPU {i} requires compute capability {REQUIRED_COMPUTE_CAPABILITY} "
                 f"or higher but only has {major}.{minor}."
+                "See https://developer.nvidia.com/cuda-gpus for more information."
             )
     return True
