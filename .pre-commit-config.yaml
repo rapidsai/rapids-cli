@@ -64,5 +64,15 @@ repos:
     hooks:
         - id: rapids-dependency-file-generator
           args: ["--clean"]
+  - repo: local
+    hooks:
+      - id: check-entrypoints
+        name: Ensure conda entrypoints are in sync with pyproject.toml
+        entry: ci/check_entrypoints.py
+        language: python
+        pass_filenames: false
+        additional_dependencies:
+          - tomli
+          - ruamel.yaml
 default_language_version:
   python: python3
