@@ -25,7 +25,9 @@ class CheckResult:
     warnings: list[warnings.WarningMessage] | None
 
 
-def doctor_check(verbose: bool, filters: list[str] | None = None) -> bool:
+def doctor_check(
+    verbose: bool, dry_run: bool, filters: list[str] | None = None
+) -> bool:
     """Perform a health check for RAPIDS.
 
     This function runs a series of checks based on the provided arguments.
@@ -71,7 +73,11 @@ def doctor_check(verbose: bool, filters: list[str] | None = None) -> bool:
             checks += [ep.load()]
     if verbose:
         console.print(f"Discovered {len(checks)} checks")
+    if not dry_run:
         console.print("Running checks")
+    else:
+        console.print("Dry run, skipping checks")
+        return True
 
     results: list[CheckResult] = []
     with console.status("[bold green]Running checks...") as ui_status:
