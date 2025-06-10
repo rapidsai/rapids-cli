@@ -138,7 +138,7 @@ All checks passed!
 
 ### Check status
 
-If a check function returns successfuly it is assumed the check was successful, regardless of what was returned.
+If a check function returns successfully it is assumed the check was successful, regardless of what was returned.
 
 To fail a test an exception should be raised, ideally with a helpful message that gives the user actionable
 next steps to resolve the problem.
