@@ -31,5 +31,16 @@ rapids-print-env
 rapids-logger "Check GPU usage"
 nvidia-smi
 
+rapids-logger "Checking CLI is available and check discovery is working"
+
+# Sometimes we choose not to explore further.
+# If this is left as a "clean" (non-echo'd) command, the output doesn't get
+# properly grepped
+# shellcheck disable=SC2005
+if ! echo "$(rapids doctor --verbose --dry-run)" | grep -q "Found check"; then
+  echo "Error: 'Found check' not found in output"
+  exit 1
+fi
+
 rapids-logger "running tests"
 python -m pytest
