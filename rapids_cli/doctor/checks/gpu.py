@@ -12,9 +12,10 @@ def gpu_check(verbose=False):
     """Check GPU availability."""
     try:
         pynvml.nvmlInit()
+        num_gpus = pynvml.nvmlDeviceGetCount()
     except pynvml.NVMLError as e:
         raise ValueError("No available GPUs detected") from e
-    num_gpus = pynvml.nvmlDeviceGetCount()
+    assert num_gpus > 0, "No GPUs detected"
     return f"GPU(s) detected: {num_gpus}"
 
 
