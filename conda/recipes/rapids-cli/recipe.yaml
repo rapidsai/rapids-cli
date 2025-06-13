@@ -1,6 +1,4 @@
 # Copyright (c) 2025, NVIDIA CORPORATION.
-{% set pyproject = load_file_data("../../../pyproject.toml", from_recipe_dir=True)  %}
-{% set proj = pyproject.get('project') %}
 schema_version: 1
 
 context:
@@ -26,11 +24,15 @@ build:
       python -m pip install -v .
   python:
     entry_points:
-    {% for module, entrypoints in project.get('entry-points').items() %}
-    {% for name, path in entrypoints.items() %}
-      - {{ name }} = {{ module }}.{{ path }}
-    {% endfor %}
-    {% endfor %}
+      - driver = rapids_doctor_check.rapids_cli.doctor.checks.cuda_driver:check_driver_compatibility
+      - gpu = rapids_doctor_check.rapids_cli.doctor.checks.gpu:gpu_check
+      - gpu_compute_capability = rapids_doctor_check.rapids_cli.doctor.checks.gpu:check_gpu_compute_capability
+      - cuda = rapids_doctor_check.rapids_cli.doctor.checks.cuda_driver:cuda_check
+      - driver_compatibility = rapids_doctor_check.rapids_cli.doctor.checks.cuda_driver:check_driver_compatibility
+      - sdd_nvme = rapids_doctor_check.rapids_cli.doctor.checks.sdd_nvme:check_sdd_nvme
+      - memory_to_gpu_ratio = rapids_doctor_check.rapids_cli.doctor.checks.memory:check_memory_to_gpu_ratio
+      - nvlink_status = rapids_doctor_check.rapids_cli.doctor.checks.nvlink:check_nvlink_status
+      - os = rapids_doctor_check.rapids_cli.doctor.checks.os:detect_os
 
 requirements:
   host:
