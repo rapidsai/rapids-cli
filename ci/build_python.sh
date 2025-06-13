@@ -7,6 +7,7 @@ source rapids-date-string
 
 rapids-print-env
 
+pip install hatch
 RAPIDS_PACKAGE_VERSION=$(hatch version)
 export RAPIDS_PACKAGE_VERSION
 
