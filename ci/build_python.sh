@@ -7,7 +7,7 @@ source rapids-date-string
 
 rapids-print-env
 
-RAPIDS_PACKAGE_VERSION=$(head -1 ./VERSION)
+RAPIDS_PACKAGE_VERSION=$(hatch version)
 export RAPIDS_PACKAGE_VERSION
 
 # populates `RATTLER_CHANNELS` array and `RATTLER_ARGS` array
