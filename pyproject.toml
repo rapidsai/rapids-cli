@@ -35,10 +35,8 @@ gpu = "rapids_cli.doctor.checks.gpu:gpu_check"
 gpu_compute_capability = "rapids_cli.doctor.checks.gpu:check_gpu_compute_capability"
 cuda = "rapids_cli.doctor.checks.cuda_driver:cuda_check"
 driver_compatibility = "rapids_cli.doctor.checks.cuda_driver:check_driver_compatibility"
-sdd_nvme = "rapids_cli.doctor.checks.sdd_nvme:check_sdd_nvme"
 memory_to_gpu_ratio = "rapids_cli.doctor.checks.memory:check_memory_to_gpu_ratio"
 nvlink_status = "rapids_cli.doctor.checks.nvlink:check_nvlink_status"
-os = "rapids_cli.doctor.checks.os:detect_os"
 
 [project.urls]
 Homepage = "https://github.com/rapidsai/rapids-cli"
