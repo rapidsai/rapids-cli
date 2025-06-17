@@ -23,15 +23,11 @@ test = [
 rapids = "rapids_cli.cli:rapids"
 
 [project.entry-points.rapids_doctor_check]
-driver = "rapids_cli.doctor.checks.cuda_driver:check_driver_compatibility"
 gpu = "rapids_cli.doctor.checks.gpu:gpu_check"
 gpu_compute_capability = "rapids_cli.doctor.checks.gpu:check_gpu_compute_capability"
 cuda = "rapids_cli.doctor.checks.cuda_driver:cuda_check"
-driver_compatibility = "rapids_cli.doctor.checks.cuda_driver:check_driver_compatibility"
-sdd_nvme = "rapids_cli.doctor.checks.sdd_nvme:check_sdd_nvme"
 memory_to_gpu_ratio = "rapids_cli.doctor.checks.memory:check_memory_to_gpu_ratio"
 nvlink_status = "rapids_cli.doctor.checks.nvlink:check_nvlink_status"
-os = "rapids_cli.doctor.checks.os:detect_os"
 
 [project.urls]
 Homepage = "https://github.com/rapidsai/rapids-cli"
@@ -56,6 +52,12 @@ include = [
 [tool.black]
 # this should match the oldest version of Python the library supports
 target-version = ["py310"]
+
+[tool.codespell]
+# NOTE: pre-commit passes explicit lists of files here, which this skip file list doesn't override.
+#       This is just here for IDEs.
+skip = "./.git,./pyproject.toml,./.ruff_cache"
+quiet-level = 3
 
 [tool.pytest]
 testpaths = ["tests"]
