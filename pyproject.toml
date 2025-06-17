@@ -30,11 +30,9 @@ test = [
 rapids = "rapids_cli.cli:rapids"
 
 [project.entry-points.rapids_doctor_check]
-driver = "rapids_cli.doctor.checks.cuda_driver:check_driver_compatibility"
 gpu = "rapids_cli.doctor.checks.gpu:gpu_check"
 gpu_compute_capability = "rapids_cli.doctor.checks.gpu:check_gpu_compute_capability"
 cuda = "rapids_cli.doctor.checks.cuda_driver:cuda_check"
-driver_compatibility = "rapids_cli.doctor.checks.cuda_driver:check_driver_compatibility"
 memory_to_gpu_ratio = "rapids_cli.doctor.checks.memory:check_memory_to_gpu_ratio"
 nvlink_status = "rapids_cli.doctor.checks.nvlink:check_nvlink_status"
 
