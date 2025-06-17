@@ -27,7 +27,8 @@ requirements:
   host:
     - python
     - pip
-    - setuptools >=77.0.0
+    - hatchling
+    - hatch-vcs
   run:
     - python
     - importlib-metadata >=4.13.0
