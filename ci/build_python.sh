@@ -7,7 +7,9 @@ source rapids-date-string
 
 rapids-print-env
 
-pip install hatch
+rapids-mamba-retry install \
+  --yes \
+  'hatch'
 RAPIDS_PACKAGE_VERSION=$(hatch version)
 export RAPIDS_PACKAGE_VERSION
 
