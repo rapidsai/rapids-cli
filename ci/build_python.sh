@@ -10,7 +10,7 @@ rapids-print-env
 rapids-mamba-retry install \
   --yes \
   'hatchling' 'hatch-vcs'
-RAPIDS_PACKAGE_VERSION=$(python -m hatchling version)
+RAPIDS_PACKAGE_VERSION=$(hatchling version)
 export RAPIDS_PACKAGE_VERSION
 
 # populates `RATTLER_CHANNELS` array and `RATTLER_ARGS` array
