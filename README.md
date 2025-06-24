@@ -36,8 +36,8 @@ All checks passed!
 
 ```bash
 # Install and activate a RAPIDS environment E.g
-conda create -y -n rapids-24.12 -c rapidsai -c conda-forge -c nvidia rapids=24.12 python=3.12 'cuda-version>=12.0,<=12.5'
-conda activate rapids-24.12
+conda create -y -n rapids-25.06 -c rapidsai -c conda-forge rapids=25.06 python=3.13 'cuda-version>=12.0,<=12.8'
+conda activate rapids-25.06
 
 # Install the RAPIDS CLI
 git clone git@github.com:rapidsai/rapids-cli.git
