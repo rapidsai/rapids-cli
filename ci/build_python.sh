@@ -7,7 +7,10 @@ source rapids-date-string
 
 rapids-print-env
 
-RAPIDS_PACKAGE_VERSION=$(head -1 ./VERSION)
+rapids-mamba-retry install \
+  --yes \
+  'hatchling' 'hatch-vcs'
+RAPIDS_PACKAGE_VERSION=$(hatchling version)
 export RAPIDS_PACKAGE_VERSION
 
 # populates `RATTLER_CHANNELS` array and `RATTLER_ARGS` array
