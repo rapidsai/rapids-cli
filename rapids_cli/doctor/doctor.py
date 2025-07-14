@@ -84,13 +84,13 @@ def doctor_check(
         for i, check_fn in enumerate(checks):
             error = None
             caught_warnings = None
-            ui_status.update(f"Running [{i}/{len(checks)}] {check_fn.__name__}")
+            ui_status.update(f"Running [{i+1}/{len(checks)}] {check_fn.__name__}")
 
             try:
                 with warnings.catch_warnings(record=True) as w:
                     warnings.simplefilter("always")
                     status = True
-                    check_fn(verbose=verbose)
+                    value = check_fn(verbose=verbose)
                     caught_warnings = w
 
             except Exception as e:
@@ -102,7 +102,7 @@ def doctor_check(
                     name=check_fn.__name__,
                     description=check_fn.__doc__.strip().split("\n")[0],
                     status=bool(status),
-                    value=status if isinstance(status, str) else None,
+                    value=value if isinstance(value, str) else None,
                     error=error,
                     warnings=caught_warnings,
                 )
@@ -113,6 +113,12 @@ def doctor_check(
         if result.warnings:
             for warning in result.warnings:
                 console.print(f"[bold yellow]Warning[/bold yellow]: {warning.message}")
+
+    # Print verbose output for successful checks
+    if verbose:
+        for result in results:
+            if result.status and result.value:
+                console.print(f"[bold blue]{result.name}[/bold blue]: {result.value}")
 
     if all(result.status for result in results):
         console.print("[bold green]All checks passed![/bold green]")
