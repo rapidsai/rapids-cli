@@ -5,4 +5,4 @@
 
 from .benchmark import benchmark_run
 
-__all__ = ["benchmark_run"] 
+__all__ = ["benchmark_run"]

@@ -59,5 +59,6 @@ def benchmark(verbose, dry_run, runs, filters):
     if not status:
         raise click.ClickException("Some benchmarks failed.")
 
+
 if __name__ == "__main__":
     rapids()

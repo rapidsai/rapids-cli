@@ -9,7 +9,7 @@ import warnings
 from dataclasses import dataclass
 
 from rich.console import Console
-from rich.progress import Progress, BarColumn, TextColumn, TimeElapsedColumn
+from rich.progress import BarColumn, Progress, TextColumn, TimeElapsedColumn
 from rich.table import Table
 
 from rapids_cli._compatibility import entry_points
@@ -103,7 +103,7 @@ def benchmark_run(
     benchmarks = []
     if verbose:
         console.print("Discovering benchmarks")
-    
+
     for ep in entry_points(group="rapids_benchmark"):
         with contextlib.suppress(AttributeError, ImportError):
             if verbose:
@@ -111,10 +111,10 @@ def benchmark_run(
             if filters and not any(f in ep.value for f in filters):
                 continue
             benchmarks += [ep.load()]
-    
+
     if verbose:
         console.print(f"Discovered {len(benchmarks)} benchmarks")
-    
+
     if not dry_run:
         console.print(f"Running benchmarks ({runs} runs each)")
     else:
@@ -122,11 +122,13 @@ def benchmark_run(
         return True
 
     if not benchmarks:
-        console.print("[yellow]No benchmarks found. Install RAPIDS libraries to enable benchmarks.[/yellow]")
+        console.print(
+            "[yellow]No benchmarks found. Install RAPIDS libraries to enable benchmarks.[/yellow]"
+        )
         return True
 
     results: list[BenchmarkResult] = []
-    
+
     with Progress(
         TextColumn("[bold blue]{task.fields[benchmark_name]}"),
         BarColumn(bar_width=40),
@@ -135,62 +137,76 @@ def benchmark_run(
         console=console,
         expand=False,
     ) as progress:
-        
+
         for i, benchmark_fn in enumerate(benchmarks):
             error = None
             caught_warnings = None
             all_cpu_times = []
             all_gpu_times = []
-            
+
             task_id = progress.add_task(
                 f"[{i+1}/{len(benchmarks)}]",
                 total=runs,
                 benchmark_name=f"[{i+1}/{len(benchmarks)}] {benchmark_fn.__name__}",
-                completed=0
+                completed=0,
             )
 
             try:
                 for run in range(runs):
                     with warnings.catch_warnings(record=True) as w:
                         warnings.simplefilter("always")
-                        
+
                         result = benchmark_fn(verbose=verbose)
                         if isinstance(result, tuple) and len(result) == 2:
                             cpu_time, gpu_time = result
                             if cpu_time and gpu_time and cpu_time > 0 and gpu_time > 0:
                                 all_cpu_times.append(cpu_time)
                                 all_gpu_times.append(gpu_time)
-                        
+
                         if run == 0:
                             caught_warnings = w
-                    
+
                     progress.update(task_id, completed=run + 1)
-                
+
                 if all_cpu_times and all_gpu_times:
                     avg_cpu_time = sum(all_cpu_times) / len(all_cpu_times)
                     avg_gpu_time = sum(all_gpu_times) / len(all_gpu_times)
                     speedup = avg_cpu_time / avg_gpu_time
-                    
+
                     # Calculate standard deviations (only if we have multiple runs)
-                    cpu_std = statistics.stdev(all_cpu_times) if len(all_cpu_times) > 1 else 0.0
-                    gpu_std = statistics.stdev(all_gpu_times) if len(all_gpu_times) > 1 else 0.0
-                    
+                    cpu_std = (
+                        statistics.stdev(all_cpu_times)
+                        if len(all_cpu_times) > 1
+                        else 0.0
+                    )
+                    gpu_std = (
+                        statistics.stdev(all_gpu_times)
+                        if len(all_gpu_times) > 1
+                        else 0.0
+                    )
+
                     status = True
-                    
+
                     # Remove progress task and show completion summary with variance
                     progress.remove_task(task_id)
-                    console.print(f"[green]✓[/green] [{i+1}/{len(benchmarks)}] {benchmark_fn.__name__}")
-                    
+                    console.print(
+                        f"[green]✓[/green] [{i+1}/{len(benchmarks)}] {benchmark_fn.__name__}"
+                    )
+
                     # Show timing details with standard deviation
                     if runs > 1:
-                        console.print(f"  CPU Time: [red]{avg_cpu_time:.3f}s ± {cpu_std:.3f}s[/red]  "
-                                    f"GPU Time: [green]{avg_gpu_time:.3f}s ± {gpu_std:.3f}s[/green]  "
-                                    f"Speedup: [bold green]{speedup:.1f}x[/bold green]")
+                        console.print(
+                            f"  CPU Time: [red]{avg_cpu_time:.3f}s ± {cpu_std:.3f}s[/red]  "
+                            f"GPU Time: [green]{avg_gpu_time:.3f}s ± {gpu_std:.3f}s[/green]  "
+                            f"Speedup: [bold green]{speedup:.1f}x[/bold green]"
+                        )
                     else:
-                        console.print(f"  CPU Time: [red]{avg_cpu_time:.3f}s[/red]  "
-                                    f"GPU Time: [green]{avg_gpu_time:.3f}s[/green]  "
-                                    f"Speedup: [bold green]{speedup:.1f}x[/bold green]")
-                    
+                        console.print(
+                            f"  CPU Time: [red]{avg_cpu_time:.3f}s[/red]  "
+                            f"GPU Time: [green]{avg_gpu_time:.3f}s[/green]  "
+                            f"Speedup: [bold green]{speedup:.1f}x[/bold green]"
+                        )
+
                 else:
                     avg_cpu_time = None
                     avg_gpu_time = None
@@ -198,10 +214,13 @@ def benchmark_run(
                     gpu_std = None
                     speedup = None
                     status = False
-                    
+
                     # Remove progress and show failure
                     progress.remove_task(task_id)
-                    console.print(f"[red]❌[/red] [{i+1}/{len(benchmarks)}] {benchmark_fn.__name__} - [bold red]Failed[/bold red]")
+                    console.print(
+                        f"[red]❌[/red] [{i+1}/{len(benchmarks)}] {benchmark_fn.__name__} - "
+                        f"[bold red]Failed[/bold red]"
+                    )
 
             except Exception as e:
                 error = e
@@ -211,15 +230,22 @@ def benchmark_run(
                 cpu_std = None
                 gpu_std = None
                 speedup = None
-                
+
                 # Remove progress and show failure
                 progress.remove_task(task_id)
-                console.print(f"[red]❌[/red] [{i+1}/{len(benchmarks)}] {benchmark_fn.__name__} - [bold red]Error: {str(e)}[/bold red]")
+                console.print(
+                    f"[red]❌[/red] [{i+1}/{len(benchmarks)}] {benchmark_fn.__name__} - "
+                    f"[bold red]Error: {str(e)}[/bold red]"
+                )
 
             results.append(
                 BenchmarkResult(
                     name=benchmark_fn.__name__,
-                    description=benchmark_fn.__doc__.strip().split("\n")[0] if benchmark_fn.__doc__ else "No description",
+                    description=(
+                        benchmark_fn.__doc__.strip().split("\n")[0]
+                        if benchmark_fn.__doc__
+                        else "No description"
+                    ),
                     status=status,
                     cpu_time=avg_cpu_time,
                     gpu_time=avg_gpu_time,
@@ -253,19 +279,21 @@ def benchmark_run(
                 except Exception:
                     console.print_exception()
         return False
-    
+
     return True
 
 
 def _display_benchmark_results(results: list[BenchmarkResult], verbose: bool) -> None:
     """Display benchmark results in a formatted table."""
     successful_results = [r for r in results if r.status and r.speedup is not None]
-    
+
     if not successful_results:
         console.print("[yellow]No successful benchmarks to display.[/yellow]")
         return
 
-    table = Table(title=f"{SPEEDUP_SYMBOL} CPU vs GPU Performance Comparison", show_header=True)
+    table = Table(
+        title=f"{SPEEDUP_SYMBOL} CPU vs GPU Performance Comparison", show_header=True
+    )
     table.add_column("Benchmark", style="cyan", width=20)
     table.add_column("Description", style="white", width=30)
     table.add_column("CPU Time (mean ± σ)", style="red", justify="right")
@@ -276,14 +304,14 @@ def _display_benchmark_results(results: list[BenchmarkResult], verbose: bool) ->
         cpu_time_str = result.cpu_time_display
         gpu_time_str = result.gpu_time_display
         speedup_str = result.speedup_display
-        
+
         if result.speedup and result.speedup > 1:
             speedup_style = "bold green"
         elif result.speedup and result.speedup < 1:
             speedup_style = "bold red"
         else:
             speedup_style = "yellow"
-        
+
         table.add_row(
             result.name,
             result.description,
