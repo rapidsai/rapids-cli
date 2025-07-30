@@ -29,6 +29,9 @@ cuda = "rapids_cli.doctor.checks.cuda_driver:cuda_check"
 memory_to_gpu_ratio = "rapids_cli.doctor.checks.memory:check_memory_to_gpu_ratio"
 nvlink_status = "rapids_cli.doctor.checks.nvlink:check_nvlink_status"
 
+[project.entry-points.rapids_benchmark]
+dataframe_joins = "rapids_cli.benchmark.benchmarks.dataframe_operations:dataframe_join_operations"
+
 [project.urls]
 Homepage = "https://github.com/rapidsai/rapids-cli"
 Source = "https://github.com/rapidsai/rapids-cli"
