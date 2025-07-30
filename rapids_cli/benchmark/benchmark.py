@@ -9,7 +9,7 @@ import warnings
 from dataclasses import dataclass
 
 from rich.console import Console
-from rich.progress import Progress, BarColumn, TextColumn, TimeRemainingColumn, TimeElapsedColumn
+from rich.progress import Progress, BarColumn, TextColumn, TimeElapsedColumn
 from rich.table import Table
 
 from rapids_cli._compatibility import entry_points
@@ -127,26 +127,21 @@ def benchmark_run(
 
     results: list[BenchmarkResult] = []
     
-    # Create progress bar with custom columns for the active benchmark only
     with Progress(
         TextColumn("[bold blue]{task.fields[benchmark_name]}"),
         BarColumn(bar_width=40),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
         TextColumn("{task.completed}/{task.total}"),
         TimeElapsedColumn(),
-        TimeRemainingColumn(),
         console=console,
         expand=False,
     ) as progress:
         
-        # Run each benchmark
         for i, benchmark_fn in enumerate(benchmarks):
             error = None
             caught_warnings = None
             all_cpu_times = []
             all_gpu_times = []
             
-            # Create progress task for current benchmark only
             task_id = progress.add_task(
                 f"[{i+1}/{len(benchmarks)}]",
                 total=runs,
@@ -155,12 +150,10 @@ def benchmark_run(
             )
 
             try:
-                # Run the benchmark multiple times
                 for run in range(runs):
                     with warnings.catch_warnings(record=True) as w:
                         warnings.simplefilter("always")
                         
-                        # Run the benchmark function once
                         result = benchmark_fn(verbose=verbose)
                         if isinstance(result, tuple) and len(result) == 2:
                             cpu_time, gpu_time = result
@@ -168,14 +161,11 @@ def benchmark_run(
                                 all_cpu_times.append(cpu_time)
                                 all_gpu_times.append(gpu_time)
                         
-                        # Collect warnings from first run only to avoid spam
                         if run == 0:
                             caught_warnings = w
                     
-                    # Update progress bar (Rich auto-calculates time remaining)
                     progress.update(task_id, completed=run + 1)
                 
-                # Compute averages and standard deviations
                 if all_cpu_times and all_gpu_times:
                     avg_cpu_time = sum(all_cpu_times) / len(all_cpu_times)
                     avg_gpu_time = sum(all_gpu_times) / len(all_gpu_times)
@@ -247,7 +237,7 @@ def benchmark_run(
             for warning in result.warnings:
                 console.print(f"[bold yellow]Warning[/bold yellow]: {warning.message}")
 
-    # Display results in a nice table
+    # Display results in a table
     if any(result.status for result in results):
         _display_benchmark_results(results, verbose)
 
@@ -275,7 +265,6 @@ def _display_benchmark_results(results: list[BenchmarkResult], verbose: bool) ->
         console.print("[yellow]No successful benchmarks to display.[/yellow]")
         return
 
-    # Create a rich table
     table = Table(title=f"{SPEEDUP_SYMBOL} CPU vs GPU Performance Comparison", show_header=True)
     table.add_column("Benchmark", style="cyan", width=20)
     table.add_column("Description", style="white", width=30)
@@ -288,7 +277,6 @@ def _display_benchmark_results(results: list[BenchmarkResult], verbose: bool) ->
         gpu_time_str = result.gpu_time_display
         speedup_str = result.speedup_display
         
-        # Color code the speedup
         if result.speedup and result.speedup > 1:
             speedup_style = "bold green"
         elif result.speedup and result.speedup < 1:

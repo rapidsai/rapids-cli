@@ -107,7 +107,7 @@ def _dataframe_join_operations_gpu(left_data, right_data, verbose=False):
         print("Running cuDF (GPU) implementation...")
         print("Transferring data to GPU (not timed)...")
     
-    # Data transfer to GPU (NOT TIMED for fair comparison)
+    # Data transfer to GPU (NOT TIMED)
     left_df_gpu = cudf.DataFrame(left_data)
     right_df_gpu = cudf.DataFrame(right_data)
     
@@ -136,7 +136,6 @@ def _dataframe_join_operations_gpu(left_data, right_data, verbose=False):
     
     # Process left join
     left_join_gpu['has_profile'] = left_join_gpu['age'].notna()
-    # cuDF doesn't have pd.cut, so use simple binning
     left_join_gpu['amount_bucket'] = (left_join_gpu['amount'] // 200).astype(int)
     
     # Aggregations on left join
@@ -175,10 +174,10 @@ def dataframe_join_operations(verbose: bool = False) -> tuple[float, float]:
     if verbose:
         print(f"Created join test data: {len(left_data['customer_id']):,} x {len(right_data['customer_id']):,} rows")
     
-    # Run CPU implementation (handles its own timing)
+    # Run CPU implementation
     cpu_time = _dataframe_join_operations_cpu(left_data, right_data, verbose)
     
-    # Run GPU implementation (handles its own timing, excludes data transfer)
+    # Run GPU implementation
     gpu_time = _dataframe_join_operations_gpu(left_data, right_data, verbose)
     
     if verbose:
