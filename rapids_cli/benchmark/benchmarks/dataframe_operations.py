@@ -219,7 +219,7 @@ def _dataframe_join_operations_gpu(left_data, right_data, verbose=False):
     return gpu_time
 
 
-def dataframe_join_operations(verbose: bool = False) -> tuple[float, float]:
+def dataframe_join_operations(verbose: bool = False, **kwargs) -> tuple[float, float]:
     """Benchmark DataFrame join and merge operations with aggregations."""
     # Prepare data once
     left_data, right_data = _prepare_join_data()
