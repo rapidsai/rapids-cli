@@ -102,11 +102,12 @@ def benchmark_run(
     
     # Handle dry run
     if dry_run:
-        _render_dry_run()
+        console.print(f"[bold green]{BENCHMARK_SYMBOL} Running RAPIDS CPU vs GPU benchmarks [/bold green]")
+        console.print("Dry run, skipping benchmarks")
         return True
 
     if not benchmarks:
-        _render_no_benchmarks()
+        console.print("[yellow]No benchmarks found. Install RAPIDS libraries to enable benchmarks.[/yellow]")
         return True
 
     # Execute benchmarks and collect results
@@ -318,12 +319,3 @@ def _display_benchmark_results(results: list[BenchmarkResult], verbose: bool) ->
 
     console.print()
     console.print(table)
-
-def _render_dry_run():
-    """Render dry run output."""
-    console.print(f"[bold green]{BENCHMARK_SYMBOL} Running RAPIDS CPU vs GPU benchmarks [/bold green]")
-    console.print("Dry run, skipping benchmarks")
-
-def _render_no_benchmarks():
-    """Render output when no benchmarks are found."""
-    console.print("[yellow]No benchmarks found. Install RAPIDS libraries to enable benchmarks.[/yellow]")
