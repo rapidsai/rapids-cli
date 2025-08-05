@@ -99,23 +99,27 @@ def benchmark_run(
 
     # Discover benchmarks
     benchmarks = _discover_benchmarks(filters, verbose)
-    
+
     # Handle dry run
     if dry_run:
-        console.print(f"[bold green]{BENCHMARK_SYMBOL} Running RAPIDS CPU vs GPU benchmarks [/bold green]")
+        console.print(
+            f"[bold green]{BENCHMARK_SYMBOL} Running RAPIDS CPU vs GPU benchmarks [/bold green]"
+        )
         console.print("Dry run, skipping benchmarks")
         return True
 
     if not benchmarks:
-        console.print("[yellow]No benchmarks found. Install RAPIDS libraries to enable benchmarks.[/yellow]")
+        console.print(
+            "[yellow]No benchmarks found. Install RAPIDS libraries to enable benchmarks.[/yellow]"
+        )
         return True
 
     # Execute benchmarks and collect results
     results = _execute_benchmarks(benchmarks, runs, verbose)
-    
+
     # Render results
     _render_results_rich(results, verbose)
-    
+
     # Return overall success
     return all(result.status for result in results)
 
@@ -123,7 +127,7 @@ def benchmark_run(
 def _discover_benchmarks(filters: list[str], verbose: bool) -> list:
     """Discover available benchmark functions."""
     benchmarks = []
-    
+
     if verbose:
         console.print("Discovering benchmarks")
 
@@ -137,15 +141,19 @@ def _discover_benchmarks(filters: list[str], verbose: bool) -> list:
 
     if verbose:
         console.print(f"Discovered {len(benchmarks)} benchmarks")
-    
+
     return benchmarks
 
 
-def _execute_benchmarks(benchmarks: list, runs: int, verbose: bool) -> list[BenchmarkResult]:
+def _execute_benchmarks(
+    benchmarks: list, runs: int, verbose: bool
+) -> list[BenchmarkResult]:
     """Execute all benchmarks and collect results."""
-    console.print(f"[bold green]{BENCHMARK_SYMBOL} Running RAPIDS CPU vs GPU benchmarks [/bold green]")
+    console.print(
+        f"[bold green]{BENCHMARK_SYMBOL} Running RAPIDS CPU vs GPU benchmarks [/bold green]"
+    )
     console.print(f"Running benchmarks ({runs} runs each)")
-    
+
     results: list[BenchmarkResult] = []
 
     with Progress(
@@ -169,6 +177,8 @@ def _execute_benchmarks(benchmarks: list, runs: int, verbose: bool) -> list[Benc
             all_gpu_times = []
             caught_warnings = None
             error = None
+            avg_cpu_time = avg_gpu_time = speedup = cpu_std = gpu_std = None
+            status = False
 
             try:
                 for run in range(runs):
@@ -192,17 +202,21 @@ def _execute_benchmarks(benchmarks: list, runs: int, verbose: bool) -> list[Benc
                     avg_cpu_time = sum(all_cpu_times) / len(all_cpu_times)
                     avg_gpu_time = sum(all_gpu_times) / len(all_gpu_times)
                     speedup = avg_cpu_time / avg_gpu_time
-                    cpu_std = statistics.stdev(all_cpu_times) if len(all_cpu_times) > 1 else 0.0
-                    gpu_std = statistics.stdev(all_gpu_times) if len(all_gpu_times) > 1 else 0.0
+                    cpu_std = (
+                        statistics.stdev(all_cpu_times)
+                        if len(all_cpu_times) > 1
+                        else 0.0
+                    )
+                    gpu_std = (
+                        statistics.stdev(all_gpu_times)
+                        if len(all_gpu_times) > 1
+                        else 0.0
+                    )
                     status = True
-                else:
-                    avg_cpu_time = avg_gpu_time = speedup = cpu_std = gpu_std = None
-                    status = False
 
             except Exception as e:
                 error = e
                 status = False
-                avg_cpu_time = avg_gpu_time = speedup = cpu_std = gpu_std = None
 
             # Create result
             result = BenchmarkResult(
@@ -232,7 +246,9 @@ def _execute_benchmarks(benchmarks: list, runs: int, verbose: bool) -> list[Benc
     return results
 
 
-def _render_benchmark_completion(result: BenchmarkResult, index: int, total: int, runs: int):
+def _render_benchmark_completion(
+    result: BenchmarkResult, index: int, total: int, runs: int
+):
     """Render completion of a single benchmark."""
     if result.status:
         console.print(f"[green]✓[/green] [{index}/{total}] {result.name}")
@@ -240,19 +256,21 @@ def _render_benchmark_completion(result: BenchmarkResult, index: int, total: int
         # Show timing details
         cpu_display = f"{result.cpu_time:.3f}s"
         gpu_display = f"{result.gpu_time:.3f}s"
-        
+
         if runs > 1:
             cpu_display += f" ± {result.cpu_std:.3f}s"
             gpu_display += f" ± {result.gpu_std:.3f}s"
-        
+
         console.print(
             f"  CPU Time: [red]{cpu_display}[/red]  "
             f"GPU Time: [green]{gpu_display}[/green]  "
             f"Speedup: [bold green]{result.speedup:.1f}x[/bold green]"
         )
     else:
-        console.print(f"[red]❌[/red] [{index}/{total}] {result.name} - "
-                     f"[bold red]Failed[/bold red]")
+        console.print(
+            f"[red]❌[/red] [{index}/{total}] {result.name} - "
+            f"[bold red]Failed[/bold red]"
+        )
 
 
 def _render_results_rich(results: list[BenchmarkResult], verbose: bool):
