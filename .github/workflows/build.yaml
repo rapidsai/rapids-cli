@@ -46,3 +46,4 @@ jobs:
       build_type: branch
       package-name: rapids-cli
       package-type: python
+      publish_to_pypi: true
