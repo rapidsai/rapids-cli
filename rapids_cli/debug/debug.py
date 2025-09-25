@@ -9,6 +9,7 @@ import subprocess
 import sys
 from datetime import datetime
 from importlib.metadata import distributions, version
+from pathlib import Path
 
 import pynvml
 from rich.console import Console
@@ -84,6 +85,11 @@ def gather_conda_packages():
         return "Conda not installed"
 
 
+def gather_system_ctk():
+    """Return system ctk."""
+    return sorted([str(p) for p in Path("/usr/local").glob("cuda*") if p.is_dir()])
+
+
 def gather_package_managers():
     """Return package managers."""
     return {
@@ -102,6 +108,7 @@ def run_debug(output_format="console"):
         "nvidia_smi_output": gather_nvidia_smi_output(),
         "driver_version": gather_driver_version(),
         "cuda_version": gather_cuda_version(),
+        "system_ctk": gather_system_ctk(),
         "python_version_full": gather_python_version_full(),
         "python_version": gather_python_version(),
         "package_versions": gather_package_versions(),
