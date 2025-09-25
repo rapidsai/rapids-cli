@@ -4,12 +4,11 @@
 """The Rapids CLI is a command-line interface for RAPIDS."""
 
 import rich_click as click
-from rich.console import Console
 from rich.traceback import install
 
+from rapids_cli.debug import run_debug
 from rapids_cli.doctor import doctor_check
 
-console = Console()
 install(show_locals=True)
 
 
@@ -34,6 +33,13 @@ def doctor(verbose, dry_run, filters):
     status = doctor_check(verbose, dry_run, filters)
     if not status:
         raise click.ClickException("Health checks failed.")
+
+
+@rapids.command()
+@click.option("--json", is_flag=True, help="Enable JSON mode for detailed output.")
+def debug(json):
+    """Gather debugging information for RAPIDS."""
+    run_debug(output_format="json" if json else "console")
 
 
 if __name__ == "__main__":
