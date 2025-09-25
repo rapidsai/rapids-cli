@@ -6,6 +6,7 @@ import json
 import shutil
 import subprocess
 import sys
+from importlib.metadata import distributions, version
 
 import pynvml
 from rich.console import Console
@@ -62,6 +63,19 @@ def gather_python_version():
     return f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
 
 
+def gather_package_versions():
+    """Return package version."""
+    installed_packages = sorted(
+        distributions(), key=lambda pkg: pkg.metadata["Name"].lower()
+    )
+    package_versions = {}
+    for package in installed_packages:
+        package_name = package.metadata["Name"]
+        package_version = version(package_name)
+        package_versions[package_name] = package_version
+    return package_versions
+
+
 def gather_conda_packages():
     """Return conda packages."""
     try:
@@ -88,6 +102,7 @@ def run_debug(output_format="console"):
         "cuda_version": gather_cuda_version(),
         "python_version_full": gather_python_version_full(),
         "python_version": gather_python_version(),
+        "package_versions": gather_package_versions(),
         "pip_packages": gather_pip_packages(),
         "conda_packages": gather_conda_packages(),
         "package_managers": gather_package_managers(),
