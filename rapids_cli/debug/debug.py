@@ -3,9 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 """This module contains the debug subcommand for the Rapids CLI."""
 import json
+import platform
 import shutil
 import subprocess
 import sys
+from datetime import datetime
 from importlib.metadata import distributions, version
 
 import pynvml
@@ -20,9 +22,7 @@ pynvml.nvmlInit()
 def gather_nvidia_smi_output():
     """Gather NVIDIA-SMI output."""
     try:
-        return subprocess.run(
-            ["nvsdazsdidia-smi"], capture_output=True, text=True
-        ).stdout
+        return subprocess.run(["nvidia-smi"], capture_output=True, text=True).stdout
     except FileNotFoundError:
         return "Nvidia-smi not installed"
 
@@ -97,6 +97,8 @@ def gather_package_managers():
 def run_debug(output_format="console"):
     """Run debug."""
     debug_info = {
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "platform": platform.platform(),
         "nvidia_smi_output": gather_nvidia_smi_output(),
         "driver_version": gather_driver_version(),
         "cuda_version": gather_cuda_version(),
