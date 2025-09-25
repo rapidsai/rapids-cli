@@ -11,6 +11,7 @@ from datetime import datetime
 from importlib.metadata import distributions, version
 from pathlib import Path
 
+import cuda.pathfinder
 import pynvml
 from rich.console import Console
 from rich.table import Table
@@ -108,6 +109,7 @@ def run_debug(output_format="console"):
         "nvidia_smi_output": gather_nvidia_smi_output(),
         "driver_version": gather_driver_version(),
         "cuda_version": gather_cuda_version(),
+        "cuda_runtime_path": cuda.pathfinder.find_nvidia_header_directory("cudart"),
         "system_ctk": gather_system_ctk(),
         "python_version_full": gather_python_version_full(),
         "python_version": gather_python_version(),
