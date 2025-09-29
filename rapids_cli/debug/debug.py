@@ -4,7 +4,6 @@
 """This module contains the debug subcommand for the Rapids CLI."""
 import json
 import platform
-import shutil
 import subprocess
 import sys
 from datetime import datetime
@@ -21,14 +20,6 @@ console = Console()
 pynvml.nvmlInit()
 
 
-def gather_nvidia_smi_output():
-    """Gather NVIDIA-SMI output."""
-    try:
-        return subprocess.run(["nvidia-smi"], capture_output=True, text=True).stdout
-    except FileNotFoundError:
-        return "Nvidia-smi not installed"
-
-
 def gather_cuda_version():
     """Return CUDA driver version as a string, similar to nvidia-smi output."""
     version = pynvml.nvmlSystemGetCudaDriverVersion()
@@ -40,29 +31,6 @@ def gather_cuda_version():
         return f"{major}.{minor}"
     else:
         return f"{major}.{minor}.{patch}"
-
-
-def gather_driver_version():
-    """Return CUDA driver version as a string, similar to nvidia-smi output."""
-    return pynvml.nvmlSystemGetDriverVersion()
-
-
-def gather_pip_packages():
-    """Return pip packages."""
-    try:
-        return subprocess.check_output(["pip", "freeze"], text=True)
-    except FileNotFoundError:
-        return "Pip not installed"
-
-
-def gather_python_version_full():
-    """Return full Python version."""
-    return sys.version
-
-
-def gather_python_version():
-    """Return Python version."""
-    return f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
 
 
 def gather_package_versions():
@@ -78,26 +46,26 @@ def gather_package_versions():
     return package_versions
 
 
-def gather_conda_packages():
-    """Return conda packages."""
+def gather_command_output(
+    command: list[str], fallback_output: str | None = None
+) -> str | None:
+    """Return command output."""
     try:
-        return subprocess.check_output(["conda", "list"], text=True)
+        return subprocess.check_output(command, text=True).strip()
     except FileNotFoundError:
-        return "Conda not installed"
+        return fallback_output
 
 
-def gather_system_ctk():
-    """Return system ctk."""
-    return sorted([str(p) for p in Path("/usr/local").glob("cuda*") if p.is_dir()])
-
-
-def gather_package_managers():
-    """Return package managers."""
+def gather_tools():
+    """Return tools."""
     return {
-        "pip": shutil.which("pip") is not None,
-        "conda": shutil.which("conda") is not None,
-        "uv": shutil.which("uv") is not None,
-        "pixi": shutil.which("pixi") is not None,
+        "pip": gather_command_output(["pip", "--version"]),
+        "conda": gather_command_output(["conda", "--version"]),
+        "uv": gather_command_output(["uv", "--version"]),
+        "pixi": gather_command_output(["pixi", "--version"]),
+        "g++": gather_command_output(["g++", "--version"]),
+        "cmake": gather_command_output(["cmake", "--version"]),
+        "nvcc": gather_command_output(["nvcc", "--version"]),
     }
 
 
@@ -106,17 +74,28 @@ def run_debug(output_format="console"):
     debug_info = {
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "platform": platform.platform(),
-        "nvidia_smi_output": gather_nvidia_smi_output(),
-        "driver_version": gather_driver_version(),
+        "nvidia_smi_output": gather_command_output(
+            ["nvidia-smi"], "Nvidia-smi not installed"
+        ),
+        "driver_version": pynvml.nvmlSystemGetDriverVersion(),
         "cuda_version": gather_cuda_version(),
         "cuda_runtime_path": cuda.pathfinder.find_nvidia_header_directory("cudart"),
-        "system_ctk": gather_system_ctk(),
-        "python_version_full": gather_python_version_full(),
-        "python_version": gather_python_version(),
+        "system_ctk": sorted(
+            [str(p) for p in Path("/usr/local").glob("cuda*") if p.is_dir()]
+        ),
+        "python_version_full": sys.version,
+        "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
         "package_versions": gather_package_versions(),
-        "pip_packages": gather_pip_packages(),
-        "conda_packages": gather_conda_packages(),
-        "package_managers": gather_package_managers(),
+        "pip_packages": gather_command_output(["pip", "freeze"], "Pip not installed"),
+        "conda_packages": gather_command_output(
+            ["conda", "list"], "Conda not installed"
+        ),
+        "conda_info": gather_command_output(["conda", "info"], "Conda not installed"),
+        "tools": gather_tools(),
+        "os_info": {
+            v.split("=")[0]: v.split("=")[1].strip('"')
+            for v in Path("/etc/os-release").read_text().splitlines()
+        },
     }
 
     if output_format == "json":
