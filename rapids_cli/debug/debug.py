@@ -17,8 +17,6 @@ from rich.table import Table
 
 console = Console()
 
-pynvml.nvmlInit()
-
 
 def gather_cuda_version():
     """Return CUDA driver version as a string, similar to nvidia-smi output."""
@@ -71,6 +69,7 @@ def gather_tools():
 
 def run_debug(output_format="console"):
     """Run debug."""
+    pynvml.nvmlInit()
     debug_info = {
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "platform": platform.platform(),
