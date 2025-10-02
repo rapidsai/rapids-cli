@@ -5,6 +5,9 @@ set -euo pipefail
 
 . /opt/conda/etc/profile.d/conda.sh
 
+# TODO(gforsyth): this shouldn't be required, but trying to unblock CI
+export RAPIDS_CUDA_VERSION=12.9.1
+
 rapids-logger "Downloading artifacts from previous jobs"
 PYTHON_CHANNEL=$(rapids-download-conda-from-github python)
 
