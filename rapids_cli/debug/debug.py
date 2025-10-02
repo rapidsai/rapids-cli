@@ -85,7 +85,9 @@ def run_debug(output_format="console"):
         ),
         "python_version_full": sys.version,
         "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
-        "python_hash_info": str(sys.hash_info),
+        "python_hash_info": str(
+            sys.hash_info
+        ),  # cast to str as repr is most useful https://github.com/rapidsai/rapids-cli/pull/127#discussion_r2397926022
         "package_versions": gather_package_versions(),
         "pip_packages": gather_command_output(["pip", "freeze"], "Pip not installed"),
         "conda_packages": gather_command_output(
