@@ -32,6 +32,7 @@ requirements:
   run:
     - python
     - importlib-metadata >=4.13.0
+    - cuda-pathfinder >=1.2.3
     - nvidia-ml-py >=12.0
     - packaging
     - psutil
