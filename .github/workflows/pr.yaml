@@ -36,6 +36,7 @@ jobs:
     with:
       build_type: pull-request
       script: ci/build_python.sh
+      pure-conda: true
   conda-python-tests:
     needs: [conda-python-build]
     secrets: inherit

@@ -20,6 +20,7 @@ jobs:
     with:
       build_type: branch
       script: ci/build_python.sh
+      pure-conda: true
   upload-conda:
     needs: [conda-python-build]
     secrets: inherit
