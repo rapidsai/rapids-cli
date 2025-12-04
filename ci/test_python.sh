@@ -5,11 +5,8 @@ set -euo pipefail
 
 . /opt/conda/etc/profile.d/conda.sh
 
-# TODO(gforsyth): this shouldn't be required, but trying to unblock CI
-export RAPIDS_CUDA_VERSION=12.9.1
-
 rapids-logger "Downloading artifacts from previous jobs"
-PYTHON_CHANNEL=$(rapids-download-conda-from-github python)
+PYTHON_CHANNEL=$(rapids-download-from-github "$(rapids-package-name conda_python rapids-cli --pure)")
 
 # ensure we always install the just-built-in-CI package, instead of falling back to earlier ones
 conda config --set channel_priority strict

@@ -26,3 +26,7 @@ rattler-build build                   \
 # remove build_cache directory to avoid uploading the entire source tree
 # tracked in https://github.com/prefix-dev/rattler-build/issues/1424
 rm -rf "$RAPIDS_CONDA_BLD_OUTPUT_DIR"/build_cache
+
+# set package name so it is picked up by the shared-workflow for artifact naming
+RAPIDS_PACKAGE_NAME="$(rapids-package-name conda_python rapids-cli --pure)"
+export RAPIDS_PACKAGE_NAME
