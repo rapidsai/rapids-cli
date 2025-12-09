@@ -2,3 +2,4 @@
 # - https://github.com/rapidsai/ops-bot
 
 auto_merger: true
+merge_barriers: true
