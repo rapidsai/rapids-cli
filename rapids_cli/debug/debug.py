@@ -100,7 +100,7 @@ def run_debug(output_format="console"):
     }
 
     if output_format == "json":
-        console.print(json.dumps(debug_info, indent=4))
+        print(json.dumps(debug_info, indent=4))
     else:
         console.print("[bold purple]RAPIDS Debug Information[/bold purple]")
         for key, value in debug_info.items():
