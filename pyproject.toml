@@ -44,12 +44,6 @@ version-file = "rapids_cli/_version.py"
 [tool.hatch.version]
 source = "vcs"
 
-[tool.setuptools.packages.find]
-include = [
-    "rapids_cli*",
-    "rapids_cli.*",
-]
-
 [tool.black]
 # this should match the oldest version of Python the library supports
 target-version = ["py310"]
