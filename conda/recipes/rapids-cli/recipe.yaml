@@ -44,5 +44,5 @@ tests:
 
 about:
   homepage: ${{ load_from_file("pyproject.toml").project.urls.Homepage }}
-  license: ${{ load_from_file("pyproject.toml").project.license.text }}
+  license: ${{ load_from_file("pyproject.toml").project.license }}
   summary: ${{ load_from_file("pyproject.toml").project.description }}
