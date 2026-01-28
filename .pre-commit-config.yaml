@@ -71,7 +71,7 @@ repos:
         args: [--fix, --spdx]
         files: |
           (?x)
-            [.](py|sh|yaml)$
+            [.](py|sh|yaml|yml)$
       - id: verify-pyproject-license
 default_language_version:
   python: python3
