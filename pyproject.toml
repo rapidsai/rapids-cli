@@ -4,6 +4,7 @@ description = "A CLI for RAPIDS"
 dynamic = ["version"]
 license = "Apache-2.0"
 license-files = ["LICENSE"]
+readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "cuda-pathfinder >=1.2.3",
