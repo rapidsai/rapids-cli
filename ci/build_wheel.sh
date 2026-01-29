@@ -11,4 +11,4 @@ python -m pip wheel                     \
     -w "${RAPIDS_WHEEL_BLD_OUTPUT_DIR}" \
     .
 
-ci/validate_wheel.sh "${RAPIDS_WHEEL_BLD_OUTPUT_DR}"
+ci/validate_wheel.sh "${RAPIDS_WHEEL_BLD_OUTPUT_DIR}"
