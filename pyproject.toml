@@ -4,6 +4,7 @@ description = "A CLI for RAPIDS"
 dynamic = ["version"]
 license = "Apache-2.0"
 license-files = ["LICENSE"]
+readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "cuda-pathfinder >=1.2.3",
@@ -53,6 +54,14 @@ target-version = ["py310"]
 #       This is just here for IDEs.
 skip = "./.git,./pyproject.toml,./.ruff_cache"
 quiet-level = 3
+
+[tool.pydistcheck]
+select = [
+    "distro-too-large-compressed",
+]
+
+# PyPI hard limit is 1GiB, but try to keep this as small as possible
+max_allowed_size_compressed = '10Mi'
 
 [tool.pytest]
 testpaths = ["tests"]
