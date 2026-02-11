@@ -75,6 +75,12 @@ dependencies:
       - output_types: [pyproject, requirements]
         packages:
           - importlib-metadata >= 4.13.0; python_version < '3.12'
+  docs:
+    common:
+      - output_types: [conda, requirements, pyproject]
+        packages:
+          - sphinx
+          - sphinx-rtd-theme
   test_python:
     common:
       - output_types: [conda, requirements, pyproject]
