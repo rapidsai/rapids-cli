@@ -9,43 +9,23 @@ primarily focused on health checks (``rapids doctor``) and debugging (``rapids d
 It uses a plugin system that allows RAPIDS libraries to register their own health checks
 via Python entry points.
 
-.. image:: https://img.shields.io/badge/python-3.10+-blue.svg
-   :target: https://www.python.org/downloads/
-   :alt: Python Version
-
-.. image:: https://img.shields.io/badge/license-Apache%202.0-blue.svg
-   :target: https://github.com/rapidsai/rapids-cli/blob/main/LICENSE
-   :alt: License
-
 Quick Start
 -----------
-
-Install the RAPIDS CLI:
 
 .. code-block:: bash
 
    pip install rapids-cli
 
-Run health checks:
-
-.. code-block:: bash
-
+   # Run health checks
    rapids doctor
 
-Gather debugging information:
-
-.. code-block:: bash
-
+   # Gather system info for debugging
    rapids debug --json
-
-Documentation Contents
-----------------------
 
 .. toctree::
    :maxdepth: 2
    :caption: User Guide
 
-   installation
    user_guide
    troubleshooting
 
@@ -54,7 +34,6 @@ Documentation Contents
    :caption: Developer Guide
 
    plugin_development
-   contributing
 
 .. toctree::
    :maxdepth: 2

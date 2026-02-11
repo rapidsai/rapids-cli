@@ -79,8 +79,9 @@ dependencies:
     common:
       - output_types: [conda, requirements, pyproject]
         packages:
+          - pydata-sphinx-theme
           - sphinx
-          - sphinx-rtd-theme
+          - sphinx-copybutton
   test_python:
     common:
       - output_types: [conda, requirements, pyproject]

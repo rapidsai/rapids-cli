@@ -5,80 +5,77 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-
-
+import datetime
 import os
 import sys
 
 sys.path.insert(0, os.path.abspath("../../"))
 
+# -- Project information -----------------------------------------------------
 
 project = "RAPIDS CLI"
-copyright = "2025-2026, NVIDIA CORPORATION & AFFILIATES"
-author = "NVIDIA RAPIDS"
-
-# The short X.Y version
-version = "0.1"
-# The full version, including alpha/beta/rc tags
-release = "0.1.0"
+html_title = "RAPIDS CLI"
+copyright = f"{datetime.date.today().year}, NVIDIA"
+author = "NVIDIA"
 
 # -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",  # For Google and NumPy style docstrings
-    "sphinx.ext.intersphinx",  # Link to other project docs
-    "sphinx.ext.todo",  # Support for todo items
+    "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
+    "sphinx_copybutton",
 ]
 
 templates_path = ["_templates"]
 exclude_patterns = []
 
+copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
+copybutton_prompt_is_regexp = True
+
 # Napoleon settings for Google-style docstrings
 napoleon_google_docstring = True
 napoleon_numpy_docstring = False
-napoleon_include_init_with_doc = True
-napoleon_include_private_with_doc = False
-napoleon_include_special_with_doc = True
-napoleon_use_admonition_for_examples = True
-napoleon_use_admonition_for_notes = True
-napoleon_use_admonition_for_references = True
-napoleon_use_ivar = False
-napoleon_use_param = True
-napoleon_use_rtype = True
 
 # Autodoc settings
 autodoc_default_options = {
     "members": True,
     "member-order": "bysource",
-    "special-members": "__init__",
     "undoc-members": True,
-    "exclude-members": "__weakref__",
 }
 
-# Intersphinx mapping
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
 }
 
 # -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "sphinx_rtd_theme"
-html_static_path = ["_static"]
+html_theme = "pydata_sphinx_theme"
 
 html_theme_options = {
-    "navigation_depth": 4,
-    "collapse_navigation": False,
-    "sticky_navigation": True,
-    "includehidden": True,
+    "header_links_before_dropdown": 7,
+    "icon_links": [],
+    "logo": {
+        "link": "https://docs.rapids.ai/",
+    },
+    "github_url": "https://github.com/rapidsai/rapids-cli",
+    "show_toc_level": 1,
+    "navbar_align": "right",
 }
 
-# Add any paths that contain custom static files (such as style sheets)
-html_logo = None
-html_favicon = None
+html_sidebars = {
+    "**": ["sidebar-nav-bs", "sidebar-ethical-ads"],
+}
+
+html_static_path = ["_static"]
+
+
+def setup(app):
+    app.add_css_file("https://docs.rapids.ai/assets/css/custom.css")
+    app.add_css_file(
+        "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css"
+    )
+    app.add_js_file(
+        "https://docs.rapids.ai/assets/js/custom.js", loading_method="defer"
+    )
