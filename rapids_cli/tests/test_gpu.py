@@ -1,7 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025-2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
-from unittest.mock import patch
-
 import pytest
 
 from rapids_cli.doctor.checks.gpu import (
@@ -9,67 +7,60 @@ from rapids_cli.doctor.checks.gpu import (
     check_gpu_compute_capability,
     gpu_check,
 )
+from rapids_cli.hardware import DeviceInfo, FailingGpuInfo, FakeGpuInfo
 
 
 def test_gpu_check_success():
-    with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlDeviceGetCount", return_value=2),
-    ):
-        result = gpu_check(verbose=True)
-        assert result == "GPU(s) detected: 2"
+    gpu_info = FakeGpuInfo(device_count=2)
+    result = gpu_check(verbose=True, gpu_info=gpu_info)
+    assert result == "GPU(s) detected: 2"
 
 
 def test_gpu_check_no_gpus():
-    with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlDeviceGetCount", return_value=0),
-    ):
-        with pytest.raises(AssertionError, match="No GPUs detected"):
-            gpu_check(verbose=False)
+    gpu_info = FakeGpuInfo(device_count=0)
+    with pytest.raises(AssertionError, match="No GPUs detected"):
+        gpu_check(verbose=False, gpu_info=gpu_info)
 
 
 def test_gpu_check_nvml_error():
-    import pynvml
-
-    with patch("pynvml.nvmlInit", side_effect=pynvml.NVMLError(1)):
-        with pytest.raises(ValueError, match="No available GPUs detected"):
-            gpu_check(verbose=False)
+    gpu_info = FailingGpuInfo()
+    with pytest.raises(ValueError, match="No available GPUs detected"):
+        gpu_check(verbose=False, gpu_info=gpu_info)
 
 
 def test_check_gpu_compute_capability_success():
-    with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlDeviceGetCount", return_value=2),
-        patch("pynvml.nvmlDeviceGetHandleByIndex"),
-        patch(
-            "pynvml.nvmlDeviceGetCudaComputeCapability",
-            return_value=(REQUIRED_COMPUTE_CAPABILITY, 5),
+    devices = [
+        DeviceInfo(
+            index=0,
+            compute_capability=(REQUIRED_COMPUTE_CAPABILITY, 5),
+            memory_total_bytes=0,
         ),
-    ):
-        result = check_gpu_compute_capability(verbose=True)
-        assert result is True
+        DeviceInfo(
+            index=1,
+            compute_capability=(REQUIRED_COMPUTE_CAPABILITY, 5),
+            memory_total_bytes=0,
+        ),
+    ]
+    gpu_info = FakeGpuInfo(device_count=2, devices=devices)
+    result = check_gpu_compute_capability(verbose=True, gpu_info=gpu_info)
+    assert result is True
 
 
 def test_check_gpu_compute_capability_insufficient():
-    with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlDeviceGetCount", return_value=1),
-        patch("pynvml.nvmlDeviceGetHandleByIndex"),
-        patch("pynvml.nvmlDeviceGetCudaComputeCapability", return_value=(6, 0)),
+    devices = [
+        DeviceInfo(index=0, compute_capability=(6, 0), memory_total_bytes=0),
+    ]
+    gpu_info = FakeGpuInfo(device_count=1, devices=devices)
+    with pytest.raises(
+        ValueError,
+        match=f"GPU 0 requires compute capability {REQUIRED_COMPUTE_CAPABILITY}",
     ):
-        with pytest.raises(
-            ValueError,
-            match=f"GPU 0 requires compute capability {REQUIRED_COMPUTE_CAPABILITY}",
-        ):
-            check_gpu_compute_capability(verbose=False)
+        check_gpu_compute_capability(verbose=False, gpu_info=gpu_info)
 
 
 def test_check_gpu_compute_capability_no_gpu():
-    import pynvml
-
-    with patch("pynvml.nvmlInit", side_effect=pynvml.NVMLError(1)):
-        with pytest.raises(
-            ValueError, match="No GPU - cannot determine GPU Compute Capability"
-        ):
-            check_gpu_compute_capability(verbose=False)
+    gpu_info = FailingGpuInfo()
+    with pytest.raises(
+        ValueError, match="No GPU - cannot determine GPU Compute Capability"
+    ):
+        check_gpu_compute_capability(verbose=False, gpu_info=gpu_info)
