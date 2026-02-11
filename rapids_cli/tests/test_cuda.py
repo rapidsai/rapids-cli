@@ -1,26 +1,17 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025-2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
-from unittest.mock import patch
+import pytest
 
 from rapids_cli.doctor.checks.cuda_driver import cuda_check
+from rapids_cli.hardware import FailingGpuInfo, FakeGpuInfo
 
 
-def mock_cuda_version():
-    return 12050
+def test_cuda_check_success():
+    gpu_info = FakeGpuInfo(cuda_driver_version=12050)
+    assert cuda_check(verbose=True, gpu_info=gpu_info) == 12050
 
 
-def test_get_cuda_version_success():
-    with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12050),
-    ):
-        version = mock_cuda_version()
-        assert version
-
-
-def test_cuda_check_success(capfd):
-    with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12050),
-    ):
-        assert cuda_check(verbose=True)
+def test_cuda_check_no_gpu():
+    gpu_info = FailingGpuInfo()
+    with pytest.raises(ValueError, match="Unable to look up CUDA version"):
+        cuda_check(verbose=False, gpu_info=gpu_info)

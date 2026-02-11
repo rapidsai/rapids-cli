@@ -10,6 +10,7 @@ from rich.console import Console
 
 from rapids_cli._compatibility import entry_points
 from rapids_cli.constants import DOCTOR_SYMBOL
+from rapids_cli.hardware import NvmlGpuInfo
 
 console = Console()
 
@@ -74,6 +75,8 @@ def doctor_check(
         console.print("Dry run, skipping checks")
         return True
 
+    gpu_info = NvmlGpuInfo()
+
     results: list[CheckResult] = []
     with console.status("[bold green]Running checks...") as ui_status:
         for i, check_fn in enumerate(checks):
@@ -85,7 +88,7 @@ def doctor_check(
                 with warnings.catch_warnings(record=True) as w:
                     warnings.simplefilter("always")
                     status = True
-                    value = check_fn(verbose=verbose)
+                    value = check_fn(verbose=verbose, gpu_info=gpu_info)
                     caught_warnings = w
 
             except Exception as e:
