@@ -39,6 +39,19 @@ coverage report
 coverage html && open htmlcov/index.html
 ```
 
+### Documentation
+
+```bash
+# Build HTML documentation
+cd docs && make html
+
+# View documentation
+open docs/build/html/index.html
+
+# Clean build artifacts
+cd docs && make clean
+```
+
 ### Linting and Pre-commit
 
 ```bash
