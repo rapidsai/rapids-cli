@@ -23,7 +23,7 @@ pip install -e .[test]
 ### Testing
 
 ```bash
-# Run all tests
+# Run all tests (coverage reporting is automatic via pyproject.toml)
 pytest
 
 # Run a specific test file
@@ -31,6 +31,12 @@ pytest rapids_cli/tests/test_cuda.py
 
 # Run a specific test function
 pytest rapids_cli/tests/test_cuda.py::test_function_name
+
+# Generate coverage report without running tests
+coverage report
+
+# View detailed HTML coverage report
+coverage html && open htmlcov/index.html
 ```
 
 ### Linting and Pre-commit
@@ -113,8 +119,15 @@ The doctor command discovers and runs checks via Python entry points defined in 
 
 ## Testing Notes
 
-Tests are located in `rapids_cli/tests/`. The test suite is small and runs quickly. GPU-based tests
-run in CI on actual GPU hardware (L4 instances).
+Tests are located in `rapids_cli/tests/`. The test suite runs quickly with 53 tests covering all
+modules. GPU-based tests run in CI on actual GPU hardware (L4 instances).
+
+### Coverage Requirements
+
+- Minimum coverage threshold: **95%**
+- Coverage is automatically measured when running `pytest`
+- Coverage reports are generated in XML format for CI and terminal format for local development
+- Test files and `_version.py` are excluded from coverage measurements
 
 ## CI/CD
 
