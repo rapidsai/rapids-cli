@@ -65,9 +65,9 @@ dependencies:
           - cuda-pathfinder >=1.2.3
           - packaging
           - psutil
+          - pyyaml
           - rich
           - rich-click
-          - yaml
       - output_types: [conda]
         packages:
           - importlib-metadata >=4.13.0
