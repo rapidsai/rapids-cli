@@ -27,10 +27,10 @@ pip install -e .[test]
 pytest
 
 # Run a specific test file
-pytest rapids_cli/tests/test_cuda.py
+pytest rapids_cli/tests/test_gpu.py
 
 # Run a specific test function
-pytest rapids_cli/tests/test_cuda.py::test_function_name
+pytest rapids_cli/tests/test_gpu.py::test_gpu_check_success
 
 # Generate coverage report without running tests
 coverage report
