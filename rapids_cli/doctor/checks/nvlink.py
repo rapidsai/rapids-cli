@@ -2,25 +2,33 @@
 # SPDX-License-Identifier: Apache-2.0
 """Check for NVLink status."""
 
-import pynvml
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from rapids_cli.hardware import GpuInfoProvider
 
 
-def check_nvlink_status(verbose=True):
+def check_nvlink_status(
+    verbose=True, *, gpu_info: GpuInfoProvider | None = None, **kwargs
+):
     """Check the system for NVLink with 2 or more GPUs."""
+    if gpu_info is None:  # pragma: no cover
+        from rapids_cli.hardware import NvmlGpuInfo
+
+        gpu_info = NvmlGpuInfo()
+
     try:
-        pynvml.nvmlInit()
-    except pynvml.NVMLError as e:
+        device_count = gpu_info.device_count
+    except ValueError as e:
         raise ValueError("GPU not found. Please ensure GPUs are installed.") from e
 
-    device_count = pynvml.nvmlDeviceGetCount()
     if device_count < 2:
         return False
 
-    for i in range(device_count):
-        handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-        for nvlink_id in range(pynvml.NVML_NVLINK_MAX_LINKS):
-            try:
-                pynvml.nvmlDeviceGetNvLinkState(handle, 0)
-                return True
-            except pynvml.NVMLError as e:
-                raise ValueError(f"NVLink {nvlink_id} Status Check Failed") from e
+    for dev in gpu_info.devices:
+        if any(dev.nvlink_states):
+            return True
+
+    return False

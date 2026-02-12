@@ -10,6 +10,7 @@ from rich.console import Console
 
 from rapids_cli._compatibility import entry_points
 from rapids_cli.constants import DOCTOR_SYMBOL
+from rapids_cli.hardware import NvmlGpuInfo
 
 console = Console()
 
@@ -34,26 +35,22 @@ def doctor_check(
     If specific subcommands are given, it validates them against valid
     subcommands and executes corresponding checks.
 
-    Parameters:
-    ----------
-    filters : list (optional)
-        A list of filters to run specific checks.
+    Args:
+        verbose: Whether to print verbose output.
+        dry_run: Whether to skip running checks.
+        filters: A list of filters to run specific checks.
 
     Raises:
-    -------
-    ValueError:
-        If an invalid subcommand is provided.
+        ValueError: If an invalid subcommand is provided.
 
-    Notes:
-    -----
-    The function discovers and loads check functions defined in entry points
-    under the 'rapids_doctor_check' group. It also checks specific
-    configurations related to a corresponding subcommand if given.
+    Note:
+        The function discovers and loads check functions defined in entry points
+        under the ``rapids_doctor_check`` group. It also checks specific
+        configurations related to a corresponding subcommand if given.
 
     Example:
-    --------
-    > doctor_check([])  # Run all health checks
-    > doctor_check(['cudf'])  # Run 'cudf' specific checks
+        >>> doctor_check(verbose=False, dry_run=False)
+        >>> doctor_check(verbose=False, dry_run=False, filters=['cudf'])
     """
     filters = [] if not filters else filters
     console.print(
@@ -78,6 +75,8 @@ def doctor_check(
         console.print("Dry run, skipping checks")
         return True
 
+    gpu_info = NvmlGpuInfo()
+
     results: list[CheckResult] = []
     with console.status("[bold green]Running checks...") as ui_status:
         for i, check_fn in enumerate(checks):
@@ -89,7 +88,7 @@ def doctor_check(
                 with warnings.catch_warnings(record=True) as w:
                     warnings.simplefilter("always")
                     status = True
-                    value = check_fn(verbose=verbose)
+                    value = check_fn(verbose=verbose, gpu_info=gpu_info)
                     caught_warnings = w
 
             except Exception as e:
