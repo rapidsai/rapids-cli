@@ -67,6 +67,7 @@ dependencies:
           - psutil
           - rich
           - rich-click
+          - yaml
       - output_types: [conda]
         packages:
           - importlib-metadata >=4.13.0
