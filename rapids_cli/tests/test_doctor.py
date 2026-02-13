@@ -100,21 +100,31 @@ def test_doctor_check_dry_run(capsys):
 
 def test_doctor_check_with_filters(capsys):
     """Test doctor_check with filters."""
+    cudf_check = MagicMock(
+        side_effect=mock_passing_check, __name__="cudf_check", __doc__="cudf check."
+    )
+    cuml_check = MagicMock(
+        side_effect=mock_passing_check, __name__="cuml_check", __doc__="cuml check."
+    )
+
     mock_ep1 = MagicMock()
     mock_ep1.name = "cudf_check"
     mock_ep1.value = "cudf.module:check"
-    mock_ep1.load.return_value = mock_passing_check
+    mock_ep1.load.return_value = cudf_check
 
     mock_ep2 = MagicMock()
     mock_ep2.name = "cuml_check"
     mock_ep2.value = "cuml.module:check"
-    mock_ep2.load.return_value = mock_passing_check
+    mock_ep2.load.return_value = cuml_check
 
     with patch(
         "rapids_cli.doctor.doctor.entry_points", return_value=[mock_ep1, mock_ep2]
     ):
         result = doctor_check(verbose=False, dry_run=False, filters=["cudf"])
         assert result is True
+
+    cudf_check.assert_called_once()
+    cuml_check.assert_not_called()
 
 
 def test_doctor_check_with_warnings(capsys):

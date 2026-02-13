@@ -34,26 +34,24 @@ def doctor_check(
     If specific subcommands are given, it validates them against valid
     subcommands and executes corresponding checks.
 
-    Parameters:
-    ----------
-    filters : list (optional)
-        A list of filters to run specific checks.
+    Args:
+        verbose: Whether to print verbose output.
+        dry_run: Whether to skip running checks.
+        filters: A list of filters to run specific checks containing specified
+            strings. For example, passing ``['cudf', 'cuml']`` will only run
+            checks containing those strings.
 
-    Raises:
-    -------
-    ValueError:
-        If an invalid subcommand is provided.
+    Returns:
+        True if all checks passed (or dry_run is True), False otherwise.
 
-    Notes:
-    -----
-    The function discovers and loads check functions defined in entry points
-    under the 'rapids_doctor_check' group. It also checks specific
-    configurations related to a corresponding subcommand if given.
+    Note:
+        The function discovers and loads check functions defined in entry points
+        under the ``rapids_doctor_check`` group. It also checks specific
+        configurations related to a corresponding subcommand if given.
 
     Example:
-    --------
-    > doctor_check([])  # Run all health checks
-    > doctor_check(['cudf'])  # Run 'cudf' specific checks
+        >>> doctor_check(verbose=False, dry_run=False)
+        >>> doctor_check(verbose=False, dry_run=False, filters=['cudf'])
     """
     filters = [] if not filters else filters
     console.print(

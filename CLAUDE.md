@@ -39,6 +39,19 @@ coverage report
 coverage html && open htmlcov/index.html
 ```
 
+### Documentation
+
+```bash
+# Build HTML documentation
+make -C docs html
+
+# Live-reload documentation server
+make -C docs serve
+
+# Remove build artifacts
+make -C clean
+```
+
 ### Linting and Pre-commit
 
 ```bash
