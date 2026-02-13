@@ -79,11 +79,11 @@ dependencies:
     common:
       - output_types: [conda, requirements, pyproject]
         packages:
-          - pydata-sphinx-theme
-          - sphinx
-          - sphinx-autobuild
-          - sphinx-copybutton
-          - sphinx-llm
+          - pydata-sphinx-theme>=0.16.1
+          - sphinx>=8
+          - sphinx-autobuild>=2025.8.25
+          - sphinx-copybutton>=0.5.2
+          - sphinx-llm>=0.3.0
   test_python:
     common:
       - output_types: [conda, requirements, pyproject]
