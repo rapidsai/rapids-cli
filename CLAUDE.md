@@ -43,13 +43,13 @@ coverage html && open htmlcov/index.html
 
 ```bash
 # Build HTML documentation
-cd docs && make html
+make -C docs html
 
 # Live-reload documentation server
-cd docs && make serve
+make -C docs serve
 
-# Clean build artifacts
-cd docs && make clean
+# Remove build artifacts
+make -C clean
 ```
 
 ### Linting and Pre-commit
