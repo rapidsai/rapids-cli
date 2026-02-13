@@ -37,7 +37,9 @@ def doctor_check(
     Args:
         verbose: Whether to print verbose output.
         dry_run: Whether to skip running checks.
-        filters: A list of filters to run specific checks.
+        filters: A list of filters to run specific checks containing specified
+            strings. For example, passing ``['cudf', 'cuml']`` will only run
+            checks containing those strings.
 
     Returns:
         True if all checks passed (or dry_run is True), False otherwise.
