@@ -20,6 +20,10 @@ for troubleshooting RAPIDS installations.
 
 Output is either a Rich-formatted console table or JSON (``--json``).
 
+Example:
+
+``rapids debug --json > "<name-output-file>.json"``
+
 API
 ---
 
