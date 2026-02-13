@@ -81,7 +81,9 @@ dependencies:
         packages:
           - pydata-sphinx-theme
           - sphinx
+          - sphinx-autobuild
           - sphinx-copybutton
+          - sphinx-llm
   test_python:
     common:
       - output_types: [conda, requirements, pyproject]

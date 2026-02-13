@@ -7,27 +7,37 @@ Doctor Module
 The ``rapids_cli.doctor.doctor`` module orchestrates health check discovery
 and execution.
 
-Checks are discovered via Python entry points in the ``rapids_doctor_check``
-group. Each check function is called with ``verbose`` as a keyword argument.
-Results are collected into :class:`CheckResult` objects that track pass/fail
-status, return values, errors, and warnings.
+The CUDA + Python software stack spans multiple layers — the GPU driver, the
+CUDA runtime, C/C++ libraries, and Python packages — each managed by different
+package managers (OS packages, CUDA toolkit installers, conda, pip). Because no
+single package manager owns the full stack, misconfigurations across layer
+boundaries are common and difficult to diagnose. ``rapids doctor`` validates
+compatibility across these layers, from the driver through CUDA to the Python
+libraries, and provides actionable feedback when an incompatibility is found.
 
-Check Execution Flow
---------------------
+Health checks are bundled with the RAPIDS libraries you install rather than
+hard-coded into ``rapids-cli`` itself. When you install a library such as
+cuDF or cuML, any checks it ships are automatically available to
+``rapids doctor`` — no extra configuration required.
 
-1. **Discovery**: Scan ``rapids_doctor_check`` entry points and load check
-   functions. ``ImportError`` and ``AttributeError`` during loading are
-   silently suppressed via ``contextlib.suppress``.
+You can run all discovered checks at once, or filter to a specific library
+by passing its name as an argument:
 
-2. **Filtering**: If filter arguments are provided, only checks whose
-   ``ep.value`` contains a filter substring are kept.
+.. code-block:: bash
 
-3. **Execution**: Each check runs inside ``warnings.catch_warnings(record=True)``
-   so warnings are captured. Exceptions are caught and stored rather than
-   propagated.
+   # Run every available check
+   rapids doctor
 
-4. **Reporting**: Warnings are printed, verbose output is shown for passing
-   checks, and failed checks are listed with their error messages.
+   # Run only checks related to cudf
+   rapids doctor cudf
+
+   # See which checks would run without executing them
+   rapids doctor --dry-run --verbose
+
+Results are collected into :class:`~rapids_cli.doctor.doctor.CheckResult`
+objects that track pass/fail status, return values, errors, and warnings.
+For details on how checks are discovered and executed, or how to write your
+own, see :doc:`/plugin_development`.
 
 API
 ---

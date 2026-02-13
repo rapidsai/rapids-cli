@@ -7,7 +7,7 @@ Debug Module
 The ``rapids_cli.debug.debug`` module gathers system and environment information
 for troubleshooting RAPIDS installations.
 
-:func:`run_debug` is the main entry point. It collects:
+:func:`~rapids_cli.debug.debug.run_debug` is the main entry point. It collects:
 
 - Platform and OS details (from ``platform`` and ``/etc/os-release``)
 - NVIDIA driver and CUDA versions (via ``pynvml``)

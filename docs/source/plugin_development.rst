@@ -43,6 +43,25 @@ Quick Start
       pip install -e .
       rapids doctor --verbose --dry-run
 
+Check Execution Flow
+--------------------
+
+When ``rapids doctor`` runs, checks go through four stages:
+
+1. **Discovery**: Scan ``rapids_doctor_check`` entry points and load check
+   functions. ``ImportError`` and ``AttributeError`` during loading are
+   silently suppressed via ``contextlib.suppress``.
+
+2. **Filtering**: If filter arguments are provided, only checks whose
+   ``ep.value`` contains a filter substring are kept.
+
+3. **Execution**: Each check runs inside ``warnings.catch_warnings(record=True)``
+   so warnings are captured. Exceptions are caught and stored rather than
+   propagated.
+
+4. **Reporting**: Warnings are printed, verbose output is shown for passing
+   checks, and failed checks are listed with their error messages.
+
 Check Function Contract
 -----------------------
 

@@ -26,6 +26,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinx_copybutton",
+    "sphinx_llm.txt",
 ]
 
 templates_path = ["_templates"]

@@ -39,8 +39,8 @@ def doctor_check(
         dry_run: Whether to skip running checks.
         filters: A list of filters to run specific checks.
 
-    Raises:
-        ValueError: If an invalid subcommand is provided.
+    Returns:
+        True if all checks passed (or dry_run is True), False otherwise.
 
     Note:
         The function discovers and loads check functions defined in entry points

@@ -45,8 +45,8 @@ coverage html && open htmlcov/index.html
 # Build HTML documentation
 cd docs && make html
 
-# View documentation
-open docs/build/html/index.html
+# Live-reload documentation server
+cd docs && make serve
 
 # Clean build artifacts
 cd docs && make clean
