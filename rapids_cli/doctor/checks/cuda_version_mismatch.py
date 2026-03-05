@@ -3,7 +3,6 @@
 """Check for CUDA toolkit vs driver major version mismatch."""
 
 import re
-import warnings
 from pathlib import Path
 
 import cuda.pathfinder
@@ -46,16 +45,12 @@ def check_cuda_major_version_mismatch(
         True on success, or a descriptive string if verbose is True.
 
     Raises:
-        ValueError: If no driver is found or if the toolkit and driver major versions differ.
+        ValueError: If the toolkit and driver major versions differ.
     """
-    try:
-        driver_major = get_driver_cuda_major()
-    except pynvml.NVMLError as e:
-        raise ValueError("Unable to determine driver CUDA version. Is an NVIDIA driver installed?") from e
+    driver_major = get_driver_cuda_major()
 
     toolkit_major = get_toolkit_cuda_major()
     if toolkit_major is None:
-        warnings.warn("No CUDA toolkit found in the current environment; skipping toolkit version check.")
         return True
 
     if toolkit_major > driver_major:

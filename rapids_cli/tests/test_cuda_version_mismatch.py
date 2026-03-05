@@ -1,11 +1,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025-2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
-import warnings
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import pytest
-import pynvml
 
 from rapids_cli.doctor.checks.cuda_version_mismatch import (
     check_cuda_major_version_mismatch,
@@ -34,29 +31,6 @@ def test_toolkit_newer_than_driver():
     with pytest.raises(ValueError, match="CUDA toolkit major version"):
         check_cuda_major_version_mismatch(
             get_driver_cuda_major=lambda: 11,
-            get_toolkit_cuda_major=lambda: 12,
-        )
-
-
-def test_no_toolkit_found():
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        result = check_cuda_major_version_mismatch(
-            get_driver_cuda_major=lambda: 12,
-            get_toolkit_cuda_major=lambda: None,
-        )
-    assert result is True
-    assert len(caught) == 1
-    assert "No CUDA toolkit found" in str(caught[0].message)
-
-
-def test_no_driver():
-    def raise_nvml_error():
-        raise pynvml.NVMLError(pynvml.NVML_ERROR_DRIVER_NOT_LOADED)
-
-    with pytest.raises(ValueError, match="Unable to determine driver CUDA version"):
-        check_cuda_major_version_mismatch(
-            get_driver_cuda_major=raise_nvml_error,
             get_toolkit_cuda_major=lambda: 12,
         )
 
