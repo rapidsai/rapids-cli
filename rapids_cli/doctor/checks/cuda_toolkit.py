@@ -9,57 +9,109 @@ from pathlib import Path
 import pynvml
 
 # Core libraries to check for findability.
-# cudart: universal — everything needs it.
-# nvrtc: JIT compilation — cupy, cudf UDFs. Frequently missing with pip (pre-cupy 14).
-# nvvm: numba-cuda JIT — cudf string UDFs. Was moved/renamed in CUDA 13.1.
 _CUDA_LIBS = {
     "cudart": "libcudart.so",
     "nvrtc": "libnvrtc.so",
     "nvvm": "libnvvm.so",
 }
 
-_INSTALL_ADVICE = {
-    "conda": (
-        "Update your conda environment with the correct CUDA toolkit version, "
-        "e.g. 'conda install cuda-toolkit' in your active environment."
-    ),
-    "pip": (
-        "Update the CUDA pip packages in your environment, "
-        "e.g. 'pip install --upgrade nvidia-cuda-toolkit'."
-    ),
-}
-_DEFAULT_ADVICE = (
-    "Install the CUDA Toolkit matching your driver, "
-    "or use conda which manages CUDA automatically."
-)
-
 _CUDA_SYMLINK = Path("/usr/local/cuda")
 
-def _get_advice(found_via: str | None) -> str:
-    """Return install advice based on how cuda-pathfinder found the library."""
+# Maps cuda-pathfinder's found_via values to human-readable source labels.
+_SOURCE_LABELS = {
+    "conda": "conda",
+    "site-packages": "pip",
+    "system": "system",
+    "CUDA_HOME": "CUDA_HOME",
+}
+
+
+def _get_source_label(found_via: str | None) -> str | None:
+    """Map cuda-pathfinder's found_via to a human-readable source label."""
     if found_via:
-        for key, advice in _INSTALL_ADVICE.items():
+        for key, label in _SOURCE_LABELS.items():
             if key in found_via:
-                return advice
-    return _DEFAULT_ADVICE
+                return label
+    return None
 
 
-def _get_toolkit_cuda_major() -> int | None:
-    """Return the CUDA major version of the toolkit via cuda-pathfinder headers.
+def _format_mismatch_error(
+    toolkit_major: int,
+    driver_major: int,
+    found_via: str | None,
+    cudart_path: str | None,
+) -> str:
+    """Build a clear error message for toolkit > driver version mismatch."""
+    source = _get_source_label(found_via)
 
-    Parses #define CUDA_VERSION from cuda_runtime_version.h.
-    Returns None if headers are not available.
+    location = f"CUDA {toolkit_major} toolkit"
+    if source and cudart_path:
+        location += f" (found via {source} at {cudart_path})"
+    elif source:
+        location += f" (found via {source})"
+    elif cudart_path:
+        location += f" (at {cudart_path})"
+
+    return (
+        f"{location} is newer than what the GPU driver supports (CUDA {driver_major}). "
+        f"Either update the GPU driver to one that supports CUDA {toolkit_major}, "
+        f"or recreate your environment with CUDA {driver_major} packages."
+    )
+
+
+def _format_missing_error(missing_libs: list[str], found_via: str | None) -> str:
+    """Build a clear error message for missing CUDA libraries."""
+    source = _get_source_label(found_via)
+    missing_str = ", ".join(missing_libs)
+
+    if source:
+        return (
+            f"A {source} CUDA installation was detected, but {missing_str} could not be found. "
+            f"Try reinstalling the CUDA packages in your {source} environment."
+        )
+
+    return (
+        f"Some CUDA libraries ({missing_str}) could not be found. "
+        "Install the CUDA Toolkit, or use conda/pip which manage CUDA automatically."
+    )
+
+
+def _get_toolkit_cuda_major(cudart_path: str | None = None) -> int | None:
+    """Return the CUDA major version of the toolkit.
+
+    Tries two strategies in order:
+    1. Parse #define CUDA_VERSION from cuda_runtime_version.h (precise, needs dev headers)
+    2. Call cudaRuntimeGetVersion via ctypes on the loaded libcudart.so
+
+    Args:
+        cudart_path: Absolute path to libcudart.so from cuda-pathfinder, used as fallback.
     """
+    import ctypes
+
     import cuda.pathfinder
 
+    # header parsing
     header_dir = cuda.pathfinder.find_nvidia_header_directory("cudart")
-    if header_dir is None:
-        return None
-    version_file = Path(header_dir) / "cuda_runtime_version.h"
-    if not version_file.exists():
-        return None
-    match = re.search(r"#define\s+CUDA_VERSION\s+(\d+)", version_file.read_text())
-    return int(match.group(1)) // 1000 if match else None
+    if header_dir is not None:
+        version_file = Path(header_dir) / "cuda_runtime_version.h"
+        if version_file.exists():
+            match = re.search(
+                r"#define\s+CUDA_VERSION\s+(\d+)", version_file.read_text()
+            )
+            if match:
+                return int(match.group(1)) // 1000
+
+    # if header parsing fails, call cudaRuntimeGetVersion via ctypes
+    if cudart_path is not None:
+        try:
+            libcudart = ctypes.CDLL(cudart_path)
+            version = ctypes.c_int()
+            if libcudart.cudaRuntimeGetVersion(ctypes.byref(version)) == 0:
+                return version.value // 1000
+        except OSError:
+            pass
+
+    return None
 
 
 def _extract_major_from_cuda_path(path: Path) -> int | None:
@@ -82,20 +134,20 @@ def cuda_toolkit_check(verbose=False):
 
     # Check library findability
     found_via = {}
+    cudart_path = None
     missing = []
     for libname, soname in _CUDA_LIBS.items():
         try:
             loaded = cuda.pathfinder.load_nvidia_dynamic_lib(libname)
             found_via[libname] = loaded.found_via
+            if libname == "cudart":
+                cudart_path = loaded.abs_path
         except (DynamicLibNotFoundError, RuntimeError):
             missing.append(soname)
 
     if missing:
-        advice = _get_advice(next(iter(found_via.values()), None))
-        raise ValueError(
-            f"{', '.join(missing)} could not be found. "
-            f"RAPIDS will not be able to run GPU operations. {advice}"
-        )
+        any_found_via = next(iter(found_via.values()), None)
+        raise ValueError(_format_missing_error(missing, any_found_via))
 
     # Get driver CUDA major version
     try:
@@ -109,12 +161,12 @@ def cuda_toolkit_check(verbose=False):
 
     # Get toolkit CUDA major version and compare to driver
     # Only error when toolkit > driver (drivers are backward compatible)
-    toolkit_major = _get_toolkit_cuda_major()
+    toolkit_major = _get_toolkit_cuda_major(cudart_path)
     if toolkit_major is not None and toolkit_major > driver_major:
-        advice = _get_advice(found_via.get("cudart"))
         raise ValueError(
-            f"CUDA toolkit is version {toolkit_major} but the GPU driver "
-            f"only supports up to CUDA {driver_major}. {advice}"
+            _format_mismatch_error(
+                toolkit_major, driver_major, found_via.get("cudart"), cudart_path
+            )
         )
 
     # Check /usr/local/cuda symlink
