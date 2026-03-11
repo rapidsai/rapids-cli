@@ -79,7 +79,7 @@ def _format_missing_error(missing_libs: list[str], found_via: str | None) -> str
 def _get_toolkit_cuda_major(cudart_path: str | None = None) -> int | None:
     """Return the CUDA major version of the toolkit.
 
-    Tries two strategies in order:
+    Tries two different methods:
     1. Parse #define CUDA_VERSION from cuda_runtime_version.h (precise, needs dev headers)
     2. Call cudaRuntimeGetVersion via ctypes on the loaded libcudart.so
 
