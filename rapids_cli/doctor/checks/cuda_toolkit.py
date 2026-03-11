@@ -169,27 +169,33 @@ def cuda_toolkit_check(verbose=False):
             )
         )
 
-    # Check /usr/local/cuda symlink
-    if _CUDA_SYMLINK.exists():
-        sym_major = _extract_major_from_cuda_path(_CUDA_SYMLINK.resolve())
-        if sym_major is not None and sym_major > driver_major:
-            raise ValueError(
-                f"/usr/local/cuda points to CUDA {sym_major} but the GPU driver "
-                f"only supports up to CUDA {driver_major}. "
-                f"Update the symlink to a CUDA {driver_major}.x installation."
-            )
+    # Only check system paths if CUDA was found via system/CUDA_HOME.
+    # When found via conda or pip, RAPIDS uses those libs and ignores system paths.
+    cudart_source = found_via.get("cudart", "")
+    uses_system_paths = cudart_source not in ("conda", "site-packages")
 
-    # Check CUDA_HOME / CUDA_PATH
-    for env_var in ("CUDA_HOME", "CUDA_PATH"):
-        env_val = os.environ.get(env_var)
-        if env_val:
-            env_major = _extract_major_from_cuda_path(Path(env_val))
-            if env_major is not None and env_major > driver_major:
+    if uses_system_paths:
+        # Check /usr/local/cuda symlink
+        if _CUDA_SYMLINK.exists():
+            sym_major = _extract_major_from_cuda_path(_CUDA_SYMLINK.resolve())
+            if sym_major is not None and sym_major > driver_major:
                 raise ValueError(
-                    f"{env_var}={env_val} (CUDA {env_major}) but the GPU driver "
+                    f"/usr/local/cuda points to CUDA {sym_major} but the GPU driver "
                     f"only supports up to CUDA {driver_major}. "
-                    f"Set {env_var} to a CUDA {driver_major}.x path."
+                    f"Update the symlink to a CUDA {driver_major}.x installation."
                 )
+
+        # Check CUDA_HOME / CUDA_PATH
+        for env_var in ("CUDA_HOME", "CUDA_PATH"):
+            env_val = os.environ.get(env_var)
+            if env_val:
+                env_major = _extract_major_from_cuda_path(Path(env_val))
+                if env_major is not None and env_major > driver_major:
+                    raise ValueError(
+                        f"{env_var}={env_val} (CUDA {env_major}) but the GPU driver "
+                        f"only supports up to CUDA {driver_major}. "
+                        f"Set {env_var} to a CUDA {driver_major}.x path."
+                    )
 
     if verbose:
         version_str = f"CUDA {toolkit_major}" if toolkit_major else "unknown version"

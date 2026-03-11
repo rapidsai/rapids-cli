@@ -115,13 +115,22 @@ def test_check_toolkit_older_than_driver_passes(tmp_path):
 
 
 def test_check_cuda_symlink_newer_than_driver(tmp_path):
+    """Only checked when CUDA was found via system paths, not conda/pip."""
     symlink_target = tmp_path / "cuda-13.0"
     symlink_target.mkdir()
     symlink_path = tmp_path / "cuda"
     symlink_path.symlink_to(symlink_target)
 
+    system_libs = {
+        "cudart": FakeLoadedLib(
+            abs_path="/usr/lib/libcudart.so.12", found_via="system-search"
+        ),
+    }
     with (
-        patch("cuda.pathfinder.load_nvidia_dynamic_lib", side_effect=_fake_loader()),
+        patch(
+            "cuda.pathfinder.load_nvidia_dynamic_lib",
+            side_effect=_fake_loader(system_libs),
+        ),
         patch("pynvml.nvmlInit"),
         patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12040),
         patch("cuda.pathfinder.find_nvidia_header_directory", return_value=None),
@@ -133,8 +142,17 @@ def test_check_cuda_symlink_newer_than_driver(tmp_path):
 
 
 def test_check_cuda_home_newer_than_driver():
+    """Only checked when CUDA was found via system paths, not conda/pip."""
+    system_libs = {
+        "cudart": FakeLoadedLib(
+            abs_path="/usr/lib/libcudart.so.12", found_via="system-search"
+        ),
+    }
     with (
-        patch("cuda.pathfinder.load_nvidia_dynamic_lib", side_effect=_fake_loader()),
+        patch(
+            "cuda.pathfinder.load_nvidia_dynamic_lib",
+            side_effect=_fake_loader(system_libs),
+        ),
         patch("pynvml.nvmlInit"),
         patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12040),
         patch("cuda.pathfinder.find_nvidia_header_directory", return_value=None),
