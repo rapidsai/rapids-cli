@@ -32,6 +32,7 @@ gpu_compute_capability = "rapids_cli.doctor.checks.gpu:check_gpu_compute_capabil
 cuda = "rapids_cli.doctor.checks.cuda_driver:cuda_check"
 memory_to_gpu_ratio = "rapids_cli.doctor.checks.memory:check_memory_to_gpu_ratio"
 nvlink_status = "rapids_cli.doctor.checks.nvlink:check_nvlink_status"
+cuda_toolkit = "rapids_cli.doctor.checks.cuda_toolkit:cuda_toolkit_check"
 
 [project.urls]
 Homepage = "https://github.com/rapidsai/rapids-cli"
