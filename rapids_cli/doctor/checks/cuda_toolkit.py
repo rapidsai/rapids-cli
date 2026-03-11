@@ -45,8 +45,14 @@ def _format_mismatch_error(
     source = _get_source_label(found_via)
 
     location = f"CUDA {toolkit_major} toolkit"
-    details = [v for v in (f"found via {source}" if source else None,
-                           f"at {cudart_path}" if cudart_path else None) if v]
+    details = [
+        v
+        for v in (
+            f"found via {source}" if source else None,
+            f"at {cudart_path}" if cudart_path else None,
+        )
+        if v
+    ]
     if details:
         location += f" ({', '.join(details)})"
     return (
@@ -123,6 +129,7 @@ def _extract_major_from_cuda_path(path: Path) -> int | None:
             return int(match.group(1))
     return None
 
+
 def _check_path_version(label: str, path: Path, driver_major: int) -> None:
     """Raise if a CUDA path points to a version newer than the driver supports."""
     major = _extract_major_from_cuda_path(path)
@@ -184,7 +191,9 @@ def cuda_toolkit_check(verbose=False):
     if uses_system_paths:
         # Check /usr/local/cuda symlink
         if _CUDA_SYMLINK.exists():
-            _check_path_version("/usr/local/cuda", _CUDA_SYMLINK.resolve(), driver_major)
+            _check_path_version(
+                "/usr/local/cuda", _CUDA_SYMLINK.resolve(), driver_major
+            )
 
         # Check CUDA_HOME / CUDA_PATH
         for env_var in ("CUDA_HOME", "CUDA_PATH"):
