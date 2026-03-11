@@ -45,13 +45,10 @@ def _format_mismatch_error(
     source = _get_source_label(found_via)
 
     location = f"CUDA {toolkit_major} toolkit"
-    if source and cudart_path:
-        location += f" (found via {source} at {cudart_path})"
-    elif source:
-        location += f" (found via {source})"
-    elif cudart_path:
-        location += f" (at {cudart_path})"
-
+    details = [v for v in (f"found via {source}" if source else None,
+                           f"at {cudart_path}" if cudart_path else None) if v]
+    if details:
+        location += f" ({', '.join(details)})"
     return (
         f"{location} is newer than what the GPU driver supports (CUDA {driver_major}). "
         f"Either update the GPU driver to one that supports CUDA {toolkit_major}, "
@@ -126,6 +123,16 @@ def _extract_major_from_cuda_path(path: Path) -> int | None:
             return int(match.group(1))
     return None
 
+def _check_path_version(label: str, path: Path, driver_major: int) -> None:
+    """Raise if a CUDA path points to a version newer than the driver supports."""
+    major = _extract_major_from_cuda_path(path)
+    if major is not None and major > driver_major:
+        raise ValueError(
+            f"{label} points to CUDA {major} but the GPU driver "
+            f"only supports up to CUDA {driver_major}. "
+            f"Update {label} to a CUDA {driver_major}.x installation."
+        )
+
 
 def cuda_toolkit_check(verbose=False):
     """Check CUDA toolkit library availability and version consistency."""
@@ -177,25 +184,13 @@ def cuda_toolkit_check(verbose=False):
     if uses_system_paths:
         # Check /usr/local/cuda symlink
         if _CUDA_SYMLINK.exists():
-            sym_major = _extract_major_from_cuda_path(_CUDA_SYMLINK.resolve())
-            if sym_major is not None and sym_major > driver_major:
-                raise ValueError(
-                    f"/usr/local/cuda points to CUDA {sym_major} but the GPU driver "
-                    f"only supports up to CUDA {driver_major}. "
-                    f"Update the symlink to a CUDA {driver_major}.x installation."
-                )
+            _check_path_version("/usr/local/cuda", _CUDA_SYMLINK.resolve(), driver_major)
 
         # Check CUDA_HOME / CUDA_PATH
         for env_var in ("CUDA_HOME", "CUDA_PATH"):
             env_val = os.environ.get(env_var)
             if env_val:
-                env_major = _extract_major_from_cuda_path(Path(env_val))
-                if env_major is not None and env_major > driver_major:
-                    raise ValueError(
-                        f"{env_var}={env_val} (CUDA {env_major}) but the GPU driver "
-                        f"only supports up to CUDA {driver_major}. "
-                        f"Set {env_var} to a CUDA {driver_major}.x path."
-                    )
+                _check_path_version(f"{env_var}={env_val}", Path(env_val), driver_major)
 
     if verbose:
         version_str = f"CUDA {toolkit_major}" if toolkit_major else "unknown version"
