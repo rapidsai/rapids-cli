@@ -24,6 +24,7 @@ _SOURCE_LABELS = {
     "CUDA_HOME": "CUDA_HOME",
 }
 
+
 @dataclass
 class CudaToolkitInfo:
     """Gathered CUDA toolkit and driver information for the check to evaluate."""
