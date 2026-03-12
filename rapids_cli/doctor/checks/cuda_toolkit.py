@@ -4,9 +4,8 @@
 
 import os
 import re
+from dataclasses import dataclass, field
 from pathlib import Path
-
-import pynvml
 
 # Core libraries to check for findability.
 _CUDA_LIBS = {
@@ -24,6 +23,16 @@ _SOURCE_LABELS = {
     "system": "system",
     "CUDA_HOME": "CUDA_HOME",
 }
+
+@dataclass
+class CudaToolkitInfo:
+    """Gathered CUDA toolkit and driver information for the check to evaluate."""
+
+    found_libs: dict[str, str] = field(default_factory=dict)  # libname -> found_via
+    cudart_path: str | None = None
+    missing_libs: list[str] = field(default_factory=list)
+    driver_major: int | None = None
+    toolkit_major: int | None = None
 
 
 def _get_source_label(found_via: str | None) -> str | None:
@@ -79,6 +88,20 @@ def _format_missing_error(missing_libs: list[str], found_via: str | None) -> str
     )
 
 
+def _ctypes_cuda_version(cudart_path: str) -> int | None:
+    """Get CUDA major version by calling cudaRuntimeGetVersion via ctypes."""
+    import ctypes
+
+    try:
+        libcudart = ctypes.CDLL(cudart_path)
+        version = ctypes.c_int()
+        if libcudart.cudaRuntimeGetVersion(ctypes.byref(version)) == 0:
+            return version.value // 1000
+    except OSError:
+        pass
+    return None
+
+
 def _get_toolkit_cuda_major(cudart_path: str | None = None) -> int | None:
     """Return the CUDA major version of the toolkit.
 
@@ -89,8 +112,6 @@ def _get_toolkit_cuda_major(cudart_path: str | None = None) -> int | None:
     Args:
         cudart_path: Absolute path to libcudart.so from cuda-pathfinder, used as fallback.
     """
-    import ctypes
-
     import cuda.pathfinder
 
     # header parsing
@@ -106,28 +127,15 @@ def _get_toolkit_cuda_major(cudart_path: str | None = None) -> int | None:
 
     # if header parsing fails, call cudaRuntimeGetVersion via ctypes
     if cudart_path is not None:
-        try:
-            libcudart = ctypes.CDLL(cudart_path)
-            version = ctypes.c_int()
-            if libcudart.cudaRuntimeGetVersion(ctypes.byref(version)) == 0:
-                return version.value // 1000
-        except OSError:
-            pass
+        return _ctypes_cuda_version(cudart_path)
 
     return None
 
 
 def _extract_major_from_cuda_path(path: Path) -> int | None:
-    """Extract CUDA major version from a path like /usr/local/cuda-12.4 or its version.txt."""
+    """Extract CUDA major version from a path like /usr/local/cuda-12.4."""
     match = re.search(r"cuda-(\d+)", str(path))
-    if match:
-        return int(match.group(1))
-    version_file = path / "version.txt"
-    if version_file.exists():
-        match = re.search(r"(\d+)\.", version_file.read_text())
-        if match:
-            return int(match.group(1))
-    return None
+    return int(match.group(1)) if match else None
 
 
 def _check_path_version(label: str, path: Path, driver_major: int) -> None:
@@ -141,61 +149,81 @@ def _check_path_version(label: str, path: Path, driver_major: int) -> None:
         )
 
 
-def cuda_toolkit_check(verbose=False):
-    """Check CUDA toolkit library availability and version consistency."""
+def _gather_toolkit_info() -> CudaToolkitInfo:  # pragma: no cover
+    """Gather CUDA toolkit and driver information from the real system."""
     import cuda.pathfinder
+    from cuda.core.system import get_driver_version
     from cuda.pathfinder import DynamicLibNotFoundError
 
-    # Check library findability
-    found_via = {}
-    cudart_path = None
-    missing = []
+    info = CudaToolkitInfo()
+
+    # Discover libraries
     for libname, soname in _CUDA_LIBS.items():
         try:
             loaded = cuda.pathfinder.load_nvidia_dynamic_lib(libname)
-            found_via[libname] = loaded.found_via
+            info.found_libs[libname] = loaded.found_via
             if libname == "cudart":
-                cudart_path = loaded.abs_path
+                info.cudart_path = loaded.abs_path
         except (DynamicLibNotFoundError, RuntimeError):
-            missing.append(soname)
+            info.missing_libs.append(soname)
 
-    if missing:
-        any_found_via = next(iter(found_via.values()), None)
-        raise ValueError(_format_missing_error(missing, any_found_via))
-
-    # Get driver CUDA major version
+    # Get driver version
     try:
-        pynvml.nvmlInit()
-        driver_major = pynvml.nvmlSystemGetCudaDriverVersion() // 1000
-    except pynvml.NVMLError as e:
+        info.driver_major = get_driver_version()[0]
+    except Exception:
+        info.driver_major = None
+
+    # Get toolkit version
+    if not info.missing_libs:
+        info.toolkit_major = _get_toolkit_cuda_major(info.cudart_path)
+
+    return info
+
+
+def cuda_toolkit_check(
+    verbose=False, *, toolkit_info: CudaToolkitInfo | None = None, **kwargs
+):
+    """Check CUDA toolkit library availability and version consistency."""
+    if toolkit_info is None:  # pragma: no cover
+        toolkit_info = _gather_toolkit_info()
+
+    # Check library findability
+    if toolkit_info.missing_libs:
+        any_found_via = next(iter(toolkit_info.found_libs.values()), None)
+        raise ValueError(
+            _format_missing_error(toolkit_info.missing_libs, any_found_via)
+        )
+
+    # Check driver availability
+    if toolkit_info.driver_major is None:
         raise ValueError(
             "Unable to query the GPU driver's CUDA version. "
             "RAPIDS requires a working NVIDIA GPU driver."
-        ) from e
+        )
 
-    # Get toolkit CUDA major version and compare to driver
-    # Only error when toolkit > driver (drivers are backward compatible)
-    toolkit_major = _get_toolkit_cuda_major(cudart_path)
+    driver_major = toolkit_info.driver_major
+    toolkit_major = toolkit_info.toolkit_major
+
+    # Compare toolkit to driver (only error when toolkit > driver, drivers are backward compatible)
     if toolkit_major is not None and toolkit_major > driver_major:
         raise ValueError(
             _format_mismatch_error(
-                toolkit_major, driver_major, found_via.get("cudart"), cudart_path
+                toolkit_major,
+                driver_major,
+                toolkit_info.found_libs.get("cudart"),
+                toolkit_info.cudart_path,
             )
         )
 
     # Only check system paths if CUDA was found via system/CUDA_HOME.
     # When found via conda or pip, RAPIDS uses those libs and ignores system paths.
-    cudart_source = found_via.get("cudart", "")
-    uses_system_paths = cudart_source not in ("conda", "site-packages")
-
-    if uses_system_paths:
-        # Check /usr/local/cuda symlink
+    cudart_source = toolkit_info.found_libs.get("cudart", "")
+    if cudart_source not in ("conda", "site-packages"):
         if _CUDA_SYMLINK.exists():
             _check_path_version(
                 "/usr/local/cuda", _CUDA_SYMLINK.resolve(), driver_major
             )
 
-        # Check CUDA_HOME / CUDA_PATH
         for env_var in ("CUDA_HOME", "CUDA_PATH"):
             env_val = os.environ.get(env_var)
             if env_val:

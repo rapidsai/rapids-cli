@@ -7,6 +7,7 @@ license-files = ["LICENSE"]
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "cuda-core >=0.6.0",
     "cuda-pathfinder >=1.2.3",
     "importlib-metadata >= 4.13.0; python_version < '3.12'",
     "nvidia-ml-py>=12.0",
