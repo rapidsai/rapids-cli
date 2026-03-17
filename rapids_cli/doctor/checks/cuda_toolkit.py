@@ -170,7 +170,7 @@ def _gather_toolkit_info() -> CudaToolkitInfo:  # pragma: no cover
 
     # Get driver version
     try:
-        info.driver_major = get_driver_version()[0]
+        info.driver_major = get_driver_version(kernel_mode=True)[0]
     except Exception:
         info.driver_major = None
 
