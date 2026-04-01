@@ -19,7 +19,7 @@ _CUDA_SYMLINK = Path("/usr/local/cuda")
 # Maps cuda-pathfinder's found_via values to human-readable source labels.
 _SOURCE_LABELS = {
     "conda": "conda",
-    "site-packages": "pip",
+    "site-packages": "pip/uv",
     "system": "system",
     "CUDA_HOME": "CUDA_HOME",
 }
@@ -68,7 +68,8 @@ def _format_mismatch_error(
     return (
         f"{location} is newer than what the GPU driver supports (CUDA {driver_major}). "
         f"Either update the GPU driver to one that supports CUDA {toolkit_major}, "
-        f"or recreate your environment with CUDA {driver_major} packages."
+        f"or recreate your environment with CUDA {driver_major} packages. "
+        f"See https://docs.nvidia.com/deploy/cuda-compatibility/ for details."
     )
 
 
@@ -85,7 +86,9 @@ def _format_missing_error(missing_libs: list[str], found_via: str | None) -> str
 
     return (
         f"Some CUDA libraries ({missing_str}) could not be found. "
-        "Install the CUDA Toolkit, or use conda/pip which manage CUDA automatically."
+        "Install the CUDA Toolkit from https://developer.nvidia.com/cuda-downloads, "
+        "or use a conda environment which manages CUDA dependencies automatically. "
+        "pip also bundles CUDA for cudf and cuml (recent versions)."
     )
 
 
@@ -99,6 +102,8 @@ def _ctypes_cuda_version(cudart_path: str) -> int | None:
         if libcudart.cudaRuntimeGetVersion(ctypes.byref(version)) == 0:
             return version.value // 1000
     except OSError:
+        # ctypes.CDLL raises OSError when the .so file cannot be loaded
+        # (e.g. file missing, broken symlink, or incompatible architecture).
         pass
     return None
 
