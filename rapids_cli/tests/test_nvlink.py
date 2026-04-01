@@ -19,13 +19,18 @@ def test_check_nvlink_status_success(verbose, expected):
     import pynvml
 
     mock_handle = MagicMock()
+
+    # Simulate a V100 with 6 NVLink slots; link_id >= 6 is out of range.
+    def mock_link_state(handle, link_id):
+        if link_id >= 6:
+            raise pynvml.NVMLError_InvalidArgument
+        return pynvml.NVML_FEATURE_ENABLED
+
     with (
         patch("pynvml.nvmlInit"),
         patch("pynvml.nvmlDeviceGetCount", return_value=2),
         patch("pynvml.nvmlDeviceGetHandleByIndex", return_value=mock_handle),
-        patch(
-            "pynvml.nvmlDeviceGetNvLinkState", return_value=pynvml.NVML_FEATURE_ENABLED
-        ),
+        patch("pynvml.nvmlDeviceGetNvLinkState", side_effect=mock_link_state),
     ):
         result = check_nvlink_status(verbose=verbose)
         assert result == expected
@@ -74,13 +79,18 @@ def test_check_nvlink_status_link_inactive():
     import pynvml
 
     mock_handle = MagicMock()
+
+    # Simulate a V100 with 6 NVLink slots, all inactive.
+    def mock_link_state(handle, link_id):
+        if link_id >= 6:
+            raise pynvml.NVMLError_InvalidArgument
+        return pynvml.NVML_FEATURE_DISABLED
+
     with (
         patch("pynvml.nvmlInit"),
         patch("pynvml.nvmlDeviceGetCount", return_value=2),
         patch("pynvml.nvmlDeviceGetHandleByIndex", return_value=mock_handle),
-        patch(
-            "pynvml.nvmlDeviceGetNvLinkState", return_value=pynvml.NVML_FEATURE_DISABLED
-        ),
+        patch("pynvml.nvmlDeviceGetNvLinkState", side_effect=mock_link_state),
     ):
         with pytest.raises(ValueError, match="NVLink inactive on:"):
             check_nvlink_status(verbose=False)
@@ -92,8 +102,10 @@ def test_check_nvlink_status_partial_failure():
 
     mock_handle = MagicMock()
 
-    # Simulate: link 0 active, link 1 inactive, rest active
+    # Simulate a V100 with 6 NVLink slots: link 0 active, link 1 inactive, rest active.
     def mock_link_state(handle, link_id):
+        if link_id >= 6:
+            raise pynvml.NVMLError_InvalidArgument
         if link_id == 1:
             return pynvml.NVML_FEATURE_DISABLED
         return pynvml.NVML_FEATURE_ENABLED
@@ -109,3 +121,25 @@ def test_check_nvlink_status_partial_failure():
         # Both GPUs should have link 1 reported as failed
         assert "GPU 0 link 1" in str(exc_info.value)
         assert "GPU 1 link 1" in str(exc_info.value)
+
+
+def test_check_nvlink_status_invalid_argument():
+    """NVMLError_InvalidArgument stops link iteration early — check succeeds for valid links."""
+    import pynvml
+
+    mock_handle = MagicMock()
+
+    # Simulate an A100 with 12 NVLink slots; link_id >= 12 is out of range.
+    def mock_link_state(handle, link_id):
+        if link_id >= 12:
+            raise pynvml.NVMLError_InvalidArgument
+        return pynvml.NVML_FEATURE_ENABLED
+
+    with (
+        patch("pynvml.nvmlInit"),
+        patch("pynvml.nvmlDeviceGetCount", return_value=2),
+        patch("pynvml.nvmlDeviceGetHandleByIndex", return_value=mock_handle),
+        patch("pynvml.nvmlDeviceGetNvLinkState", side_effect=mock_link_state),
+    ):
+        result = check_nvlink_status(verbose=True)
+        assert result == "All NVLinks active across 2 GPUs"

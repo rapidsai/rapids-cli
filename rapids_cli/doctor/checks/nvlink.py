@@ -27,6 +27,10 @@ def check_nvlink_status(verbose=True, **kwargs):
 
     for gpu_idx in range(device_count):
         handle = pynvml.nvmlDeviceGetHandleByIndex(gpu_idx)
+        # NVML provides no API to query the number of NVLink slots on a device
+        # (e.g. V100=6, A100=12, H100=18). The only way to discover the real count
+        # is to iterate up to NVML_NVLINK_MAX_LINKS and stop when the driver signals
+        # that link_id is out of range via NVMLError_InvalidArgument.
         for link_id in range(pynvml.NVML_NVLINK_MAX_LINKS):
             try:
                 # nvmlDeviceGetNvLinkState(device, link) returns NVML_FEATURE_ENABLED
@@ -38,6 +42,10 @@ def check_nvlink_status(verbose=True, **kwargs):
                 # The driver reports NVLink is not supported on this system.
                 # There is nothing to check — skip like the single-GPU case above.
                 return False
+            except pynvml.NVMLError_InvalidArgument:
+                # link_id exceeds the number of NVLink slots on this device.
+                # Stop iterating links for this GPU.
+                break
 
     if failed_links:
         details = ", ".join(f"GPU {gpu} link {link}" for gpu, link in failed_links)
