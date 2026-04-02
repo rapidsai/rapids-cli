@@ -7,6 +7,7 @@ license-files = ["LICENSE"]
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "cuda-core >=0.6.0",
     "cuda-pathfinder >=1.2.3",
     "importlib-metadata >= 4.13.0; python_version < '3.12'",
     "nvidia-ml-py>=12.0",
@@ -32,6 +33,7 @@ gpu_compute_capability = "rapids_cli.doctor.checks.gpu:check_gpu_compute_capabil
 cuda = "rapids_cli.doctor.checks.cuda_driver:cuda_check"
 memory_to_gpu_ratio = "rapids_cli.doctor.checks.memory:check_memory_to_gpu_ratio"
 nvlink_status = "rapids_cli.doctor.checks.nvlink:check_nvlink_status"
+cuda_toolkit = "rapids_cli.doctor.checks.cuda_toolkit:cuda_toolkit_check"
 
 [project.urls]
 Homepage = "https://github.com/rapidsai/rapids-cli"
