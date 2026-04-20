@@ -8,9 +8,10 @@ from dataclasses import dataclass
 
 from rich.console import Console
 
+from rapids_cli import providers
 from rapids_cli._compatibility import entry_points
 from rapids_cli.constants import DOCTOR_SYMBOL
-from rapids_cli.hardware import NvmlGpuInfo
+from rapids_cli.hardware import DefaultSystemInfo, NvmlGpuInfo
 
 console = Console()
 
@@ -77,7 +78,7 @@ def doctor_check(
         console.print("Dry run, skipping checks")
         return True
 
-    gpu_info = NvmlGpuInfo()
+    providers.set_providers(gpu_info=NvmlGpuInfo(), system_info=DefaultSystemInfo())
 
     results: list[CheckResult] = []
     with console.status("[bold green]Running checks...") as ui_status:
@@ -90,7 +91,7 @@ def doctor_check(
                 with warnings.catch_warnings(record=True) as w:
                     warnings.simplefilter("always")
                     status = True
-                    value = check_fn(verbose=verbose, gpu_info=gpu_info)
+                    value = check_fn(verbose=verbose)
                     caught_warnings = w
 
             except Exception as e:

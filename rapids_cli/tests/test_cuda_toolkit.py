@@ -71,9 +71,9 @@ def test_ctypes_cuda_version_oserror():
 # Check function tests
 
 
-def test_check_success():
-    info = _make_info()
-    result = cuda_toolkit_check(verbose=True, toolkit_info=info)
+def test_check_success(set_toolkit_info):
+    set_toolkit_info(_make_info())
+    result = cuda_toolkit_check(verbose=True)
     assert isinstance(result, str)
     assert "CUDA 12" in result
 
@@ -90,75 +90,83 @@ def test_check_success():
     ],
     ids=["all_missing", "partial_missing"],
 )
-def test_check_missing_libs(found_libs, missing_libs, expected_match):
-    info = _make_info(
-        found_libs=found_libs,
-        missing_libs=missing_libs,
-        cudart_path=None if not found_libs else "/usr/lib/libcudart.so",
-        toolkit_major=None if not found_libs else 12,
+def test_check_missing_libs(set_toolkit_info, found_libs, missing_libs, expected_match):
+    set_toolkit_info(
+        _make_info(
+            found_libs=found_libs,
+            missing_libs=missing_libs,
+            cudart_path=None if not found_libs else "/usr/lib/libcudart.so",
+            toolkit_major=None if not found_libs else 12,
+        )
     )
     with pytest.raises(ValueError, match=expected_match):
-        cuda_toolkit_check(toolkit_info=info)
+        cuda_toolkit_check()
 
 
-def test_check_driver_query_fails():
-    info = _make_info(driver_major=None)
+def test_check_driver_query_fails(set_toolkit_info):
+    set_toolkit_info(_make_info(driver_major=None))
     with pytest.raises(ValueError, match="Unable to query"):
-        cuda_toolkit_check(toolkit_info=info)
+        cuda_toolkit_check()
 
 
-def test_check_toolkit_newer_than_driver():
+def test_check_toolkit_newer_than_driver(set_toolkit_info):
     """CUDA 13 toolkit + CUDA 12 driver = error."""
-    info = _make_info(
-        found_libs={"cudart": "conda", "nvrtc": "conda", "nvvm": "conda"},
-        cudart_path="/usr/lib/libcudart.so.13",
-        toolkit_major=13,
-        driver_major=12,
+    set_toolkit_info(
+        _make_info(
+            found_libs={"cudart": "conda", "nvrtc": "conda", "nvvm": "conda"},
+            cudart_path="/usr/lib/libcudart.so.13",
+            toolkit_major=13,
+            driver_major=12,
+        )
     )
     with pytest.raises(ValueError, match="newer than what the GPU driver supports"):
-        cuda_toolkit_check(toolkit_info=info)
+        cuda_toolkit_check()
 
 
-def test_check_toolkit_older_than_driver_passes():
+def test_check_toolkit_older_than_driver_passes(set_toolkit_info):
     """CUDA 12 toolkit + CUDA 13 driver = fine (backward compatible)."""
-    info = _make_info(toolkit_major=12, driver_major=13)
-    assert cuda_toolkit_check(verbose=False, toolkit_info=info) is True
+    set_toolkit_info(_make_info(toolkit_major=12, driver_major=13))
+    assert cuda_toolkit_check(verbose=False) is True
 
 
-def test_check_cuda_symlink_newer_than_driver(tmp_path):
+def test_check_cuda_symlink_newer_than_driver(set_toolkit_info, tmp_path):
     """Only checked when CUDA was found via system paths, not conda/pip."""
     symlink_target = tmp_path / "cuda-13.0"
     symlink_target.mkdir()
     symlink_path = tmp_path / "cuda"
     symlink_path.symlink_to(symlink_target)
 
-    info = _make_info(
-        found_libs={
-            "cudart": "system-search",
-            "nvrtc": "system-search",
-            "nvvm": "system-search",
-        },
-        toolkit_major=12,
-        driver_major=12,
+    set_toolkit_info(
+        _make_info(
+            found_libs={
+                "cudart": "system-search",
+                "nvrtc": "system-search",
+                "nvvm": "system-search",
+            },
+            toolkit_major=12,
+            driver_major=12,
+        )
     )
     with (
         patch("rapids_cli.doctor.checks.cuda_toolkit._CUDA_SYMLINK", symlink_path),
         patch.dict("os.environ", {}, clear=True),
     ):
         with pytest.raises(ValueError, match="points to CUDA 13"):
-            cuda_toolkit_check(toolkit_info=info)
+            cuda_toolkit_check()
 
 
-def test_check_cuda_home_newer_than_driver():
+def test_check_cuda_home_newer_than_driver(set_toolkit_info):
     """Only checked when CUDA was found via system paths, not conda/pip."""
-    info = _make_info(
-        found_libs={
-            "cudart": "system-search",
-            "nvrtc": "system-search",
-            "nvvm": "system-search",
-        },
-        toolkit_major=12,
-        driver_major=12,
+    set_toolkit_info(
+        _make_info(
+            found_libs={
+                "cudart": "system-search",
+                "nvrtc": "system-search",
+                "nvvm": "system-search",
+            },
+            toolkit_major=12,
+            driver_major=12,
+        )
     )
     with (
         patch(
@@ -167,4 +175,4 @@ def test_check_cuda_home_newer_than_driver():
         patch.dict("os.environ", {"CUDA_HOME": "/usr/local/cuda-13.0"}, clear=True),
     ):
         with pytest.raises(ValueError, match="CUDA_HOME"):
-            cuda_toolkit_check(toolkit_info=info)
+            cuda_toolkit_check()

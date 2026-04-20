@@ -13,16 +13,14 @@ from rapids_cli.debug.debug import (
 from rapids_cli.hardware import FakeGpuInfo, FakeSystemInfo
 
 
-def test_gather_cuda_version():
-    gpu_info = FakeGpuInfo(cuda_driver_version=12040)
-    result = gather_cuda_version(gpu_info=gpu_info)
-    assert result == "12.4"
+def test_gather_cuda_version(set_gpu_info):
+    set_gpu_info(FakeGpuInfo(cuda_driver_version=12040))
+    assert gather_cuda_version() == "12.4"
 
 
-def test_gather_cuda_version_with_patch():
-    gpu_info = FakeGpuInfo(cuda_driver_version=12345)
-    result = gather_cuda_version(gpu_info=gpu_info)
-    assert result == "12.34.5"
+def test_gather_cuda_version_with_patch(set_gpu_info):
+    set_gpu_info(FakeGpuInfo(cuda_driver_version=12345))
+    assert gather_cuda_version() == "12.34.5"
 
 
 def test_gather_package_versions():
@@ -62,15 +60,19 @@ def test_gather_tools():
         assert "g++" in result
 
 
-def test_run_debug_console(capsys):
-    gpu_info = FakeGpuInfo(
-        device_count=1,
-        cuda_driver_version=12040,
-        driver_version="550.54.15",
+def test_run_debug_console(capsys, set_gpu_info, set_system_info):
+    set_gpu_info(
+        FakeGpuInfo(
+            device_count=1,
+            cuda_driver_version=12040,
+            driver_version="550.54.15",
+        )
     )
-    system_info = FakeSystemInfo(
-        total_memory_bytes=32 * 1024**3,
-        cuda_runtime_path="/usr/local/cuda/include",
+    set_system_info(
+        FakeSystemInfo(
+            total_memory_bytes=32 * 1024**3,
+            cuda_runtime_path="/usr/local/cuda/include",
+        )
     )
 
     with (
@@ -80,21 +82,25 @@ def test_run_debug_console(capsys):
         patch("rapids_cli.debug.debug.gather_tools", return_value={}),
         patch("pathlib.Path.read_text", return_value='NAME="Ubuntu"\nVERSION="22.04"'),
     ):
-        run_debug(output_format="console", gpu_info=gpu_info, system_info=system_info)
+        run_debug(output_format="console")
 
     captured = capsys.readouterr()
     assert "RAPIDS Debug Information" in captured.out
 
 
-def test_run_debug_json(capsys):
-    gpu_info = FakeGpuInfo(
-        device_count=1,
-        cuda_driver_version=12040,
-        driver_version="550.54.15",
+def test_run_debug_json(capsys, set_gpu_info, set_system_info):
+    set_gpu_info(
+        FakeGpuInfo(
+            device_count=1,
+            cuda_driver_version=12040,
+            driver_version="550.54.15",
+        )
     )
-    system_info = FakeSystemInfo(
-        total_memory_bytes=32 * 1024**3,
-        cuda_runtime_path="/usr/local/cuda/include",
+    set_system_info(
+        FakeSystemInfo(
+            total_memory_bytes=32 * 1024**3,
+            cuda_runtime_path="/usr/local/cuda/include",
+        )
     )
 
     with (
@@ -109,7 +115,7 @@ def test_run_debug_json(capsys):
         patch("rapids_cli.debug.debug.gather_tools", return_value={"pip": "pip 23.0"}),
         patch("pathlib.Path.read_text", return_value='NAME="Ubuntu"\nVERSION="22.04"'),
     ):
-        run_debug(output_format="json", gpu_info=gpu_info, system_info=system_info)
+        run_debug(output_format="json")
 
     captured = capsys.readouterr()
     output = json.loads(captured.out)

@@ -4,21 +4,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from rapids_cli.hardware import GpuInfoProvider
+from rapids_cli.providers import get_gpu_info
 
 
-def check_nvlink_status(
-    verbose=True, *, gpu_info: GpuInfoProvider | None = None, **kwargs
-):
+def check_nvlink_status(verbose=True, **kwargs):
     """Check NVLink status across all GPUs."""
-    if gpu_info is None:  # pragma: no cover
-        from rapids_cli.hardware import NvmlGpuInfo
-
-        gpu_info = NvmlGpuInfo()
-
+    gpu_info = get_gpu_info()
     try:
         device_count = gpu_info.device_count
     except ValueError as e:

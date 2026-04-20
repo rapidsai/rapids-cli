@@ -186,29 +186,26 @@ def _gather_toolkit_info() -> CudaToolkitInfo:  # pragma: no cover
     return info
 
 
-def cuda_toolkit_check(
-    verbose=False, *, toolkit_info: CudaToolkitInfo | None = None, **kwargs
-):
+def cuda_toolkit_check(verbose=False, **kwargs):
     """Check CUDA toolkit library availability and version consistency."""
-    if toolkit_info is None:  # pragma: no cover
-        toolkit_info = _gather_toolkit_info()
+    from rapids_cli.providers import get_toolkit_info
+
+    info = get_toolkit_info()
 
     # Check library findability
-    if toolkit_info.missing_libs:
-        any_found_via = next(iter(toolkit_info.found_libs.values()), None)
-        raise ValueError(
-            _format_missing_error(toolkit_info.missing_libs, any_found_via)
-        )
+    if info.missing_libs:
+        any_found_via = next(iter(info.found_libs.values()), None)
+        raise ValueError(_format_missing_error(info.missing_libs, any_found_via))
 
     # Check driver availability
-    if toolkit_info.driver_major is None:
+    if info.driver_major is None:
         raise ValueError(
             "Unable to query the GPU driver's CUDA version. "
             "RAPIDS requires a working NVIDIA GPU driver."
         )
 
-    driver_major = toolkit_info.driver_major
-    toolkit_major = toolkit_info.toolkit_major
+    driver_major = info.driver_major
+    toolkit_major = info.toolkit_major
 
     # Compare toolkit to driver (only error when toolkit > driver, drivers are backward compatible)
     if toolkit_major is not None and toolkit_major > driver_major:
@@ -216,14 +213,14 @@ def cuda_toolkit_check(
             _format_mismatch_error(
                 toolkit_major,
                 driver_major,
-                toolkit_info.found_libs.get("cudart"),
-                toolkit_info.cudart_path,
+                info.found_libs.get("cudart"),
+                info.cudart_path,
             )
         )
 
     # Only check system paths if CUDA was found via system/CUDA_HOME.
     # When found via conda or pip, RAPIDS uses those libs and ignores system paths.
-    cudart_source = toolkit_info.found_libs.get("cudart", "")
+    cudart_source = info.found_libs.get("cudart", "")
     if cudart_source not in ("conda", "site-packages"):
         if _CUDA_SYMLINK.exists():
             _check_path_version(

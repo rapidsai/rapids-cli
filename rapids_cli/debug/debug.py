@@ -11,25 +11,18 @@ import sys
 from datetime import datetime
 from importlib.metadata import distributions, version
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from rich.console import Console
 from rich.table import Table
 
-if TYPE_CHECKING:
-    from rapids_cli.hardware import GpuInfoProvider, SystemInfoProvider
+from rapids_cli.providers import get_gpu_info, get_system_info
 
 console = Console()
 
 
-def gather_cuda_version(*, gpu_info: GpuInfoProvider | None = None):
+def gather_cuda_version():
     """Return CUDA driver version as a string, similar to nvidia-smi output."""
-    if gpu_info is None:  # pragma: no cover
-        from rapids_cli.hardware import NvmlGpuInfo
-
-        gpu_info = NvmlGpuInfo()
-
-    ver = gpu_info.cuda_driver_version
+    ver = get_gpu_info().cuda_driver_version
     # pynvml returns an int like 12040 for 12.4, so format as string
     major = ver // 1000
     minor = (ver % 1000) // 10
@@ -76,21 +69,10 @@ def gather_tools():
     }
 
 
-def run_debug(
-    output_format="console",
-    *,
-    gpu_info: GpuInfoProvider | None = None,
-    system_info: SystemInfoProvider | None = None,
-):
+def run_debug(output_format="console"):
     """Run debug."""
-    if gpu_info is None:  # pragma: no cover
-        from rapids_cli.hardware import NvmlGpuInfo
-
-        gpu_info = NvmlGpuInfo()
-    if system_info is None:  # pragma: no cover
-        from rapids_cli.hardware import DefaultSystemInfo
-
-        system_info = DefaultSystemInfo()
+    gpu_info = get_gpu_info()
+    system_info = get_system_info()
 
     debug_info = {
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -99,7 +81,7 @@ def run_debug(
             ["nvidia-smi"], "Nvidia-smi not installed"
         ),
         "driver_version": gpu_info.driver_version,
-        "cuda_version": gather_cuda_version(gpu_info=gpu_info),
+        "cuda_version": gather_cuda_version(),
         "cuda_runtime_path": system_info.cuda_runtime_path,
         "system_ctk": sorted(
             [str(p) for p in Path("/usr/local").glob("cuda*") if p.is_dir()]

@@ -10,25 +10,24 @@ from rapids_cli.doctor.checks.gpu import (
 from rapids_cli.hardware import DeviceInfo, FailingGpuInfo, FakeGpuInfo
 
 
-def test_gpu_check_success():
-    gpu_info = FakeGpuInfo(device_count=2)
-    result = gpu_check(verbose=True, gpu_info=gpu_info)
-    assert result == "GPU(s) detected: 2"
+def test_gpu_check_success(set_gpu_info):
+    set_gpu_info(FakeGpuInfo(device_count=2))
+    assert gpu_check(verbose=True) == "GPU(s) detected: 2"
 
 
-def test_gpu_check_no_gpus():
-    gpu_info = FakeGpuInfo(device_count=0)
+def test_gpu_check_no_gpus(set_gpu_info):
+    set_gpu_info(FakeGpuInfo(device_count=0))
     with pytest.raises(AssertionError, match="No GPUs detected"):
-        gpu_check(verbose=False, gpu_info=gpu_info)
+        gpu_check(verbose=False)
 
 
-def test_gpu_check_nvml_error():
-    gpu_info = FailingGpuInfo()
+def test_gpu_check_nvml_error(set_gpu_info):
+    set_gpu_info(FailingGpuInfo())
     with pytest.raises(ValueError, match="No available GPUs detected"):
-        gpu_check(verbose=False, gpu_info=gpu_info)
+        gpu_check(verbose=False)
 
 
-def test_check_gpu_compute_capability_success():
+def test_check_gpu_compute_capability_success(set_gpu_info):
     devices = [
         DeviceInfo(
             index=0,
@@ -41,26 +40,25 @@ def test_check_gpu_compute_capability_success():
             memory_total_bytes=0,
         ),
     ]
-    gpu_info = FakeGpuInfo(device_count=2, devices=devices)
-    result = check_gpu_compute_capability(verbose=True, gpu_info=gpu_info)
-    assert result is True
+    set_gpu_info(FakeGpuInfo(device_count=2, devices=devices))
+    assert check_gpu_compute_capability(verbose=True) is True
 
 
-def test_check_gpu_compute_capability_insufficient():
+def test_check_gpu_compute_capability_insufficient(set_gpu_info):
     devices = [
         DeviceInfo(index=0, compute_capability=(6, 0), memory_total_bytes=0),
     ]
-    gpu_info = FakeGpuInfo(device_count=1, devices=devices)
+    set_gpu_info(FakeGpuInfo(device_count=1, devices=devices))
     with pytest.raises(
         ValueError,
         match=f"GPU 0 requires compute capability {REQUIRED_COMPUTE_CAPABILITY}",
     ):
-        check_gpu_compute_capability(verbose=False, gpu_info=gpu_info)
+        check_gpu_compute_capability(verbose=False)
 
 
-def test_check_gpu_compute_capability_no_gpu():
-    gpu_info = FailingGpuInfo()
+def test_check_gpu_compute_capability_no_gpu(set_gpu_info):
+    set_gpu_info(FailingGpuInfo())
     with pytest.raises(
         ValueError, match="No GPU - cannot determine GPU Compute Capability"
     ):
-        check_gpu_compute_capability(verbose=False, gpu_info=gpu_info)
+        check_gpu_compute_capability(verbose=False)
