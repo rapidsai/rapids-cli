@@ -8,7 +8,7 @@ from rapids_cli.providers import get_gpu_info
 REQUIRED_COMPUTE_CAPABILITY = 7
 
 
-def gpu_check(verbose=False):
+def gpu_check(verbose=False, **kwargs):
     """Check GPU availability."""
     try:
         num_gpus = get_gpu_info().device_count
@@ -18,7 +18,7 @@ def gpu_check(verbose=False):
     return f"GPU(s) detected: {num_gpus}"
 
 
-def check_gpu_compute_capability(verbose=False):
+def check_gpu_compute_capability(verbose=False, **kwargs):
     """Check the system for GPU Compute Capability."""
     try:
         devices = get_gpu_info().devices

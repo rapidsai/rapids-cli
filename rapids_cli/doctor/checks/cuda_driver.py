@@ -6,7 +6,7 @@ from rapids_cli.hardware import HardwareInfoError
 from rapids_cli.providers import get_gpu_info
 
 
-def cuda_check(verbose=False):
+def cuda_check(verbose=False, **kwargs):
     """Check CUDA availability."""
     try:
         return get_gpu_info().cuda_driver_version

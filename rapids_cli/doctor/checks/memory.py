@@ -8,17 +8,17 @@ from rapids_cli.hardware import HardwareInfoError
 from rapids_cli.providers import get_gpu_info, get_system_info
 
 
-def get_system_memory(verbose=False):
+def get_system_memory(verbose=False, **kwargs):
     """Get the total system memory."""
     return get_system_info().total_memory_bytes / (1024**3)
 
 
-def get_gpu_memory(verbose=False):
+def get_gpu_memory(verbose=False, **kwargs):
     """Get the total GPU memory."""
     return sum(dev.memory_total_bytes for dev in get_gpu_info().devices) / (1024**3)
 
 
-def check_memory_to_gpu_ratio(verbose=True):
+def check_memory_to_gpu_ratio(verbose=True, **kwargs):
     """Check the system for a 2:1 ratio of system Memory to total GPU Memory.
 
     This is especially useful for Dask.

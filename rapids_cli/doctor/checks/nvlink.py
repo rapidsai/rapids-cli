@@ -6,7 +6,7 @@ from rapids_cli.hardware import HardwareInfoError
 from rapids_cli.providers import get_gpu_info
 
 
-def check_nvlink_status(verbose=True):
+def check_nvlink_status(verbose=True, **kwargs):
     """Check NVLink status across all GPUs."""
     gpu_info = get_gpu_info()
     try:
