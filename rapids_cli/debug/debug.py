@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """This module contains the debug subcommand for the Rapids CLI."""
 
-from __future__ import annotations
-
 import json
 import platform
 import subprocess
@@ -22,11 +20,11 @@ console = Console()
 
 def gather_cuda_version():
     """Return CUDA driver version as a string, similar to nvidia-smi output."""
-    ver = get_gpu_info().cuda_driver_version
+    version = get_gpu_info().cuda_driver_version
     # pynvml returns an int like 12040 for 12.4, so format as string
-    major = ver // 1000
-    minor = (ver % 1000) // 10
-    patch = ver % 10
+    major = version // 1000
+    minor = (version % 1000) // 10
+    patch = version % 10
     if patch == 0:
         return f"{major}.{minor}"
     else:

@@ -7,7 +7,8 @@ from rapids_cli.doctor.checks.gpu import (
     check_gpu_compute_capability,
     gpu_check,
 )
-from rapids_cli.hardware import DeviceInfo, FailingGpuInfo, FakeGpuInfo
+from rapids_cli.hardware import DeviceInfo
+from rapids_cli.tests.fakes import FailingGpuInfo, FakeGpuInfo
 
 
 def test_gpu_check_success(set_gpu_info):

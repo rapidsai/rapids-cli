@@ -7,7 +7,8 @@ from rapids_cli.doctor.checks.memory import (
     get_gpu_memory,
     get_system_memory,
 )
-from rapids_cli.hardware import DeviceInfo, FailingGpuInfo, FakeGpuInfo, FakeSystemInfo
+from rapids_cli.hardware import DeviceInfo
+from rapids_cli.tests.fakes import FailingGpuInfo, FakeGpuInfo, FakeSystemInfo
 
 
 def test_get_system_memory(set_system_info):

@@ -2,17 +2,16 @@
 # SPDX-License-Identifier: Apache-2.0
 """Check for NVLink status."""
 
-from __future__ import annotations
-
+from rapids_cli.hardware import HardwareInfoError
 from rapids_cli.providers import get_gpu_info
 
 
-def check_nvlink_status(verbose=True, **kwargs):
+def check_nvlink_status(verbose=True):
     """Check NVLink status across all GPUs."""
     gpu_info = get_gpu_info()
     try:
         device_count = gpu_info.device_count
-    except ValueError as e:
+    except HardwareInfoError as e:
         raise ValueError("GPU not found. Please ensure GPUs are installed.") from e
 
     # NVLink requires at least 2 GPUs to be meaningful. A single GPU has nothing

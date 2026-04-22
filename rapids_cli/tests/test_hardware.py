@@ -8,13 +8,16 @@ import pytest
 from rapids_cli.hardware import (
     DefaultSystemInfo,
     DeviceInfo,
+    GpuInfoProvider,
+    HardwareInfoError,
+    NvmlGpuInfo,
+    SystemInfoProvider,
+)
+from rapids_cli.tests.fakes import (
     FailingGpuInfo,
     FailingSystemInfo,
     FakeGpuInfo,
     FakeSystemInfo,
-    GpuInfoProvider,
-    NvmlGpuInfo,
-    SystemInfoProvider,
 )
 
 # --- NvmlGpuInfo tests ---
@@ -26,7 +29,7 @@ def test_nvml_gpu_info_init_failure():
         side_effect=pynvml.NVMLError(pynvml.NVML_ERROR_DRIVER_NOT_LOADED),
     ):
         gpu_info = NvmlGpuInfo()
-        with pytest.raises(ValueError, match="Unable to initialize GPU driver"):
+        with pytest.raises(HardwareInfoError, match="Unable to initialize GPU driver"):
             _ = gpu_info.device_count
 
 
@@ -203,22 +206,22 @@ def test_fake_system_info_satisfies_protocol():
 
 
 def test_failing_gpu_info_device_count():
-    with pytest.raises(ValueError, match="No GPU available"):
+    with pytest.raises(HardwareInfoError, match="No GPU available"):
         _ = FailingGpuInfo().device_count
 
 
 def test_failing_gpu_info_devices():
-    with pytest.raises(ValueError, match="No GPU available"):
+    with pytest.raises(HardwareInfoError, match="No GPU available"):
         _ = FailingGpuInfo().devices
 
 
 def test_failing_gpu_info_cuda_driver_version():
-    with pytest.raises(ValueError, match="No GPU available"):
+    with pytest.raises(HardwareInfoError, match="No GPU available"):
         _ = FailingGpuInfo().cuda_driver_version
 
 
 def test_failing_gpu_info_driver_version():
-    with pytest.raises(ValueError, match="No GPU available"):
+    with pytest.raises(HardwareInfoError, match="No GPU available"):
         _ = FailingGpuInfo().driver_version
 
 
@@ -226,10 +229,10 @@ def test_failing_gpu_info_driver_version():
 
 
 def test_failing_system_info_total_memory():
-    with pytest.raises(ValueError, match="System info unavailable"):
+    with pytest.raises(HardwareInfoError, match="System info unavailable"):
         _ = FailingSystemInfo().total_memory_bytes
 
 
 def test_failing_system_info_cuda_runtime_path():
-    with pytest.raises(ValueError, match="System info unavailable"):
+    with pytest.raises(HardwareInfoError, match="System info unavailable"):
         _ = FailingSystemInfo().cuda_runtime_path

@@ -18,6 +18,10 @@ class DeviceInfo:
     nvlink_states: list[bool] = field(default_factory=list)
 
 
+class HardwareInfoError(Exception):
+    """Raised when hardware information cannot be obtained."""
+
+
 @runtime_checkable
 class GpuInfoProvider(Protocol):
     """Read-only interface for GPU information."""
@@ -81,7 +85,7 @@ class NvmlGpuInfo:
         try:
             pynvml.nvmlInit()
         except pynvml.NVMLError as e:
-            raise ValueError("Unable to initialize GPU driver (NVML)") from e
+            raise HardwareInfoError("Unable to initialize GPU driver (NVML)") from e
 
         self._device_count = pynvml.nvmlDeviceGetCount()
         self._cuda_driver_version = pynvml.nvmlSystemGetCudaDriverVersion()
@@ -98,7 +102,10 @@ class NvmlGpuInfo:
                 try:
                     state = pynvml.nvmlDeviceGetNvLinkState(handle, link_id)
                     nvlink_states.append(bool(state))
-                except pynvml.NVMLError:
+                except (
+                    pynvml.NVMLError_InvalidArgument,
+                    pynvml.NVMLError_NotSupported,
+                ):
                     break
 
             self._devices.append(
@@ -171,59 +178,3 @@ class DefaultSystemInfo:
             )
             self._cuda_path_loaded = True
         return self._cuda_runtime_path
-
-
-@dataclass
-class FakeGpuInfo:
-    """Test fake for GPU information with pre-set data."""
-
-    device_count: int = 0
-    devices: list[DeviceInfo] = field(default_factory=list)
-    cuda_driver_version: int = 0
-    driver_version: str = ""
-
-
-@dataclass
-class FakeSystemInfo:
-    """Test fake for system information with pre-set data."""
-
-    total_memory_bytes: int = 0
-    cuda_runtime_path: str | None = None
-
-
-class FailingGpuInfo:
-    """Test fake that raises ValueError on any property access."""
-
-    @property
-    def device_count(self) -> int:
-        """Raise ValueError."""
-        raise ValueError("No GPU available")
-
-    @property
-    def devices(self) -> list[DeviceInfo]:
-        """Raise ValueError."""
-        raise ValueError("No GPU available")
-
-    @property
-    def cuda_driver_version(self) -> int:
-        """Raise ValueError."""
-        raise ValueError("No GPU available")
-
-    @property
-    def driver_version(self) -> str:
-        """Raise ValueError."""
-        raise ValueError("No GPU available")
-
-
-class FailingSystemInfo:
-    """Test fake that raises ValueError on any property access."""
-
-    @property
-    def total_memory_bytes(self) -> int:
-        """Raise ValueError."""
-        raise ValueError("System info unavailable")
-
-    @property
-    def cuda_runtime_path(self) -> str | None:
-        """Raise ValueError."""
-        raise ValueError("System info unavailable")

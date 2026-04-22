@@ -3,7 +3,7 @@
 import pytest
 
 from rapids_cli.doctor.checks.cuda_driver import cuda_check
-from rapids_cli.hardware import FailingGpuInfo, FakeGpuInfo
+from rapids_cli.tests.fakes import FailingGpuInfo, FakeGpuInfo
 
 
 def test_cuda_check_success(set_gpu_info):

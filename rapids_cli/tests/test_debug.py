@@ -10,7 +10,7 @@ from rapids_cli.debug.debug import (
     gather_tools,
     run_debug,
 )
-from rapids_cli.hardware import FakeGpuInfo, FakeSystemInfo
+from rapids_cli.tests.fakes import FakeGpuInfo, FakeSystemInfo
 
 
 def test_gather_cuda_version(set_gpu_info):

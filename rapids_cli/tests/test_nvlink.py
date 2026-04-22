@@ -3,7 +3,8 @@
 import pytest
 
 from rapids_cli.doctor.checks.nvlink import check_nvlink_status
-from rapids_cli.hardware import DeviceInfo, FailingGpuInfo, FakeGpuInfo
+from rapids_cli.hardware import DeviceInfo
+from rapids_cli.tests.fakes import FailingGpuInfo, FakeGpuInfo
 
 
 def _make_device(index: int, nvlink_states: list[bool]) -> DeviceInfo:
