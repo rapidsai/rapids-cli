@@ -10,7 +10,7 @@ for troubleshooting RAPIDS installations.
 :func:`~rapids_cli.debug.debug.run_debug` is the main entry point. It collects:
 
 - Platform and OS details (from ``platform`` and ``/etc/os-release``)
-- NVIDIA driver and CUDA versions (via ``pynvml``)
+- NVIDIA driver and CUDA versions (via ``cuda.core.system``)
 - CUDA runtime path (via ``cuda-pathfinder``)
 - System CUDA toolkit locations (globbing ``/usr/local/cuda*``)
 - Python version and hash info

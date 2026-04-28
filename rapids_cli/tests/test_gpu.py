@@ -13,8 +13,8 @@ from rapids_cli.doctor.checks.gpu import (
 
 def test_gpu_check_success():
     with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlDeviceGetCount", return_value=2),
+        patch("cuda.bindings.nvml.init_v2"),
+        patch("cuda.bindings.nvml.device_get_count_v2", return_value=2),
     ):
         result = gpu_check(verbose=True)
         assert result == "GPU(s) detected: 2"
@@ -22,28 +22,28 @@ def test_gpu_check_success():
 
 def test_gpu_check_no_gpus():
     with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlDeviceGetCount", return_value=0),
+        patch("cuda.bindings.nvml.init_v2"),
+        patch("cuda.bindings.nvml.device_get_count_v2", return_value=0),
     ):
         with pytest.raises(AssertionError, match="No GPUs detected"):
             gpu_check(verbose=False)
 
 
 def test_gpu_check_nvml_error():
-    import pynvml
+    from cuda.bindings import nvml
 
-    with patch("pynvml.nvmlInit", side_effect=pynvml.NVMLError(1)):
+    with patch("cuda.bindings.nvml.init_v2", side_effect=nvml.NvmlError(1)):
         with pytest.raises(ValueError, match="No available GPUs detected"):
             gpu_check(verbose=False)
 
 
 def test_check_gpu_compute_capability_success():
     with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlDeviceGetCount", return_value=2),
-        patch("pynvml.nvmlDeviceGetHandleByIndex"),
+        patch("cuda.bindings.nvml.init_v2"),
+        patch("cuda.bindings.nvml.device_get_count_v2", return_value=2),
+        patch("cuda.bindings.nvml.device_get_handle_by_index_v2", return_value=0xffffffff),
         patch(
-            "pynvml.nvmlDeviceGetCudaComputeCapability",
+            "cuda.bindings.nvml.device_get_cuda_compute_capability",
             return_value=(REQUIRED_COMPUTE_CAPABILITY, 5),
         ),
     ):
@@ -53,10 +53,10 @@ def test_check_gpu_compute_capability_success():
 
 def test_check_gpu_compute_capability_insufficient():
     with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlDeviceGetCount", return_value=1),
-        patch("pynvml.nvmlDeviceGetHandleByIndex"),
-        patch("pynvml.nvmlDeviceGetCudaComputeCapability", return_value=(6, 0)),
+        patch("cuda.bindings.nvml.init_v2"),
+        patch("cuda.bindings.nvml.device_get_count_v2", return_value=1),
+        patch("cuda.bindings.nvml.device_get_handle_by_index_v2", return_value=0xffffffff),
+        patch("cuda.bindings.nvml.device_get_cuda_compute_capability", return_value=(6, 0)),
     ):
         with pytest.raises(
             ValueError,
@@ -66,9 +66,9 @@ def test_check_gpu_compute_capability_insufficient():
 
 
 def test_check_gpu_compute_capability_no_gpu():
-    import pynvml
+    from cuda.bindings import nvml
 
-    with patch("pynvml.nvmlInit", side_effect=pynvml.NVMLError(1)):
+    with patch("cuda.bindings.nvml.init_v2", side_effect=nvml.NvmlError(1)):
         with pytest.raises(
             ValueError, match="No GPU - cannot determine GPU Compute Capability"
         ):

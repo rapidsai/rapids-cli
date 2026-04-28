@@ -14,14 +14,14 @@ from rapids_cli.debug.debug import (
 
 def test_gather_cuda_version():
     """Test CUDA version gathering."""
-    with patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12040):
+    with patch("cuda.core.system.get_driver_version_full", return_value=(12, 4, 0)):
         result = gather_cuda_version()
         assert result == "12.4"
 
 
 def test_gather_cuda_version_with_patch():
     """Test CUDA version with patch number."""
-    with patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12345):
+    with patch("cuda.core.system.get_driver_version_full", return_value=(12, 34, 5)):
         result = gather_cuda_version()
         assert result == "12.34.5"
 
@@ -74,9 +74,9 @@ def test_run_debug_console(capsys):
     mock_vm.total = 32 * 1024**3
 
     with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlSystemGetDriverVersion", return_value="550.54.15"),
-        patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12040),
+        patch("cuda.bindings.nvml.init_v2"),
+        patch("cuda.bindings.nvml.system_get_driver_version", return_value="550.54.15"),
+        patch("cuda.bindings.nvml.system_get_cuda_driver_version", return_value=12040),
         patch(
             "cuda.pathfinder.find_nvidia_header_directory",
             return_value="/usr/local/cuda/include",
@@ -95,10 +95,11 @@ def test_run_debug_console(capsys):
 
 def test_run_debug_json(capsys):
     """Test run_debug with JSON output."""
+    
     with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlSystemGetDriverVersion", return_value="550.54.15"),
-        patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12040),
+        patch("cuda.bindings.nvml.init_v2"),
+        patch("cuda.bindings.nvml.system_get_driver_version", return_value="550.54.15"),
+        patch("cuda.bindings.nvml.system_get_cuda_driver_version", return_value=12040),
         patch(
             "cuda.pathfinder.find_nvidia_header_directory",
             return_value="/usr/local/cuda/include",

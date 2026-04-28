@@ -5,7 +5,8 @@
 import warnings
 
 import psutil
-import pynvml
+
+from cuda.core import system
 
 
 def get_system_memory(verbose=False):
@@ -17,15 +18,11 @@ def get_system_memory(verbose=False):
 
 def get_gpu_memory(verbose=False):
     """Get the total GPU memory."""
-    pynvml.nvmlInit()
-    gpus = pynvml.nvmlDeviceGetCount()
-    gpu_memory_total = 0
-    for i in range(gpus):
-        handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-        memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-        gpu_memory_total += memory_info.total / (1024**3)  # converts to gigabytes
 
-    pynvml.nvmlShutdown()
+    gpu_memory_total = 0
+    for device in system.Device.get_all_devices():
+        gpu_memory_total += device.memory_info.total / (1024**3)  # converts to gigabytes
+
     return gpu_memory_total
 
 
@@ -36,9 +33,10 @@ def check_memory_to_gpu_ratio(verbose=True):
 
     """
     try:
-        pynvml.nvmlInit()
-    except pynvml.NVMLError as e:
-        raise ValueError("GPU not found. Please ensure GPUs are installed.") from e
+        if system.Device.get_device_count() == 0:
+            raise system.NvmlError(1)
+    except system.NvmlError:
+        raise ValueError("GPU not found. Please ensure GPUs are installed.")
 
     system_memory = get_system_memory(verbose)
     gpu_memory = get_gpu_memory(verbose)

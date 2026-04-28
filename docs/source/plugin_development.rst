@@ -95,15 +95,13 @@ GPU memory requirement check:
 
 .. code-block:: python
 
-   import pynvml
+   from cuda.core import system
 
 
    def gpu_memory_check(verbose=False, **kwargs):
        """Check that GPU has at least 8GB memory."""
-       pynvml.nvmlInit()
-       handle = pynvml.nvmlDeviceGetHandleByIndex(0)
-       mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
-       available_gb = mem.total / (1024**3)
+       device = system.Device(index=0)
+       available_gb = device.memory_info.total / (1024**3)
 
        if available_gb < 8:
            raise ValueError(

@@ -20,32 +20,30 @@ def test_get_system_memory():
 
 
 def test_get_gpu_memory_single_gpu():
-    mock_handle = MagicMock()
     mock_memory_info = MagicMock()
     mock_memory_info.total = 16 * 1024**3  # 16 GB in bytes
 
     with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlDeviceGetCount", return_value=1),
-        patch("pynvml.nvmlDeviceGetHandleByIndex", return_value=mock_handle),
-        patch("pynvml.nvmlDeviceGetMemoryInfo", return_value=mock_memory_info),
-        patch("pynvml.nvmlShutdown"),
+        patch("cuda.bindings.nvml.init_v2"),
+        patch("cuda.bindings.nvml.device_get_count_v2", return_value=1),
+        patch("cuda.bindings.nvml.device_get_handle_by_index_v2", return_value=0xffffffff),
+        patch("cuda.bindings.nvml.device_get_memory_info_v2", return_value=mock_memory_info),
+        patch("cuda.bindings.nvml.shutdown"),
     ):
         result = get_gpu_memory(verbose=False)
         assert result == 16.0
 
 
 def test_get_gpu_memory_multiple_gpus():
-    mock_handle = MagicMock()
     mock_memory_info = MagicMock()
     mock_memory_info.total = 16 * 1024**3  # 16 GB per GPU
 
     with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlDeviceGetCount", return_value=4),
-        patch("pynvml.nvmlDeviceGetHandleByIndex", return_value=mock_handle),
-        patch("pynvml.nvmlDeviceGetMemoryInfo", return_value=mock_memory_info),
-        patch("pynvml.nvmlShutdown"),
+        patch("cuda.bindings.nvml.init_v2"),
+        patch("cuda.bindings.nvml.device_get_count_v2", return_value=4),
+        patch("cuda.bindings.nvml.device_get_handle_by_index_v2", return_value=0xffffffff),
+        patch("cuda.bindings.nvml.device_get_memory_info_v2", return_value=mock_memory_info),
+        patch("cuda.bindings.nvml.shutdown"),
     ):
         result = get_gpu_memory(verbose=False)
         assert result == 64.0  # 16 GB * 4 GPUs
@@ -53,7 +51,8 @@ def test_get_gpu_memory_multiple_gpus():
 
 def test_check_memory_to_gpu_ratio_good_ratio():
     with (
-        patch("pynvml.nvmlInit"),
+        patch("cuda.bindings.nvml.init_v2"),
+        patch("cuda.bindings.nvml.device_get_count_v2", return_value=2),
         patch("rapids_cli.doctor.checks.memory.get_system_memory", return_value=64.0),
         patch("rapids_cli.doctor.checks.memory.get_gpu_memory", return_value=32.0),
     ):
@@ -63,7 +62,8 @@ def test_check_memory_to_gpu_ratio_good_ratio():
 
 def test_check_memory_to_gpu_ratio_warning():
     with (
-        patch("pynvml.nvmlInit"),
+        patch("cuda.bindings.nvml.init_v2"),
+        patch("cuda.bindings.nvml.device_get_count_v2", return_value=2),
         patch("rapids_cli.doctor.checks.memory.get_system_memory", return_value=32.0),
         patch("rapids_cli.doctor.checks.memory.get_gpu_memory", return_value=32.0),
     ):
@@ -73,9 +73,12 @@ def test_check_memory_to_gpu_ratio_warning():
 
 
 def test_check_memory_to_gpu_ratio_no_gpu():
-    import pynvml
+    from cuda.bindings import nvml
 
-    with patch("pynvml.nvmlInit", side_effect=pynvml.NVMLError(1)):
+    with (
+        patch("cuda.bindings.nvml.init_v2"),
+        patch("cuda.bindings.nvml.device_get_count_v2", return_value=0),
+    ):
         with pytest.raises(
             ValueError, match="GPU not found. Please ensure GPUs are installed."
         ):

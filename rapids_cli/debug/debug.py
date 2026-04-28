@@ -11,7 +11,7 @@ from importlib.metadata import distributions, version
 from pathlib import Path
 
 import cuda.pathfinder
-import pynvml
+from cuda.core import system
 from rich.console import Console
 from rich.table import Table
 
@@ -20,11 +20,7 @@ console = Console()
 
 def gather_cuda_version():
     """Return CUDA driver version as a string, similar to nvidia-smi output."""
-    version = pynvml.nvmlSystemGetCudaDriverVersion()
-    # pynvml returns an int like 12040 for 12.4, so format as string
-    major = version // 1000
-    minor = (version % 1000) // 10
-    patch = version % 10
+    major, minor, patch = system.get_driver_version_full()
     if patch == 0:
         return f"{major}.{minor}"
     else:
@@ -69,14 +65,13 @@ def gather_tools():
 
 def run_debug(output_format="console"):
     """Run debug."""
-    pynvml.nvmlInit()
     debug_info = {
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "platform": platform.platform(),
         "nvidia_smi_output": gather_command_output(
             ["nvidia-smi"], "Nvidia-smi not installed"
         ),
-        "driver_version": pynvml.nvmlSystemGetDriverVersion(),
+        "driver_version": ".".join(str(x) for x in system.get_driver_version_full(kernel_mode=True)),
         "cuda_version": gather_cuda_version(),
         "cuda_runtime_path": cuda.pathfinder.find_nvidia_header_directory("cudart"),
         "system_ctk": sorted(
