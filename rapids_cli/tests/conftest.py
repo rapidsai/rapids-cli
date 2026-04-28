@@ -17,9 +17,9 @@ def _reset_providers(monkeypatch):
     ``set_system_info`` / ``set_toolkit_info`` fixtures, which install fakes
     via ``monkeypatch.setattr`` so they auto-revert after the test.
     """
-    monkeypatch.setattr(providers, "_gpu_info", None)
-    monkeypatch.setattr(providers, "_system_info", None)
-    monkeypatch.setattr(providers, "_toolkit_info", None)
+    monkeypatch.setattr(providers._providers, "gpu_info", None)
+    monkeypatch.setattr(providers._providers, "system_info", None)
+    monkeypatch.setattr(providers._providers, "toolkit_info", None)
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def set_gpu_info(monkeypatch):
     """Install a fake GPU info provider for the duration of the test."""
 
     def _set(fake):
-        monkeypatch.setattr(providers, "_gpu_info", fake)
+        monkeypatch.setattr(providers._providers, "gpu_info", fake)
 
     return _set
 
@@ -37,7 +37,7 @@ def set_system_info(monkeypatch):
     """Install a fake system info provider for the duration of the test."""
 
     def _set(fake):
-        monkeypatch.setattr(providers, "_system_info", fake)
+        monkeypatch.setattr(providers._providers, "system_info", fake)
 
     return _set
 
@@ -47,6 +47,6 @@ def set_toolkit_info(monkeypatch):
     """Install a fake CUDA toolkit info for the duration of the test."""
 
     def _set(fake):
-        monkeypatch.setattr(providers, "_toolkit_info", fake)
+        monkeypatch.setattr(providers._providers, "toolkit_info", fake)
 
     return _set
