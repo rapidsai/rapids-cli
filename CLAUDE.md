@@ -111,7 +111,7 @@ The doctor command discovers and runs checks via Python entry points defined in 
 ### Key Dependencies
 
 - `rich` and `rich-click` for terminal output and CLI interface
-- `pynvml` (nvidia-ml-py) for GPU information
+- `cuda-core` for GPU information
 - `cuda-pathfinder` for locating CUDA installations
 - `psutil` for system memory checks
 

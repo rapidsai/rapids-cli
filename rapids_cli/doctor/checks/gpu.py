@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """GPU checks for the doctor command."""
 
-import pynvml
+from cuda.core import system
 
 REQUIRED_COMPUTE_CAPABILITY = 7
 
@@ -10,9 +10,8 @@ REQUIRED_COMPUTE_CAPABILITY = 7
 def gpu_check(verbose=False):
     """Check GPU availability."""
     try:
-        pynvml.nvmlInit()
-        num_gpus = pynvml.nvmlDeviceGetCount()
-    except pynvml.NVMLError as e:
+        num_gpus = system.Device.get_device_count()
+    except system.NvmlError as e:
         raise ValueError("No available GPUs detected") from e
     assert num_gpus > 0, "No GPUs detected"
     return f"GPU(s) detected: {num_gpus}"
@@ -21,13 +20,14 @@ def gpu_check(verbose=False):
 def check_gpu_compute_capability(verbose):
     """Check the system for GPU Compute Capability."""
     try:
-        pynvml.nvmlInit()
-    except pynvml.NVMLError as e:
+        num_gpus = system.Device.get_device_count()
+        if num_gpus == 0:
+            raise system.NvmlError(1)
+    except system.NvmlError as e:
         raise ValueError("No GPU - cannot determine GPU Compute Capability") from e
 
-    for i in range(pynvml.nvmlDeviceGetCount()):
-        handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-        major, minor = pynvml.nvmlDeviceGetCudaComputeCapability(handle)
+    for i, device in enumerate(system.Device.get_all_devices()):
+        major, minor = device.cuda_compute_capability
         if major >= REQUIRED_COMPUTE_CAPABILITY:
             continue
         else:
