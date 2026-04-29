@@ -8,6 +8,7 @@ import pytest
 from rapids_cli.doctor.checks.cuda_toolkit import (
     CudaToolkitInfo,
     _ctypes_cuda_version,
+    _gather_toolkit_info,
     _get_toolkit_cuda_major,
     cuda_toolkit_check,
 )
@@ -168,3 +169,23 @@ def test_check_cuda_home_newer_than_driver():
     ):
         with pytest.raises(ValueError, match="CUDA_HOME"):
             cuda_toolkit_check(toolkit_info=info)
+
+
+def test_gather_toolkit_info_driver_major_is_cuda_major():
+    """driver_major must be the CUDA Driver API major, not the kernel driver major.
+
+    Regression test: prior code passed kernel_mode=True to get_driver_version,
+    which returns the NVIDIA kernel module version (e.g. 580) and broke every
+    toolkit-vs-driver comparison. Skips when the helper can't run at all
+    (e.g. cuda.pathfinder unavailable, no GPU) so macOS and no-GPU CI runners
+    pass cleanly; on a real GPU host this would have caught the original bug.
+    """
+    try:
+        info = _gather_toolkit_info()
+    except Exception as e:
+        pytest.skip(f"_gather_toolkit_info unavailable on this platform: {e}")
+    if info.driver_major is not None:
+        assert info.driver_major < 100, (
+            f"driver_major={info.driver_major} looks like a kernel driver "
+            f"version, not a CUDA Driver API major"
+        )
