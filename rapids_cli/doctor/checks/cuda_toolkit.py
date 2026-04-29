@@ -173,10 +173,6 @@ def _gather_toolkit_info() -> CudaToolkitInfo:  # pragma: no cover
         except (DynamicLibNotFoundError, RuntimeError):
             info.missing_libs.append(soname)
 
-    # Get driver version. Default mode returns the CUDA Driver API version
-    # (e.g. 13 for CUDA 13.0), which is what the toolkit-vs-driver comparison
-    # below expects. kernel_mode=True would return the NVIDIA kernel module
-    # version (e.g. 580) and silently break all comparisons.
     try:
         info.driver_major = get_driver_version()[0]
     except Exception:

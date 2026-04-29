@@ -172,14 +172,7 @@ def test_check_cuda_home_newer_than_driver():
 
 
 def test_gather_toolkit_info_driver_major_is_cuda_major():
-    """driver_major must be the CUDA Driver API major, not the kernel driver major.
-
-    Regression test: prior code passed kernel_mode=True to get_driver_version,
-    which returns the NVIDIA kernel module version (e.g. 580) and broke every
-    toolkit-vs-driver comparison. Skips when the helper can't run at all
-    (e.g. cuda.pathfinder unavailable, no GPU) so macOS and no-GPU CI runners
-    pass cleanly; on a real GPU host this would have caught the original bug.
-    """
+    """Regression: driver_major must be the CUDA Driver API major, not the kernel driver major."""
     try:
         info = _gather_toolkit_info()
     except Exception as e:
