@@ -4,45 +4,31 @@
 
 import warnings
 
-import psutil
-import pynvml
+from rapids_cli.hardware import HardwareInfoError
+from rapids_cli.providers import get_gpu_info, get_system_info
 
 
-def get_system_memory(verbose=False):
+def get_system_memory(verbose=False, **kwargs):
     """Get the total system memory."""
-    virtual_memory = psutil.virtual_memory()
-    total_memory = virtual_memory.total / (1024**3)  # converts bytes to gigabytes
-    return total_memory
+    return get_system_info().total_memory_bytes / (1024**3)
 
 
-def get_gpu_memory(verbose=False):
+def get_gpu_memory(verbose=False, **kwargs):
     """Get the total GPU memory."""
-    pynvml.nvmlInit()
-    gpus = pynvml.nvmlDeviceGetCount()
-    gpu_memory_total = 0
-    for i in range(gpus):
-        handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-        memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-        gpu_memory_total += memory_info.total / (1024**3)  # converts to gigabytes
-
-    pynvml.nvmlShutdown()
-    return gpu_memory_total
+    return sum(dev.memory_total_bytes for dev in get_gpu_info().devices) / (1024**3)
 
 
-def check_memory_to_gpu_ratio(verbose=True):
+def check_memory_to_gpu_ratio(verbose=True, **kwargs):
     """Check the system for a 2:1 ratio of system Memory to total GPU Memory.
 
     This is especially useful for Dask.
-
     """
     try:
-        pynvml.nvmlInit()
-    except pynvml.NVMLError as e:
+        _ = get_gpu_info().device_count
+    except HardwareInfoError as e:
         raise ValueError("GPU not found. Please ensure GPUs are installed.") from e
 
-    system_memory = get_system_memory(verbose)
-    gpu_memory = get_gpu_memory(verbose)
-    ratio = system_memory / gpu_memory
+    ratio = get_system_memory() / get_gpu_memory()
     if ratio < 1.8:
         warnings.warn(
             "System Memory to total GPU Memory ratio not at least 2:1 ratio. "

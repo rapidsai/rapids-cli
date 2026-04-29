@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025-2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from rapids_cli.debug.debug import (
     gather_command_output,
@@ -10,24 +10,20 @@ from rapids_cli.debug.debug import (
     gather_tools,
     run_debug,
 )
+from rapids_cli.tests.fakes import FakeGpuInfo, FakeSystemInfo
 
 
-def test_gather_cuda_version():
-    """Test CUDA version gathering."""
-    with patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12040):
-        result = gather_cuda_version()
-        assert result == "12.4"
+def test_gather_cuda_version(set_gpu_info):
+    set_gpu_info(FakeGpuInfo(cuda_driver_version=12040))
+    assert gather_cuda_version() == "12.4"
 
 
-def test_gather_cuda_version_with_patch():
-    """Test CUDA version with patch number."""
-    with patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12345):
-        result = gather_cuda_version()
-        assert result == "12.34.5"
+def test_gather_cuda_version_with_patch(set_gpu_info):
+    set_gpu_info(FakeGpuInfo(cuda_driver_version=12345))
+    assert gather_cuda_version() == "12.34.5"
 
 
 def test_gather_package_versions():
-    """Test package version gathering."""
     result = gather_package_versions()
     assert isinstance(result, dict)
     assert len(result) > 0
@@ -36,25 +32,21 @@ def test_gather_package_versions():
 
 
 def test_gather_command_output_success():
-    """Test successful command output gathering."""
     result = gather_command_output(["echo", "test"])
     assert result == "test"
 
 
 def test_gather_command_output_with_fallback():
-    """Test command output with fallback."""
     result = gather_command_output(["nonexistent_command"], fallback_output="fallback")
     assert result == "fallback"
 
 
 def test_gather_command_output_no_fallback():
-    """Test command output without fallback."""
     result = gather_command_output(["nonexistent_command"])
     assert result is None
 
 
 def test_gather_tools():
-    """Test tools gathering."""
     with (
         patch(
             "rapids_cli.debug.debug.gather_command_output",
@@ -68,19 +60,22 @@ def test_gather_tools():
         assert "g++" in result
 
 
-def test_run_debug_console(capsys):
-    """Test run_debug with console output."""
-    mock_vm = MagicMock()
-    mock_vm.total = 32 * 1024**3
+def test_run_debug_console(capsys, set_gpu_info, set_system_info):
+    set_gpu_info(
+        FakeGpuInfo(
+            device_count=1,
+            cuda_driver_version=12040,
+            driver_version="550.54.15",
+        )
+    )
+    set_system_info(
+        FakeSystemInfo(
+            total_memory_bytes=32 * 1024**3,
+            cuda_runtime_path="/usr/local/cuda/include",
+        )
+    )
 
     with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlSystemGetDriverVersion", return_value="550.54.15"),
-        patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12040),
-        patch(
-            "cuda.pathfinder.find_nvidia_header_directory",
-            return_value="/usr/local/cuda/include",
-        ),
         patch("pathlib.Path.glob", return_value=[]),
         patch("rapids_cli.debug.debug.gather_package_versions", return_value={}),
         patch("rapids_cli.debug.debug.gather_command_output", return_value=None),
@@ -93,16 +88,22 @@ def test_run_debug_console(capsys):
     assert "RAPIDS Debug Information" in captured.out
 
 
-def test_run_debug_json(capsys):
-    """Test run_debug with JSON output."""
+def test_run_debug_json(capsys, set_gpu_info, set_system_info):
+    set_gpu_info(
+        FakeGpuInfo(
+            device_count=1,
+            cuda_driver_version=12040,
+            driver_version="550.54.15",
+        )
+    )
+    set_system_info(
+        FakeSystemInfo(
+            total_memory_bytes=32 * 1024**3,
+            cuda_runtime_path="/usr/local/cuda/include",
+        )
+    )
+
     with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlSystemGetDriverVersion", return_value="550.54.15"),
-        patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12040),
-        patch(
-            "cuda.pathfinder.find_nvidia_header_directory",
-            return_value="/usr/local/cuda/include",
-        ),
         patch("pathlib.Path.glob", return_value=[]),
         patch(
             "rapids_cli.debug.debug.gather_package_versions",

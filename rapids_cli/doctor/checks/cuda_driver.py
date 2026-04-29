@@ -2,17 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 """Check for CUDA and driver compatibility."""
 
-import pynvml
+from rapids_cli.hardware import HardwareInfoError
+from rapids_cli.providers import get_gpu_info
 
 
-def cuda_check(verbose=False):
+def cuda_check(verbose=False, **kwargs):
     """Check CUDA availability."""
     try:
-        pynvml.nvmlInit()
-        try:
-            cuda_version = pynvml.nvmlSystemGetCudaDriverVersion()
-            return cuda_version
-        except pynvml.NVMLError as e:
-            raise ValueError("Unable to look up CUDA version") from e
-    except pynvml.NVMLError as e:
+        return get_gpu_info().cuda_driver_version
+    except HardwareInfoError as e:
         raise ValueError("Unable to look up CUDA version") from e
