@@ -173,9 +173,8 @@ def _gather_toolkit_info() -> CudaToolkitInfo:  # pragma: no cover
         except (DynamicLibNotFoundError, RuntimeError):
             info.missing_libs.append(soname)
 
-    # Get driver version
     try:
-        info.driver_major = get_driver_version(kernel_mode=True)[0]
+        info.driver_major = get_driver_version()[0]
     except Exception:
         info.driver_major = None
 

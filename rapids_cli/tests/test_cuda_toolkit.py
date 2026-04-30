@@ -8,6 +8,7 @@ import pytest
 from rapids_cli.doctor.checks.cuda_toolkit import (
     CudaToolkitInfo,
     _ctypes_cuda_version,
+    _gather_toolkit_info,
     _get_toolkit_cuda_major,
     cuda_toolkit_check,
 )
@@ -176,3 +177,16 @@ def test_check_cuda_home_newer_than_driver(set_toolkit_info):
     ):
         with pytest.raises(ValueError, match="CUDA_HOME"):
             cuda_toolkit_check()
+
+
+def test_gather_toolkit_info_driver_major_is_cuda_major():
+    """Regression: driver_major must be the CUDA Driver API major, not the kernel driver major."""
+    try:
+        info = _gather_toolkit_info()
+    except Exception as e:
+        pytest.skip(f"_gather_toolkit_info unavailable on this platform: {e}")
+    if info.driver_major is not None:
+        assert info.driver_major < 100, (
+            f"driver_major={info.driver_major} looks like a kernel driver "
+            f"version, not a CUDA Driver API major"
+        )
