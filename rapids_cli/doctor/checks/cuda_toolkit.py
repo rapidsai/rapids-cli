@@ -185,12 +185,11 @@ def _gather_toolkit_info() -> CudaToolkitInfo:  # pragma: no cover
     return info
 
 
-def cuda_toolkit_check(
-    verbose=False, *, toolkit_info: CudaToolkitInfo | None = None, **kwargs
-):
+def cuda_toolkit_check(verbose=False, **kwargs):
     """Check CUDA toolkit library availability and version consistency."""
-    if toolkit_info is None:  # pragma: no cover
-        toolkit_info = _gather_toolkit_info()
+    from rapids_cli.providers import get_toolkit_info
+
+    toolkit_info = get_toolkit_info()
 
     # Check library findability
     if toolkit_info.missing_libs:
