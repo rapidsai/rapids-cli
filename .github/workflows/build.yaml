@@ -1,5 +1,4 @@
 name: build
-
 on:
   push:
     # run on every new commit pushed to 'main'
@@ -8,11 +7,10 @@ on:
     # run whenever a new tag is created following one of the following patterns
     tags:
       - v[0-9]+.[0-9]+.[0-9]+
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
-
+permissions: {}
 jobs:
   conda-python-build:
     secrets: inherit
@@ -21,12 +19,24 @@ jobs:
       build_type: branch
       script: ci/build_python.sh
       pure-conda: true
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      packages: read
+      pull-requests: read
   upload-conda:
     needs: [conda-python-build]
     secrets: inherit
     uses: rapidsai/shared-workflows/.github/workflows/conda-upload-packages.yaml@main
     with:
       build_type: branch
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      packages: read
+      pull-requests: read
   wheel-build:
     secrets: inherit
     uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@main
@@ -39,6 +49,12 @@ jobs:
       package-type: python
       pure-wheel: true
       append-cuda-suffix: false
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      packages: read
+      pull-requests: read
   wheel-publish:
     needs: wheel-build
     secrets: inherit
@@ -47,3 +63,9 @@ jobs:
       build_type: branch
       package-name: rapids-cli
       package-type: python
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      packages: read
+      pull-requests: read

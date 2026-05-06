@@ -1,15 +1,13 @@
 name: pr
-
 on:
   push:
     branches:
       - "pull-request/[0-9]+"
-
 # automatically cancel in-progress CI runs if a new commit is pushed to the same ref
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
-
+permissions: {}
 jobs:
   pr-builder:
     needs:
@@ -23,6 +21,8 @@ jobs:
     if: always()
     with:
       needs: ${{ toJSON(needs) }}
+    permissions:
+      contents: read
   checks:
     runs-on: ubuntu-latest
     steps:
@@ -37,6 +37,12 @@ jobs:
       build_type: pull-request
       script: ci/build_python.sh
       pure-conda: true
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      packages: read
+      pull-requests: read
   conda-python-tests:
     needs: [conda-python-build]
     secrets: inherit
@@ -47,6 +53,12 @@ jobs:
       arch: "amd64"
       container_image: "rapidsai/ci-conda:latest"
       script: ci/test_python.sh
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      packages: read
+      pull-requests: read
   wheel-build:
     uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@main
     needs: [checks]
@@ -59,6 +71,12 @@ jobs:
       package-type: python
       pure-wheel: true
       append-cuda-suffix: false
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      packages: read
+      pull-requests: read
   wheel-tests:
     needs: [wheel-build]
     secrets: inherit
@@ -69,3 +87,9 @@ jobs:
       arch: "amd64"
       container_image: "rapidsai/citestwheel:latest"
       script: ci/test_wheel.sh
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      packages: read
+      pull-requests: read
