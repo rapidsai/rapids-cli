@@ -13,7 +13,7 @@ concurrency:
 permissions: {}
 jobs:
   conda-python-build:
-    secrets: inherit
+    secrets: inherit # zizmor: ignore[secrets-inherit]
     uses: rapidsai/shared-workflows/.github/workflows/conda-python-build.yaml@main
     with:
       build_type: branch
@@ -27,7 +27,9 @@ jobs:
       pull-requests: read
   upload-conda:
     needs: [conda-python-build]
-    secrets: inherit
+    secrets:
+      CONDA_RAPIDSAI_NIGHTLY_TOKEN: ${{ secrets.CONDA_RAPIDSAI_NIGHTLY_TOKEN }}
+      CONDA_RAPIDSAI_TOKEN: ${{ secrets.CONDA_RAPIDSAI_TOKEN }}
     uses: rapidsai/shared-workflows/.github/workflows/conda-upload-packages.yaml@main
     with:
       build_type: branch
@@ -38,7 +40,7 @@ jobs:
       packages: read
       pull-requests: read
   wheel-build:
-    secrets: inherit
+    secrets: inherit # zizmor: ignore[secrets-inherit]
     uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@main
     with:
       build_type: branch
@@ -57,7 +59,9 @@ jobs:
       pull-requests: read
   wheel-publish:
     needs: wheel-build
-    secrets: inherit
+    secrets:
+      CONDA_RAPIDSAI_WHEELS_NIGHTLY_TOKEN: ${{ secrets.CONDA_RAPIDSAI_WHEELS_NIGHTLY_TOKEN }}
+      RAPIDSAI_PYPI_TOKEN: ${{ secrets.RAPIDSAI_PYPI_TOKEN }}
     uses: rapidsai/shared-workflows/.github/workflows/wheels-publish.yaml@main
     with:
       build_type: branch
