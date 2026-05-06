@@ -73,5 +73,9 @@ repos:
           (?x)
             [.](py|sh|yaml|yml)$
       - id: verify-pyproject-license
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.24.1
+    hooks:
+      - id: zizmor
 default_language_version:
   python: python3
