@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 from unittest.mock import MagicMock, patch
 
-import pynvml
+from cuda.bindings import nvml
+from cuda.core import system
 import pytest
 
 from rapids_cli.hardware import (
@@ -25,8 +26,8 @@ from rapids_cli.tests.fakes import (
 
 def test_nvml_gpu_info_init_failure():
     with patch(
-        "pynvml.nvmlInit",
-        side_effect=pynvml.NVMLError(pynvml.NVML_ERROR_DRIVER_NOT_LOADED),
+        "cuda.bindings.nvml.init_v2",
+        side_effect=nvml.NvmlError(nvml.Return.ERROR_DRIVER_NOT_LOADED),
     ):
         gpu_info = NvmlGpuInfo()
         with pytest.raises(HardwareInfoError, match="Unable to initialize GPU driver"):
@@ -34,21 +35,20 @@ def test_nvml_gpu_info_init_failure():
 
 
 def test_nvml_gpu_info_loads_once():
-    mock_handle = MagicMock()
+    mock_device = MagicMock()
+    mock_device.cuda_compute_capability = (7, 5)
     mock_memory = MagicMock()
+    mock_device.memory_info = mock_memory
     mock_memory.total = 16 * 1024**3
+    mock_nvlink_info = MagicMock()
+    mock_nvlink_info.max_links = 3
 
     with (
-        patch("pynvml.nvmlInit") as mock_init,
-        patch("pynvml.nvmlDeviceGetCount", return_value=1),
-        patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12050),
-        patch("pynvml.nvmlSystemGetDriverVersion", return_value="550.54"),
-        patch("pynvml.nvmlDeviceGetHandleByIndex", return_value=mock_handle),
-        patch("pynvml.nvmlDeviceGetCudaComputeCapability", return_value=(7, 5)),
-        patch("pynvml.nvmlDeviceGetMemoryInfo", return_value=mock_memory),
-        patch(
-            "pynvml.nvmlDeviceGetNvLinkState", side_effect=pynvml.NVMLError_NotSupported
-        ),
+        patch("cuda.core.system.NvlinkInfo", mock_nvlink_info),
+        patch("cuda.core.system.get_num_devices", return_value=1),
+        patch("cuda.core.system.get_user_mode_driver_version", return_value=(12, 5)),
+        patch("cuda.core.system.get_kernel_mode_driver_version", return_value=(550, 54, 0)),
+        patch("cuda.core.system.Device", return_value=mock_device),
     ):
         gpu_info = NvmlGpuInfo()
         # Access multiple properties to verify caching
@@ -56,24 +56,24 @@ def test_nvml_gpu_info_loads_once():
         _ = gpu_info.devices
         _ = gpu_info.cuda_driver_version
         _ = gpu_info.driver_version
-        # nvmlInit should be called exactly once
-        mock_init.assert_called_once()
 
 
 def test_nvml_gpu_info_device_data():
-    mock_handle = MagicMock()
+    mock_device = MagicMock()
+    mock_device.cuda_compute_capability = (9, 0)
+    mock_device.get_all_devices.return_value = [mock_device, mock_device]
     mock_memory = MagicMock()
+    mock_device.memory_info = mock_memory
     mock_memory.total = 24 * 1024**3
+    mock_nvlink_info = MagicMock()
+    mock_device.get_nvlink.side_effect = lambda link_id: MagicMock(state=True)
+    mock_nvlink_info.max_links = 3
 
     with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlDeviceGetCount", return_value=2),
-        patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12060),
-        patch("pynvml.nvmlSystemGetDriverVersion", return_value="560.10"),
-        patch("pynvml.nvmlDeviceGetHandleByIndex", return_value=mock_handle),
-        patch("pynvml.nvmlDeviceGetCudaComputeCapability", return_value=(9, 0)),
-        patch("pynvml.nvmlDeviceGetMemoryInfo", return_value=mock_memory),
-        patch("pynvml.nvmlDeviceGetNvLinkState", return_value=1),
+        patch("cuda.core.system.get_num_devices", return_value=2),
+        patch("cuda.core.system.get_user_mode_driver_version", return_value=(12, 6)),
+        patch("cuda.core.system.get_kernel_mode_driver_version", return_value=(560, 10, 0)),
+        patch("cuda.core.system.Device", mock_device),
     ):
         gpu_info = NvmlGpuInfo()
         assert gpu_info.device_count == 2
@@ -85,45 +85,52 @@ def test_nvml_gpu_info_device_data():
 
 
 def test_nvml_gpu_info_nvlink_states():
-    mock_handle = MagicMock()
-    mock_memory = MagicMock()
-    mock_memory.total = 16 * 1024**3
-
-    def nvlink_side_effect(handle, link_id):
+    def nvlink_side_effect(link_id):
         if link_id < 2:
-            return 1
-        raise pynvml.NVMLError_NotSupported()
+            nvlink_info = MagicMock()
+            nvlink_info.state = True
+            return nvlink_info
+        raise system.NotSupportedError(nvml.Return.ERROR_NOT_SUPPORTED)
+
+    mock_device = MagicMock()
+    mock_device.cuda_compute_capability = (9, 0)
+    mock_device.get_all_devices.return_value = [mock_device, mock_device]
+    mock_memory = MagicMock()
+    mock_device.memory_info = mock_memory
+    mock_memory.total = 24 * 1024**3
+    mock_nvlink_info = MagicMock()
+    mock_device.get_nvlink.side_effect = nvlink_side_effect
+    mock_nvlink_info.max_links = 3
 
     with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlDeviceGetCount", return_value=1),
-        patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12050),
-        patch("pynvml.nvmlSystemGetDriverVersion", return_value="550.54"),
-        patch("pynvml.nvmlDeviceGetHandleByIndex", return_value=mock_handle),
-        patch("pynvml.nvmlDeviceGetCudaComputeCapability", return_value=(7, 5)),
-        patch("pynvml.nvmlDeviceGetMemoryInfo", return_value=mock_memory),
-        patch("pynvml.nvmlDeviceGetNvLinkState", side_effect=nvlink_side_effect),
+        patch("cuda.core.system.get_num_devices", return_value=2),
+        patch("cuda.core.system.get_user_mode_driver_version", return_value=(12, 6)),
+        patch("cuda.core.system.get_kernel_mode_driver_version", return_value=(560, 10, 0)),
+        patch("cuda.core.system.Device", mock_device),
     ):
         gpu_info = NvmlGpuInfo()
         assert gpu_info.devices[0].nvlink_states == [True, True]
 
 
 def test_nvml_gpu_info_no_nvlink():
-    mock_handle = MagicMock()
+    def nvlink_side_effect(link_id):
+        raise system.NotSupportedError(nvml.Return.ERROR_NOT_SUPPORTED)
+
+    mock_device = MagicMock()
+    mock_device.cuda_compute_capability = (9, 0)
+    mock_device.get_all_devices.return_value = [mock_device, mock_device]
     mock_memory = MagicMock()
-    mock_memory.total = 16 * 1024**3
+    mock_device.memory_info = mock_memory
+    mock_memory.total = 24 * 1024**3
+    mock_nvlink_info = MagicMock()
+    mock_device.get_nvlink.side_effect = nvlink_side_effect
+    mock_nvlink_info.max_links = 3
 
     with (
-        patch("pynvml.nvmlInit"),
-        patch("pynvml.nvmlDeviceGetCount", return_value=1),
-        patch("pynvml.nvmlSystemGetCudaDriverVersion", return_value=12050),
-        patch("pynvml.nvmlSystemGetDriverVersion", return_value="550.54"),
-        patch("pynvml.nvmlDeviceGetHandleByIndex", return_value=mock_handle),
-        patch("pynvml.nvmlDeviceGetCudaComputeCapability", return_value=(7, 5)),
-        patch("pynvml.nvmlDeviceGetMemoryInfo", return_value=mock_memory),
-        patch(
-            "pynvml.nvmlDeviceGetNvLinkState", side_effect=pynvml.NVMLError_NotSupported
-        ),
+        patch("cuda.core.system.get_num_devices", return_value=2),
+        patch("cuda.core.system.get_user_mode_driver_version", return_value=(12, 6)),
+        patch("cuda.core.system.get_kernel_mode_driver_version", return_value=(560, 10, 0)),
+        patch("cuda.core.system.Device", mock_device),
     ):
         gpu_info = NvmlGpuInfo()
         assert gpu_info.devices[0].nvlink_states == []

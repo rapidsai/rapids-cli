@@ -63,7 +63,7 @@ class SystemInfoProvider(Protocol):
 
 
 class NvmlGpuInfo:
-    """Real GPU info provider backed by pynvml.
+    """Real GPU info provider backed by cuda.core.system.
 
     Lazily loads all device information on first property access and caches results.
     """
@@ -80,37 +80,37 @@ class NvmlGpuInfo:
         if self._loaded:
             return
 
-        import pynvml
+        from cuda.core import system
 
         try:
-            pynvml.nvmlInit()
-        except pynvml.NVMLError as e:
+            self._device_count = system.get_num_devices()
+        except system.NvmlError as e:
             raise HardwareInfoError("Unable to initialize GPU driver (NVML)") from e
 
-        self._device_count = pynvml.nvmlDeviceGetCount()
-        self._cuda_driver_version = pynvml.nvmlSystemGetCudaDriverVersion()
-        self._driver_version = pynvml.nvmlSystemGetDriverVersion()
+        cuda_driver_version = system.get_user_mode_driver_version()
+        self._cuda_driver_version = cuda_driver_version[0] * 1000 + cuda_driver_version[1] * 10
+        driver_version = system.get_kernel_mode_driver_version()
+        self._driver_version = ".".join(str(x) for x in driver_version[:2])
 
         self._devices = []
-        for i in range(self._device_count):
-            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-            major, minor = pynvml.nvmlDeviceGetCudaComputeCapability(handle)
-            memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+        for device in system.Device.get_all_devices():
+            major, minor = device.cuda_compute_capability
+            memory_info = device.memory_info
 
             nvlink_states: list[bool] = []
-            for link_id in range(pynvml.NVML_NVLINK_MAX_LINKS):
+            for link_id in range(system.NvlinkInfo.max_links):
                 try:
-                    state = pynvml.nvmlDeviceGetNvLinkState(handle, link_id)
+                    state = device.get_nvlink(link_id).state
                     nvlink_states.append(bool(state))
                 except (
-                    pynvml.NVMLError_InvalidArgument,
-                    pynvml.NVMLError_NotSupported,
+                    system.InvalidArgumentError,
+                    system.NotSupportedError,
                 ):
                     break
 
             self._devices.append(
                 DeviceInfo(
-                    index=i,
+                    index=device.index,
                     compute_capability=(major, minor),
                     memory_total_bytes=memory_info.total,
                     nvlink_states=nvlink_states,
