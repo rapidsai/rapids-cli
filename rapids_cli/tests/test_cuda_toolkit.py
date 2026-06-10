@@ -9,9 +9,11 @@ from rapids_cli.doctor.checks.cuda_toolkit import (
     CudaToolkitInfo,
     _ctypes_cuda_version,
     _gather_toolkit_info,
+    _get_driver_cuda_major,
     _get_toolkit_cuda_major,
     cuda_toolkit_check,
 )
+from rapids_cli.tests.fakes import FakeGpuInfo
 
 
 def _make_info(**overrides):
@@ -67,6 +69,11 @@ def test_ctypes_cuda_version_oserror():
     """ctypes returns None when the library can't be loaded."""
     with patch("ctypes.CDLL", side_effect=OSError("not found")):
         assert _ctypes_cuda_version("/nonexistent/libcudart.so") is None
+
+
+def test_get_driver_cuda_major_uses_gpu_info_provider(set_gpu_info):
+    set_gpu_info(FakeGpuInfo(cuda_driver_version=13020))
+    assert _get_driver_cuda_major() == 13
 
 
 # Check function tests

@@ -108,6 +108,13 @@ def _ctypes_cuda_version(cudart_path: str) -> int | None:
     return None
 
 
+def _get_driver_cuda_major() -> int:
+    """Return the CUDA major version supported by the GPU driver."""
+    from rapids_cli.providers import get_gpu_info
+
+    return get_gpu_info().cuda_driver_version // 1000
+
+
 def _get_toolkit_cuda_major(cudart_path: str | None = None) -> int | None:
     """Return the CUDA major version of the toolkit.
 
@@ -158,7 +165,6 @@ def _check_path_version(label: str, path: Path, driver_major: int) -> None:
 def _gather_toolkit_info() -> CudaToolkitInfo:  # pragma: no cover
     """Gather CUDA toolkit and driver information from the real system."""
     import cuda.pathfinder
-    from cuda.core.system import get_driver_version
     from cuda.pathfinder import DynamicLibNotFoundError
 
     info = CudaToolkitInfo()
@@ -174,7 +180,7 @@ def _gather_toolkit_info() -> CudaToolkitInfo:  # pragma: no cover
             info.missing_libs.append(soname)
 
     try:
-        info.driver_major = get_driver_version()[0]
+        info.driver_major = _get_driver_cuda_major()
     except Exception:
         info.driver_major = None
 
