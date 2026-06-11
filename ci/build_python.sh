@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPDX-FileCopyrightText: Copyright (c) 2022-2025, NVIDIA CORPORATION. All rights reserved.
+# SPDX-FileCopyrightText: Copyright (c) 2022-2026, NVIDIA CORPORATION. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
 set -euo pipefail
@@ -29,5 +29,5 @@ rattler-build build                   \
 rm -rf "$RAPIDS_CONDA_BLD_OUTPUT_DIR"/build_cache
 
 # set package name so it is picked up by the shared-workflow for artifact naming
-RAPIDS_PACKAGE_NAME="$(rapids-package-name conda_python rapids-cli --pure)"
+RAPIDS_PACKAGE_NAME="$(rapids-artifact-name conda_python rapids-cli rapids-cli --pure --arch any)"
 export RAPIDS_PACKAGE_NAME

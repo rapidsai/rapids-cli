@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # nx-cugraph is a pure wheel, which is part of generating the download path
-WHEELHOUSE=$(RAPIDS_PY_WHEEL_NAME="rapids-cli" RAPIDS_PY_WHEEL_PURE="1" rapids-download-wheels-from-github python)
+WHEELHOUSE=$(rapids-download-from-github "$(rapids-artifact-name wheel_python rapids-cli rapids-cli --pure --arch any)")
 
 # echo to expand wildcard before adding `[extra]` requires for pip
 rapids-pip-retry install \

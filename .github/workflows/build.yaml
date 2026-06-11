@@ -71,6 +71,7 @@ jobs:
       package-name: rapids-cli
       package-type: python
       publish_to_pypi: true
+      publish-wheel-search-key: rapids-cli_wheel_python_rapids-cli
     permissions:
       actions: read
       contents: read

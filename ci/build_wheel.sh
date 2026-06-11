@@ -12,3 +12,6 @@ python -m pip wheel                     \
     .
 
 ci/validate_wheel.sh "${RAPIDS_WHEEL_BLD_OUTPUT_DIR}"
+
+RAPIDS_PACKAGE_NAME="$(rapids-artifact-name wheel_python rapids-cli rapids-cli --pure --arch any)"
+export RAPIDS_PACKAGE_NAME
