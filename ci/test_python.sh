@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION. All rights reserved.
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026, NVIDIA CORPORATION. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
 set -euo pipefail
@@ -7,7 +7,7 @@ set -euo pipefail
 . /opt/conda/etc/profile.d/conda.sh
 
 rapids-logger "Downloading artifacts from previous jobs"
-PYTHON_CHANNEL=$(rapids-download-from-github "$(rapids-package-name conda_python rapids-cli --pure)")
+PYTHON_CHANNEL=$(rapids-download-from-github "$(rapids-artifact-name conda_python rapids-cli rapids-cli --pure --arch any)")
 
 # ensure we always install the just-built-in-CI package, instead of falling back to earlier ones
 conda config --set channel_priority strict
