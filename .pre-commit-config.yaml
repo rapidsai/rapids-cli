@@ -61,8 +61,8 @@ repos:
   - repo: https://github.com/rapidsai/dependency-file-generator
     rev: v1.20.2
     hooks:
-        - id: rapids-dependency-file-generator
-          args: ["--clean"]
+      - id: rapids-dependency-file-generator
+        args: ["--clean"]
   - repo: https://github.com/rapidsai/pre-commit-hooks
     rev: v1.3.3
     hooks:
@@ -73,6 +73,11 @@ repos:
           (?x)
             [.](py|sh|yaml|yml)$
       - id: verify-pyproject-license
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        additional_dependencies: [pyyaml]
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
     rev: v1.24.1
     hooks:
