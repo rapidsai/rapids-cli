@@ -19,7 +19,7 @@ No GPUs Detected
 
    .. code-block:: bash
 
-      python -c "import pynvml; pynvml.nvmlInit(); print(pynvml.nvmlDeviceGetCount())"
+      python -c "from cuda.core import system; print(system.get_num_devices())"
 
 3. If running in a container, ensure GPU passthrough is enabled:
 
