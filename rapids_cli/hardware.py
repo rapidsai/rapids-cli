@@ -88,7 +88,9 @@ class NvmlGpuInfo:
             raise HardwareInfoError("Unable to initialize GPU driver (NVML)") from e
 
         cuda_driver_version = system.get_user_mode_driver_version()
-        self._cuda_driver_version = cuda_driver_version[0] * 1000 + cuda_driver_version[1] * 10
+        self._cuda_driver_version = (
+            cuda_driver_version[0] * 1000 + cuda_driver_version[1] * 10
+        )
         driver_version = system.get_kernel_mode_driver_version()
         self._driver_version = ".".join(str(x) for x in driver_version[:2])
 

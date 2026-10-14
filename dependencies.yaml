@@ -65,7 +65,7 @@ dependencies:
           # NVML APIs we use via cuda.core.system landed in cuda-bindings
           # 12.9.6 (CUDA 12) and 13.2.0 (CUDA 13). The 13.0/13.1
           # wheels pre-date the 13.x landing and are excluded.
-          - cuda-bindings>=12.9.6,!=13.0.*,!=13.1.*
+          - cuda-bindings>=12.9.6,!=13.0.*,!=13.1.*,!=13.2.*,<14
           - cuda-pathfinder >=1.2.3
           - packaging
           - psutil

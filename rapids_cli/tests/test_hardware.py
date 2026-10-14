@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 from unittest.mock import MagicMock, patch
 
+import pytest
 from cuda.bindings import nvml
 from cuda.core import system
-import pytest
 
 from rapids_cli.hardware import (
     DefaultSystemInfo,
@@ -26,8 +26,8 @@ from rapids_cli.tests.fakes import (
 
 def test_nvml_gpu_info_init_failure():
     with patch(
-        "cuda.bindings.nvml.init_v2",
-        side_effect=nvml.NvmlError(nvml.Return.ERROR_DRIVER_NOT_LOADED),
+        "cuda.core.system.get_num_devices",
+        side_effect=system.NvmlError(nvml.Return.ERROR_DRIVER_NOT_LOADED),
     ):
         gpu_info = NvmlGpuInfo()
         with pytest.raises(HardwareInfoError, match="Unable to initialize GPU driver"):
@@ -47,7 +47,9 @@ def test_nvml_gpu_info_loads_once():
         patch("cuda.core.system.NvlinkInfo", mock_nvlink_info),
         patch("cuda.core.system.get_num_devices", return_value=1),
         patch("cuda.core.system.get_user_mode_driver_version", return_value=(12, 5)),
-        patch("cuda.core.system.get_kernel_mode_driver_version", return_value=(550, 54, 0)),
+        patch(
+            "cuda.core.system.get_kernel_mode_driver_version", return_value=(550, 54, 0)
+        ),
         patch("cuda.core.system.Device", return_value=mock_device),
     ):
         gpu_info = NvmlGpuInfo()
@@ -72,7 +74,9 @@ def test_nvml_gpu_info_device_data():
     with (
         patch("cuda.core.system.get_num_devices", return_value=2),
         patch("cuda.core.system.get_user_mode_driver_version", return_value=(12, 6)),
-        patch("cuda.core.system.get_kernel_mode_driver_version", return_value=(560, 10, 0)),
+        patch(
+            "cuda.core.system.get_kernel_mode_driver_version", return_value=(560, 10, 0)
+        ),
         patch("cuda.core.system.Device", mock_device),
     ):
         gpu_info = NvmlGpuInfo()
@@ -105,7 +109,9 @@ def test_nvml_gpu_info_nvlink_states():
     with (
         patch("cuda.core.system.get_num_devices", return_value=2),
         patch("cuda.core.system.get_user_mode_driver_version", return_value=(12, 6)),
-        patch("cuda.core.system.get_kernel_mode_driver_version", return_value=(560, 10, 0)),
+        patch(
+            "cuda.core.system.get_kernel_mode_driver_version", return_value=(560, 10, 0)
+        ),
         patch("cuda.core.system.Device", mock_device),
     ):
         gpu_info = NvmlGpuInfo()
@@ -129,7 +135,9 @@ def test_nvml_gpu_info_no_nvlink():
     with (
         patch("cuda.core.system.get_num_devices", return_value=2),
         patch("cuda.core.system.get_user_mode_driver_version", return_value=(12, 6)),
-        patch("cuda.core.system.get_kernel_mode_driver_version", return_value=(560, 10, 0)),
+        patch(
+            "cuda.core.system.get_kernel_mode_driver_version", return_value=(560, 10, 0)
+        ),
         patch("cuda.core.system.Device", mock_device),
     ):
         gpu_info = NvmlGpuInfo()

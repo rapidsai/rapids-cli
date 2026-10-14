@@ -21,7 +21,7 @@ console = Console()
 def gather_cuda_version():
     """Return CUDA driver version as a string, similar to nvidia-smi output."""
     version = get_gpu_info().cuda_driver_version
-    # pynvml returns an int like 12040 for 12.4, so format as string
+    # The driver version is an int like 12040 for 12.4, so format as string
     major = version // 1000
     minor = (version % 1000) // 10
     patch = version % 10
