@@ -11,7 +11,20 @@ rapids-print-env
 rapids-mamba-retry install \
   --yes \
   'hatchling' 'hatch-vcs'
-RAPIDS_PACKAGE_VERSION=$(hatchling version)
+if [[ "${BUILD_TYPE:-}" == "release-candidate" ]]; then
+  # Conda identity comes from the verified train, not normalized Python metadata.
+  RAPIDS_PACKAGE_VERSION=$(jq -er '
+    .unit_package_versions as $units | .package_versions as $families
+    | if ($units | type) != "object" or ($families | type) != "object"
+      then error("candidate package version maps are required")
+      else (if $units | has("conda:rapids-cli")
+        then $units["conda:rapids-cli"] else $families.conda end)
+        | select(type == "string" and length > 0)
+      end
+  ' <<< "${RAPIDS_RELEASE_CANDIDATE_UNIT_VERSIONS:?verified candidate package versions are required}")
+else
+  RAPIDS_PACKAGE_VERSION=$(hatchling version)
+fi
 export RAPIDS_PACKAGE_VERSION
 
 # populates `RATTLER_CHANNELS` array and `RATTLER_ARGS` array

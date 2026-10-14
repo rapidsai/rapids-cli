@@ -82,5 +82,14 @@ repos:
     rev: v1.24.1
     hooks:
       - id: zizmor
+  - repo: local
+    hooks:
+      - id: candidate-package-version-tests
+        name: test frozen candidate package versions
+        entry: python -m pytest -q -o addopts= ci/tests/test_candidate_package_versions.py
+        language: python
+        additional_dependencies: [pytest==8.4.2]
+        pass_filenames: false
+        files: ^(ci/build_(python|wheel)\.sh|ci/tests/test_candidate_package_versions\.py)$
 default_language_version:
   python: python3
