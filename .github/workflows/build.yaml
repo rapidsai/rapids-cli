@@ -55,9 +55,6 @@ jobs:
   upload-conda:
     if: ${{ inputs.build_type != 'release-candidate' && github.event.inputs.build_type != 'release-candidate' && github.ref != 'refs/heads/agent/release-catalog-canary' && github.head_ref != 'agent/release-catalog-canary' && github.head_ref != 'refs/heads/agent/release-catalog-canary' && inputs.branch != 'agent/release-catalog-canary' && inputs.branch != 'refs/heads/agent/release-catalog-canary' && !startsWith(github.ref_name, 'release-test-') && !startsWith(github.ref, 'refs/heads/release-test-') && !startsWith(github.head_ref, 'release-test-') && !startsWith(github.head_ref, 'refs/heads/release-test-') && !startsWith(inputs.branch, 'release-test-') && !startsWith(inputs.branch, 'refs/heads/release-test-') }}
     needs: [conda-python-build]
-    secrets:
-      CONDA_RAPIDSAI_NIGHTLY_TOKEN: ${{ secrets.CONDA_RAPIDSAI_NIGHTLY_TOKEN }}
-      CONDA_RAPIDSAI_TOKEN: ${{ secrets.CONDA_RAPIDSAI_TOKEN }}
     uses: rapidsai/shared-workflows/.github/workflows/conda-upload-packages.yaml@5fcd6608e19e3d8d91690b7d76a48a57b22d44a6
     with:
       build_type: ${{ inputs.build_type || 'branch' }}
@@ -93,8 +90,6 @@ jobs:
   wheel-publish:
     if: ${{ inputs.build_type != 'release-candidate' && github.event.inputs.build_type != 'release-candidate' && github.ref != 'refs/heads/agent/release-catalog-canary' && github.head_ref != 'agent/release-catalog-canary' && github.head_ref != 'refs/heads/agent/release-catalog-canary' && inputs.branch != 'agent/release-catalog-canary' && inputs.branch != 'refs/heads/agent/release-catalog-canary' && !startsWith(github.ref_name, 'release-test-') && !startsWith(github.ref, 'refs/heads/release-test-') && !startsWith(github.head_ref, 'release-test-') && !startsWith(github.head_ref, 'refs/heads/release-test-') && !startsWith(inputs.branch, 'release-test-') && !startsWith(inputs.branch, 'refs/heads/release-test-') }}
     needs: wheel-build
-    secrets:
-      CONDA_RAPIDSAI_WHEELS_NIGHTLY_TOKEN: ${{ secrets.CONDA_RAPIDSAI_WHEELS_NIGHTLY_TOKEN }}
     uses: rapidsai/shared-workflows/.github/workflows/wheels-publish.yaml@5fcd6608e19e3d8d91690b7d76a48a57b22d44a6
     with:
       build_type: ${{ inputs.build_type || 'branch' }}
