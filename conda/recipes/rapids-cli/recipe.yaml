@@ -5,7 +5,7 @@ schema_version: 1
 context:
   version: ${{ env.get("RAPIDS_PACKAGE_VERSION") }}
   minor_version: ${{ (version | split("."))[:2] | join(".") }}
-  date_string: '${{ env.get("RAPIDS_DATE_STRING") }}'
+  datetime_string: '${{ env.get("RAPIDS_DATETIME_STRING") }}'
   head_rev: '${{ git.head_rev(".")[:8] }}'
 
 package:
@@ -17,7 +17,7 @@ source:
 
 build:
   noarch: python
-  string: ${{ date_string }}_${{ head_rev }}
+  string: ${{ datetime_string }}_${{ head_rev }}
   script:
     content: |
       python -m pip install -v .
