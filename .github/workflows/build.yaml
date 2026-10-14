@@ -44,7 +44,7 @@ jobs:
       branch: ${{ inputs.branch }}
       date: ${{ inputs.date }}
       script: ci/build_python.sh
-      pure-conda: true
+      pure-conda: "true"
       sha: ${{ inputs.sha }}
     permissions:
       actions: read
