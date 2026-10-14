@@ -10,6 +10,24 @@ on:
     # run whenever a new tag is created following one of the following patterns
     tags:
       - v[0-9]+.[0-9]+.[0-9]+
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Git branch the workflow run targets.
+        required: true
+        type: string
+      date:
+        description: Date (YYYY-MM-DD) used to organize candidate artifacts.
+        required: true
+        type: string
+      sha:
+        description: Full source commit SHA to build.
+        required: true
+        type: string
+      build_type:
+        description: Build mode (branch, nightly, or release-candidate).
+        type: string
+        default: branch
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
@@ -19,13 +37,15 @@ jobs:
     uses: rapidsai/shared-workflows/.github/workflows/compute-build-details.yaml@main
   conda-python-build:
     needs: [build-details]
-    secrets: inherit # zizmor: ignore[secrets-inherit]
-    uses: rapidsai/shared-workflows/.github/workflows/conda-python-build.yaml@main
+    uses: rapidsai/shared-workflows/.github/workflows/conda-python-build.yaml@10c48afab35c7a70c3c4b1fcccaab11356b7720f
     with:
-      build_type: branch
+      build_type: ${{ inputs.build_type || 'branch' }}
       build-datetime: ${{ needs.build-details.outputs.build-datetime }}
+      branch: ${{ inputs.branch }}
+      date: ${{ inputs.date }}
       script: ci/build_python.sh
       pure-conda: true
+      sha: ${{ inputs.sha }}
     permissions:
       actions: read
       contents: read
@@ -33,13 +53,17 @@ jobs:
       packages: read
       pull-requests: read
   upload-conda:
+    if: ${{ inputs.build_type != 'release-candidate' && github.event.inputs.build_type != 'release-candidate' && github.ref != 'refs/heads/agent/release-catalog-canary' && github.head_ref != 'agent/release-catalog-canary' && github.head_ref != 'refs/heads/agent/release-catalog-canary' && inputs.branch != 'agent/release-catalog-canary' && inputs.branch != 'refs/heads/agent/release-catalog-canary' && !startsWith(github.ref_name, 'release-test-') && !startsWith(github.ref, 'refs/heads/release-test-') && !startsWith(github.head_ref, 'release-test-') && !startsWith(github.head_ref, 'refs/heads/release-test-') && !startsWith(inputs.branch, 'release-test-') && !startsWith(inputs.branch, 'refs/heads/release-test-') }}
     needs: [conda-python-build]
     secrets:
       CONDA_RAPIDSAI_NIGHTLY_TOKEN: ${{ secrets.CONDA_RAPIDSAI_NIGHTLY_TOKEN }}
       CONDA_RAPIDSAI_TOKEN: ${{ secrets.CONDA_RAPIDSAI_TOKEN }}
-    uses: rapidsai/shared-workflows/.github/workflows/conda-upload-packages.yaml@main
+    uses: rapidsai/shared-workflows/.github/workflows/conda-upload-packages.yaml@10c48afab35c7a70c3c4b1fcccaab11356b7720f
     with:
-      build_type: branch
+      build_type: ${{ inputs.build_type || 'branch' }}
+      branch: ${{ inputs.branch }}
+      date: ${{ inputs.date }}
+      sha: ${{ inputs.sha }}
     permissions:
       actions: read
       contents: read
@@ -47,11 +71,13 @@ jobs:
       packages: read
       pull-requests: read
   wheel-build:
-    secrets: inherit # zizmor: ignore[secrets-inherit]
-    uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@main
+    uses: rapidsai/shared-workflows/.github/workflows/wheels-build.yaml@10c48afab35c7a70c3c4b1fcccaab11356b7720f
     with:
-      build_type: branch
+      build_type: ${{ inputs.build_type || 'branch' }}
+      branch: ${{ inputs.branch }}
+      date: ${{ inputs.date }}
       script: ci/build_wheel.sh
+      sha: ${{ inputs.sha }}
       # only need 1 build (noarch package): this selects amd64, oldest-supported Python, latest-supported CUDA
       matrix_filter: '[map(select(.ARCH == "amd64")) | min_by((.PY_VER | split(".") | map(tonumber)), (.CUDA_VER | split(".") | map(-tonumber)))]'
       package-name: rapids-cli
@@ -65,16 +91,18 @@ jobs:
       packages: read
       pull-requests: read
   wheel-publish:
+    if: ${{ inputs.build_type != 'release-candidate' && github.event.inputs.build_type != 'release-candidate' && github.ref != 'refs/heads/agent/release-catalog-canary' && github.head_ref != 'agent/release-catalog-canary' && github.head_ref != 'refs/heads/agent/release-catalog-canary' && inputs.branch != 'agent/release-catalog-canary' && inputs.branch != 'refs/heads/agent/release-catalog-canary' && !startsWith(github.ref_name, 'release-test-') && !startsWith(github.ref, 'refs/heads/release-test-') && !startsWith(github.head_ref, 'release-test-') && !startsWith(github.head_ref, 'refs/heads/release-test-') && !startsWith(inputs.branch, 'release-test-') && !startsWith(inputs.branch, 'refs/heads/release-test-') }}
     needs: wheel-build
     secrets:
       CONDA_RAPIDSAI_WHEELS_NIGHTLY_TOKEN: ${{ secrets.CONDA_RAPIDSAI_WHEELS_NIGHTLY_TOKEN }}
-      RAPIDSAI_PYPI_TOKEN: ${{ secrets.RAPIDSAI_PYPI_TOKEN }}
-    uses: rapidsai/shared-workflows/.github/workflows/wheels-publish.yaml@main
+    uses: rapidsai/shared-workflows/.github/workflows/wheels-publish.yaml@10c48afab35c7a70c3c4b1fcccaab11356b7720f
     with:
-      build_type: branch
+      build_type: ${{ inputs.build_type || 'branch' }}
+      branch: ${{ inputs.branch }}
+      date: ${{ inputs.date }}
       package-name: rapids-cli
       package-type: python
-      publish_to_pypi: true
+      publish_to_pypi: false # PyPI publication is handled by Kitmaker.
       publish-wheel-search-key: rapids-cli_wheel_python_rapids-cli
     permissions:
       actions: read
