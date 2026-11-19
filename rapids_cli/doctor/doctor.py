@@ -84,6 +84,7 @@ def doctor_check(
     with console.status("[bold green]Running checks...") as ui_status:
         for i, check_fn in enumerate(checks):
             error = None
+            value = None
             caught_warnings = None
             ui_status.update(f"Running [{i+1}/{len(checks)}] {check_fn.__name__}")
 
@@ -101,7 +102,7 @@ def doctor_check(
             results.append(
                 CheckResult(
                     name=check_fn.__name__,
-                    description=check_fn.__doc__.strip().split("\n")[0],
+                    description=(check_fn.__doc__ or "").strip().split("\n")[0],
                     status=bool(status),
                     value=value if isinstance(value, str) else None,
                     error=error,
