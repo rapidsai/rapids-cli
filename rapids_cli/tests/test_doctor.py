@@ -172,3 +172,45 @@ def test_doctor_check_import_error():
         result = doctor_check(verbose=False, dry_run=False)
         # Should still pass with no checks discovered
         assert result is True
+
+
+def test_doctor_check_first_check_fails(capsys):
+    """Test doctor_check when the first check fails before any check returns."""
+    mock_ep1 = MagicMock()
+    mock_ep1.name = "failing_check"
+    mock_ep1.value = "test.module:check1"
+    mock_ep1.load.return_value = mock_failing_check
+
+    mock_ep2 = MagicMock()
+    mock_ep2.name = "passing_check"
+    mock_ep2.value = "test.module:check2"
+    mock_ep2.load.return_value = mock_passing_check
+
+    with patch(
+        "rapids_cli.doctor.doctor.entry_points", return_value=[mock_ep1, mock_ep2]
+    ):
+        result = doctor_check(verbose=False, dry_run=False)
+        assert result is False
+
+    captured = capsys.readouterr()
+    assert "mock_failing_check failed" in captured.out
+    assert "Check failed" in captured.out
+
+
+def test_doctor_check_without_docstring(capsys):
+    """Test doctor_check with a check function that has no docstring."""
+
+    def check_without_docstring(verbose=False, **kwargs):
+        return True
+
+    mock_ep = MagicMock()
+    mock_ep.name = "no_doc_check"
+    mock_ep.value = "test.module:check"
+    mock_ep.load.return_value = check_without_docstring
+
+    with patch("rapids_cli.doctor.doctor.entry_points", return_value=[mock_ep]):
+        result = doctor_check(verbose=False, dry_run=False)
+        assert result is True
+
+    captured = capsys.readouterr()
+    assert "All checks passed!" in captured.out
